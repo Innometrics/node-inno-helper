@@ -1,0 +1,12 @@
+{
+  "name": "node-inno-helper",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "request": "^2.45.0"
+  },
+  "engines": {
+    "node": "0.10.x"
+  }
+}
