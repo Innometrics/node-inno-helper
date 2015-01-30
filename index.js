@@ -279,22 +279,33 @@ var innoHelper = {
      *
      * @param {Object} req
      * @param {Function} callback
+     * @deprecated
      * @returns {Mixed}
      */
     getDatas: function (req, callback) {
+        this.getStreamData(req.body, callback);
+    },
+
+    /**
+     *
+     * @param {Mixed} rawData
+     * @param {Function} callback
+     * @return {Undefined}
+     */
+    getStreamData: function (rawData, callback) {
         var error,
-            datas;
+            data;
 
         try {
-            datas = this.parseStreamData(req.body);
-            this.setVar('profileId', datas.profile.id);
-            this.setVar('collectApp', datas.session.collectApp);
-            this.setVar('section', datas.session.section);
+            data = this.parseStreamData(rawData);
+            this.setVar('profileId', data.profile.id);
+            this.setVar('collectApp', data.session.collectApp);
+            this.setVar('section', data.session.section);
         } catch (e) {
             error = e;
         }
 
-        return callback(error, datas);
+        return callback(error, data);
     },
 
     /**
