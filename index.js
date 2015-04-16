@@ -43,7 +43,8 @@
 'use strict';
 
 var util = require('util'),
-    request = require('request');
+    request = require('request'),
+    cache = require('./cache');
 
 var innoHelper = {
     /**
@@ -52,20 +53,6 @@ var innoHelper = {
      * @type {Object}
      */
     vars: {},
-
-    /**
-     * Cache storage
-     * @private
-     * @type {Object}
-     */
-    cache: {},
-
-    /**
-     * Cache TTL
-     * @private
-     * @type {Number}
-     */
-    cachedTime: 10,
 
     /**
      * Form URL to web profile
@@ -107,72 +94,6 @@ var innoHelper = {
         return util.format('%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s', this.vars.apiUrl, params.groupId, params.bucketName, params.appName, params.appKey);
     },
 
-    /**
-     * Get data from cache by name if it's not expired
-     * @private
-     * @param {String} name
-     * @returns {Mixed|undefined}
-     */
-    getCache: function (name) {
-        var value;
-        if (this.cachedTime) {
-            if (this.cache.hasOwnProperty(name)) {
-                if (this.cache[name].expired <= Date.now()) {
-                    delete this.cache[name];
-                } else {
-                    value = this.cache[name].value;
-                }
-            }
-        }
-        return value;
-    },
-
-    /**
-     * Set data to cache
-     * @private
-     * @param {String} name
-     * @param {Mixed} value
-     * @returns {undefined}
-     */
-    setCache: function (name, value) {
-        if (this.cachedTime) {
-            this.cache[name] = {
-                expired: Date.now() + (this.cachedTime * 1000),
-                value: value || true
-            };
-        }
-    },
-
-    /**
-     * Expire record in cache by name
-     * @private
-     * @param {String} name
-     * @returns {undefined}
-     */
-    expireCache: function (name) {
-        if (this.cache.hasOwnProperty(name)) {
-            this.cache[name].expired = 0;
-        }
-    },
-
-    /**
-     * Clear all cache records
-     * @private
-     * @returns {undefined}
-     */
-    clearCache: function () {
-        this.cache = {};
-    },
-
-    /**
-     * Change cache TTL
-     * @private
-     * @param {Number} time
-     * @returns {undefined}
-     */
-    setCachedTime: function (time) {
-        this.cachedTime = time;
-    },
 
     /**
      * Merge objects
@@ -395,7 +316,7 @@ var innoHelper = {
         allowCache = !vars.noCache;
 
         if (allowCache) {
-            cachedValue = this.getCache('settings' + vars.appName);
+            cachedValue = cache.get('settings' + vars.appName);
         }
 
         if (typeof cachedValue !== 'undefined') {
@@ -427,7 +348,7 @@ var innoHelper = {
                 if (!error) {
                     settings = body.custom;
                     if (allowCache) {
-                        self.setCache('settings' + vars.appName, settings);
+                        self.cache.set('settings' + vars.appName, settings);
                     }
                 }
 
@@ -468,7 +389,7 @@ var innoHelper = {
             json: true
         }, function (error) {
             if (!error) {
-                self.expireCache('settings' + vars.appName);
+                self.cache.expire('settings' + vars.appName);
             }
             callback(error);
         });
@@ -513,7 +434,7 @@ var innoHelper = {
             json: true
         }, function (error) {
             if (!error) {
-                self.expireCache('attributes' + vars.profileId);
+                self.cache.expire('attributes' + vars.profileId);
             }
             callback(error);
         });
@@ -555,7 +476,7 @@ var innoHelper = {
         allowCache = !vars.noCache;
 
         if (allowCache) {
-            cachedValue = this.getCache('attributes' + vars.profileId);
+            cachedValue = cache.get('attributes' + vars.profileId);
         }
 
         if (typeof cachedValue !== 'undefined') {
@@ -595,7 +516,7 @@ var innoHelper = {
                         attributes = profile.attributes;
                     }
                     if (allowCache) {
-                        self.setCache('attributes' + vars.profileId, attributes);
+                        self.cache.set('attributes' + vars.profileId, attributes);
                     }
                 }
 
