@@ -46,7 +46,13 @@ var util = require('util'),
     request = require('request'),
     cache = require('./libs/cache');
 
-var innoHelper = {
+
+var InnoHelper = function(config) {
+    this.vars = config;
+    console.log(this.vars);
+};
+
+InnoHelper.prototype = {
     /**
      * Object with environment vars
      * @private
@@ -527,4 +533,4 @@ var innoHelper = {
 
 };
 
-module.exports = innoHelper;
+module.exports = InnoHelper;
