@@ -44,7 +44,7 @@
 
 var util = require('util'),
     request = require('request'),
-    cache = require('./cache');
+    cache = require('./libs/cache');
 
 var innoHelper = {
     /**
@@ -348,7 +348,7 @@ var innoHelper = {
                 if (!error) {
                     settings = body.custom;
                     if (allowCache) {
-                        self.cache.set('settings' + vars.appName, settings);
+                        cache.set('settings' + vars.appName, settings);
                     }
                 }
 
@@ -389,7 +389,7 @@ var innoHelper = {
             json: true
         }, function (error) {
             if (!error) {
-                self.cache.expire('settings' + vars.appName);
+                cache.expire('settings' + vars.appName);
             }
             callback(error);
         });
@@ -434,7 +434,7 @@ var innoHelper = {
             json: true
         }, function (error) {
             if (!error) {
-                self.cache.expire('attributes' + vars.profileId);
+                cache.expire('attributes' + vars.profileId);
             }
             callback(error);
         });
@@ -516,7 +516,7 @@ var innoHelper = {
                         attributes = profile.attributes;
                     }
                     if (allowCache) {
-                        self.cache.set('attributes' + vars.profileId, attributes);
+                        cache.set('attributes' + vars.profileId, attributes);
                     }
                 }
 
