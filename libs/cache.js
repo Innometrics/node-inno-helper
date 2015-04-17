@@ -12,7 +12,7 @@ var cache = {
      * @private
      * @type {Number}
      */
-    cachedTime: 10,
+    cachedTime: 60,
 
     /**
      * Get data from cache by name if it's not expired
