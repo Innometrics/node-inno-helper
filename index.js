@@ -2,42 +2,6 @@
  * @class InnoHelper
  * @static
  * Class provide methods to work with **Cloud**.
- *
- *     @example
- *     var InnoHelper = require('./inno-helper');
- *
- *     var inno = new InnoHelper(
- *         var1: 'value1',
- *         var2: 'value2'
- *     });
- *
- *     inno.setVar('varName', process.env.VAR_NAME);
- *
- *     app.post('/', function (req, res) {
- *          inno.getDatas(req, function (error, data) {
- *              // do something
- *          });
- *     });
- *
- *     inno.getAppSettings({
- *          vars: inno.getVars()
- *     }, function (error, settings) {
- *          // do something
- *     });
- *
- *     inno.setProfileAttributes({
- *          vars: inno.getVars(),
- *          data: settings
- *     }, function (error) {
- *          // do something
- *     });
- *
- *     inno.getProfileAttributes({
- *          vars: inno.getVars(),
- *     }, function (error, settings) {
- *          // do something
- *     });
- *
  */
 
 'use strict';
@@ -48,152 +12,88 @@ var util = require('util'),
 
 
 var InnoHelper = function(config) {
-    this.vars = config;
+
+    var error = this.validateObject(config, ['bucketName','appKey','apiUrl','appName','groupId']);
+
+    if (error) {
+        throw error;
+    }
+
+    this.config = config;
+
 };
 
 InnoHelper.prototype = {
+
     /**
-     * Object with environment vars
+     * Config with environment vars
      * @private
      * @type {Object}
      */
-    vars: {},
-
-    /**
-     * Merge objects
-     * @private
-     * @param {Object} main
-     * @param {Object} overrides
-     * @returns {Object}
-     */
-    mergeVars: function (main, overrides) {
-        var keys = [].concat(Object.keys(main), Object.keys(overrides)),
-            vars = {};
-
-        keys.forEach(function (key) {
-            if (!vars.hasOwnProperty(key)) {
-                vars[key] = overrides.hasOwnProperty(key) ? overrides[key] : main[key];
-            }
-        });
-
-        return vars;
-    },
-
-    /**
-     * Get environment vars
-     *
-     *     @example
-     *     {
-     *          bucketName: 'testbucket',
-     *          appKey: '8HJ3hnaxErdJJ62H',
-     *          appName: 'testapp',
-     *          groupId: '4',
-     *          apiUrl: 'http://app.innomdc.com',
-     *          collectApp: 'web',
-     *          section: 'testsection',
-     *          profileId: 'omrd9lsa70bqukicsctlcvcu97xwehgm'
-     *      }
-     *
-     * @returns {Object}
-     */
-    getVars: function () {
-        return this.vars || {};
-    },
-
-    /**
-     * Set environment vars
-     * @param {Object} objё
-     * @returns {undefined}
-     */
-    setVars: function (obj) {
-        this.vars = obj;
-    },
-
-    /**
-     * Set environment var by name
-     * @param {String} name
-     * @param {Mixed} value
-     * @returns {undefined}
-     */
-    setVar: function (name, value) {
-        this.vars[name] = value;
-    },
-
-    /**
-     *
-     * @param {Mixed} rawData
-     * @param {Function} callback
-     * @return {Undefined}
-     */
-    getProfileStreamData: function (rawData, callback) {
-        var error,
-            data;
-
-        try {
-            data = this.parseProfileStreamData(rawData);
-            this.setVar('profileId', data.id);
-            this.setVar('collectApp', data.session.collectApp);
-            this.setVar('section', data.session.section);
-        } catch (e) {
-            error = e;
-        }
-        return callback(error, data);
-    },
+    config: {},
 
     /**
      *
      * @param {Mixed} rawData
      * @return {Object}
      */
-    parseProfileStreamData: function (rawData) {
-        var data = rawData,
+    getProfile: function (data, callback) {
+
+        var result = null,
             profile,
-            session;
+            session,
+            error = null;
 
         try {
-            if (typeof data !== 'object') {
-                data = JSON.parse(data);
+
+            try {
+                if (typeof data !== 'object') {
+                    data = JSON.parse(data);
+                }
+            } catch (e) {
+                throw new Error('Wrong stream data');
             }
+
+            profile = data.profile;
+
+            if (!profile) {
+                throw new Error('Profile not found');
+            }
+
+            if (!profile.id) {
+                throw new Error('Profile id not found');
+            }
+
+            if (!(profile.sessions && profile.sessions.length)) {
+                throw new Error('Session not found');
+            }
+
+            session = profile.sessions[0];
+
+            if (!session.collectApp) {
+                throw new Error('CollectApp not found');
+            }
+
+            if (!session.section) {
+                throw new Error('Section not found');
+            }
+
+            if (!(session.events && session.events.length && session.events[0].data)) {
+                throw new Error('Data not set');
+            }
+
+            result = {
+                profile:    profile,
+                session:    session,
+                event:      session.events[0],
+                data:       session.events[0].data
+            };
+
         } catch (e) {
-            throw new Error('Wrong stream data');
+            error = e;
         }
 
-        profile = data.profile;
-
-        if (!profile) {
-            throw new Error('Profile not found');
-        }
-
-        if (!profile.id) {
-            throw new Error('Profile id not found');
-        }
-
-        if (!(profile.sessions && profile.sessions.length)) {
-            throw new Error('Session not found');
-        }
-
-        session = profile.sessions[0];
-
-        if (!session.collectApp) {
-            throw new Error('CollectApp not found');
-        }
-
-        if (!session.section) {
-            throw new Error('Section not found');
-        }
-
-        if (!(session.events && session.events.length && session.events[0].data)) {
-            throw new Error('Data not set');
-        }
-
-        data = {
-            profile:    profile,
-            session:    session,
-            event:      session.events[0],
-            data:       session.events[0].data
-        };
-
-        return data;
+        callback(error, result);
     },
 
 
@@ -204,25 +104,29 @@ InnoHelper.prototype = {
      * @param {Function} callback
      * @returns {undefined}
      */
-    setProfileAttributes: function (attributes, params, callback) {
-        var self = this,
-            vars;
+    setProfileAttributes: function (params, callback) {
+        var self  = this,
+            error = null;
 
-        if (arguments.length < 3) {
+        if (arguments.length < 2) {
             callback = params;
             params = {};
         }
-
-        vars = this.mergeVars(this.getVars(), params || {});
+        
+        error = this.validateObject(params, ['profileId', 'section', 'attributes']);
+        if (error) {
+            callback(error, null);
+            return;
+        }
 
         var opts = {
-            url: this.getProfileUrl(vars),
+            url: this.getProfileUrl(params.profileId),
             body: {
-                id: vars.profileId,
+                id: params.profileId,
                 attributes: [{
-                    collectApp: vars.collectApp,
-                    section:    vars.section,
-                    data:       attributes
+                    collectApp: this.config.collectApp,
+                    section:    params.section,
+                    data:       params.attributes
                 }]
             },
             json: true
@@ -230,16 +134,18 @@ InnoHelper.prototype = {
 
         request.post(opts, function (error, response) {
 
-            var profile;
+            var profile = null;
 
             error = self.checkErrors(error, response);
 
             if (!error) {
                 profile = response.body.profile || null;
-                cache.expire('attributes' + vars.profileId);
+                cache.expire('attributes' + params.profileId);
             }
 
-            callback(error, profile);
+            if (typeof callback === 'function'){
+                callback(error, profile);
+            }
         });
     },
 
@@ -265,55 +171,104 @@ InnoHelper.prototype = {
      * @returns {undefined}
      */
     getProfileAttributes: function (params, callback) {
-        var self = this,
+        var self  = this,
+            error = null,
             allowCache,
-            cachedValue,
-            vars;
+            cachedValue;
 
         if (arguments.length < 2) {
             callback = params;
             params = {};
         }
 
-        vars = this.mergeVars(this.getVars(), params || {});
+        error = this.validateObject(params, ['profileId', 'section', 'attributes']);
+        if (error) {
+            callback(error, null);
+            return;
+        }
         
-        allowCache = !vars.noCache;
+        allowCache = this.config.noCache;
         if (allowCache) {
-            cachedValue = cache.get('attributes' + vars.profileId);
+            cachedValue = cache.get('attributes' + params.profileId);
+            if (typeof cachedValue !== 'undefined') {
+               callback(null, cachedValue);
+               return;
+            }
         }
 
-        if (typeof cachedValue !== 'undefined') {
-           callback(null, cachedValue);
-        } else {
+        var opts = {
+            url: this.getProfileUrl(params.profileId),
+            json: true
+        };
 
-            var opts = {
-                url: this.getProfileUrl(vars),
-                json: true
-            };
+        request.get(opts, function (error, response) {
 
-            request.get(opts, function (error, response) {
+            var profile    = null,
+                attributes = null;
 
-                var profile    = null,
-                    attributes = null;
+            error = self.checkErrors(error, response);
 
-                error = self.checkErrors(error, response);
+            if (!error) {
+                error = self.validateObject(response.body, ['profile']);
+            }
 
-                if (!error && !response.body.hasOwnProperty('profile')) {
-                    error = new Error('Profile not found');
+            if (!error) {
+                profile = response.body.profile;
+                attributes = Array.isArray(profile.attributes) ? profile.attributes : [];
+
+                if (allowCache) {
+                    cache.set('attributes' + params.profileId, attributes);
                 }
+            }
 
-                if (!error) {
-                    profile = response.body.profile;
-                    attributes = Array.isArray(profile.attributes) ? profile.attributes : [];
-
-                    if (allowCache) {
-                        cache.set('attributes' + vars.profileId, attributes);
-                    }
-                }
-
+            if (typeof callback === 'function'){
                 callback(error, profile);
-            });
+            }
+        });
+    },
+
+    /**
+     * Set settings application
+     * @param {Object} settings
+     * @param {Object} [params]
+     * @param {Function} callback
+     * @returns {undefined}
+     */
+    setAppSettings: function (settings, callback) {
+        var self  = this,
+            error = null;
+
+        if (!settings) {
+            error = new Error('Settings not found');
+            callback(error, null);
+            return;
         }
+
+        var opts = {
+            url: this.getAppSettingsUrl(),
+            body: settings,
+            json: true
+        };
+
+        request.put(opts, function (error, response) {
+
+            var settings = null;
+            error = self.checkErrors(error, response);
+
+            if (!error) {
+                error = self.validateObject(response.body, 'custom');
+            }
+
+            if (!error) {
+                settings = response.body.custom;
+                cache.expire('settings' + self.config.appName);
+            }
+            
+            if (typeof callback === 'function'){
+                callback(error, settings);
+            }
+
+        });
     },
 
     /**
@@ -332,91 +287,42 @@ InnoHelper.prototype = {
      * @param {Function} callback
      * @returns {undefined}
      */
-    getAppSettings: function (params, callback) {
+    getAppSettings: function (callback) {
         var self = this,
-            cachedValue, 
-            vars;
+            cachedValue;
 
-        if (arguments.length < 2) {
-            callback = params;
-            params = {};
+        if (!this.config.noCache) {
+            cachedValue = cache.get('settings' + this.config.appName);
+            if (typeof cachedValue !== 'undefined') {
+                callback(null, cachedValue);
+                return;
+            }
         }
-
-        vars = this.mergeVars(this.getVars(), params || {});
-
-        if (!vars.noCache) {
-            cachedValue = cache.get('settings' + vars.appName);
-        }
-
-        if (typeof cachedValue !== 'undefined') {
-            callback(null, cachedValue);
-        } else {
-
-            var opts = {
-                url: this.getAppSettingsUrl(vars),
-                json: true
-            };
-
-            request.get(opts, function (error, response) {
-
-                var settings = null;
-                error = self.checkErrors(error, response);
-
-                if (!error && !response.body.hasOwnProperty('custom')) {
-                    error = new Error('Settings not found');
-                }
-
-                if (!error) {
-                    settings = response.body.custom;
-                }
-                
-                callback(error, settings);
-
-            });
-        }
-    },
-
-    /**
-     * Set settings application
-     * @param {Object} settings
-     * @param {Object} [params]
-     * @param {Function} callback
-     * @returns {undefined}
-     */
-    setAppSettings: function (settings, params, callback) {
-        var self = this,
-            vars;
-
-        if (arguments.length < 3) {
-            callback = params;
-            params = {};
-        }
-
-        vars = this.mergeVars(this.getVars(), params || {});
 
         var opts = {
-            url: this.getAppSettingsUrl(vars),
-            body: settings,
+            url: this.getAppSettingsUrl(),
             json: true
         };
 
-        request.put(opts, function (error, response) {
+        request.get(opts, function (error, response) {
 
             var settings = null;
             error = self.checkErrors(error, response);
 
-            if (!error && !response.body.hasOwnProperty('custom')) {
-                error = new Error('Settings not found');
+            if (!error) {
+                error = self.validateObject(response.body, 'custom');
             }
 
             if (!error) {
                 settings = response.body.custom;
-                cache.expire('settings' + vars.appName);
             }
             
-            callback(error, settings);
+            if (typeof callback === 'function'){
+                callback(error, settings);
+            }
 
         });
+
     },
 
     /**
@@ -431,10 +337,7 @@ InnoHelper.prototype = {
         if (error) {
             return error;
         } else {
-            // if (!response){
-            //     return null;
-            // }
-            if (!response.body) {
+            if (!response || !response.body) {
                 return new Error('Response does not contain data');
             }
             if (response.statusCode !== 200) {
@@ -443,21 +346,27 @@ InnoHelper.prototype = {
                 return error;
             } 
         }
-
         return null;
     },
 
-    /**
-     * Form URL to web profile
-     *
-     *     @example
-     *     http://api.innomdc.com/v1/companies/4/buckets/testbucket/profiles/vze0bxh4qpso67t2dxfc7u81a5nxvefc
-     *
-     * @param {Object} params
-     * @returns {String}
-     */
-    profileUrl: function (params) {
-        return util.format('%s/v1/companies/%s/buckets/%s/profiles/%s', this.vars.apiUrl, params.groupId, params.bucketName, params.profileId);
+    validateObject: function(obj, fields) {
+        var error = null;
+        if (!obj){
+            error = new Error('Object is not defined');
+        } else {
+            try {
+                fields = Array.isArray(fields) ? fields : [fields];
+                fields.forEach(function(key) {
+                    if (!obj[key]) {
+                        throw new Error(key.toUpperCase() + ' not found');
+                    }
+                });
+            } catch (e) {
+                error = e;
+            }
+        }
+
+        return error;
     },
 
     /**
@@ -469,8 +378,13 @@ InnoHelper.prototype = {
      * @param {Object} params
      * @returns {String}
      */
-    getProfileUrl: function (params) {
-        return util.format('%s?app_key=%s', this.profileUrl(params), params.appKey);
+    getProfileUrl: function (profileId) {
+        return util.format('%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s', 
+            this.config.apiUrl, 
+            this.config.groupId, 
+            this.config.bucketName, 
+            profileId, 
+            this.config.appKey);
     },
 
     /**
@@ -482,8 +396,13 @@ InnoHelper.prototype = {
      * @param {Object} params
      * @returns {String}
      */
-    getAppSettingsUrl: function (params) {
-        return util.format('%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s', this.vars.apiUrl, params.groupId, params.bucketName, params.appName, params.appKey);
+    getAppSettingsUrl: function () {
+        return util.format('%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s',
+            this.config.apiUrl,
+            this.config.groupId,
+            this.config.bucketName,
+            this.config.appName,
+            this.config.appKey);
     }
 
 };
