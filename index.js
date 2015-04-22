@@ -134,17 +134,19 @@ InnoHelper.prototype = {
 
         request.post(opts, function (error, response) {
 
-            var profile = null;
+            var profile    = null, 
+                attributes = null;
 
             error = self.checkErrors(error, response);
 
             if (!error) {
                 profile = response.body.profile || null;
+                attributes = Array.isArray(profile.attributes) ? profile.attributes : [];
                 cache.expire('attributes' + params.profileId);
             }
 
             if (typeof callback === 'function'){
-                callback(error, profile);
+                callback(error, attributes);
             }
         });
     },
@@ -181,13 +183,13 @@ InnoHelper.prototype = {
             params = {};
         }
 
-        error = this.validateObject(params, ['profileId', 'section', 'attributes']);
+        error = this.validateObject(params, ['profileId', 'section']);
         if (error) {
             callback(error, null);
             return;
         }
         
-        allowCache = this.config.noCache;
+        allowCache = !this.config.noCache;
         if (allowCache) {
             cachedValue = cache.get('attributes' + params.profileId);
             if (typeof cachedValue !== 'undefined') {
@@ -222,7 +224,7 @@ InnoHelper.prototype = {
             }
 
             if (typeof callback === 'function'){
-                callback(error, profile);
+                callback(error, attributes);
             }
         });
     },
@@ -289,9 +291,13 @@ InnoHelper.prototype = {
      */
     getAppSettings: function (callback) {
         var self = this,
-            cachedValue;
+            cachedValue,
+            allowCache;
 
-        if (!this.config.noCache) {
+
+        allowCache = !this.config.noCache;
+
+        if (!allowCache) {
             cachedValue = cache.get('settings' + this.config.appName);
             if (typeof cachedValue !== 'undefined') {
                 callback(null, cachedValue);
@@ -315,6 +321,9 @@ InnoHelper.prototype = {
 
             if (!error) {
                 settings = response.body.custom;
+                if (allowCache) {
+                    cache.set('settings' + this.config.appName, settings);
+                }
             }
             
             if (typeof callback === 'function'){
