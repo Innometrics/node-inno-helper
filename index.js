@@ -124,7 +124,7 @@ InnoHelper.prototype = {
             body: {
                 id: params.profileId,
                 attributes: [{
-                    collectApp: this.config.collectApp,
+                    collectApp: params.collectApp || this.config.appName,
                     section:    params.section,
                     data:       params.attributes
                 }]
@@ -183,7 +183,7 @@ InnoHelper.prototype = {
             params = {};
         }
 
-        error = this.validateObject(params, ['profileId', 'section']);
+        error = this.validateObject(params, ['profileId']);
         if (error) {
             callback(error, null);
             return;
