@@ -124,7 +124,6 @@ InnoHelper.prototype = {
             body: {
                 id: params.profileId,
                 attributes: [{
-                    collectApp: params.collectApp || this.config.appName,
                     section:    params.section,
                     data:       params.attributes
                 }]
@@ -178,6 +177,15 @@ InnoHelper.prototype = {
             allowCache,
             cachedValue;
 
+        var filterAttributes = function(attributes) {
+            return attributes.filter(function(attr) {
+                if (params.collectApp && params.collectApp !== attr.collectApp) { return false; }
+                if (params.section    && params.section    !== attr.section)    { return false; }
+                if (params.attribute  && !attr.data[params.attribute])          { return false; }
+                return true;
+            });
+        };
+
         if (arguments.length < 2) {
             callback = params;
             params = {};
@@ -193,7 +201,7 @@ InnoHelper.prototype = {
         if (allowCache) {
             cachedValue = cache.get('attributes' + params.profileId);
             if (typeof cachedValue !== 'undefined') {
-               callback(null, cachedValue);
+               callback(null, filterAttributes(cachedValue));
                return;
             }
         }
@@ -224,7 +232,7 @@ InnoHelper.prototype = {
             }
 
             if (typeof callback === 'function'){
-                callback(error, attributes);
+                callback(error, filterAttributes(attributes));
             }
         });
     },
