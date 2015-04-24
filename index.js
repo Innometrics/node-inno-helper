@@ -10,7 +10,10 @@ var util = require('util'),
     request = require('request'),
     cache = require('./libs/cache');
 
-
+/**
+ * Constructor inits config with required variables and throws error if something missed
+ * @param {Object} config
+ */
 var InnoHelper = function(config) {
 
     var error = this.validateObject(config, ['bucketName','appKey','apiUrl','appName','groupId']);
@@ -33,9 +36,10 @@ InnoHelper.prototype = {
     config: {},
 
     /**
-     *
-     * @param {Mixed} rawData
-     * @return {Object}
+     * Extracts profile data from request body and transforms it to more convinient object
+     * @param  {Object}   data     Request body
+     * @param  {Function} callback Function to be called after complete
+     * @return {Object}            Result object
      */
     getProfile: function (data, callback) {
 
@@ -99,10 +103,9 @@ InnoHelper.prototype = {
 
     /**
      * Update attributes of the profile
-     * @param {Object} attributes
-     * @param {Object} [params]
-     * @param {Function} callback
-     * @returns {undefined}
+     * @param {Object}   params     Object containing profile ID, section, and key-value object with attributes to be set
+     * @param {Function} callback   Function to be called after complete
+     * @returns {Array}             Attributes in profile
      */
     setProfileAttributes: function (params, callback) {
         var self  = this,
@@ -151,7 +154,8 @@ InnoHelper.prototype = {
     },
 
     /**
-     * Get attributes of the profile
+     * Gets attributes of the profile. Available filtration by collect app, section and name. 
+     * For attributes there is one minute cache which can be disabled by settings noCache: true in config
      *
      *     Example of returning **attributes** object:
      *
@@ -167,9 +171,9 @@ InnoHelper.prototype = {
      *          modifiedAt: 1422271791719
      *     }
      *
-     * @param {Object} [params]
-     * @param {Function} callback
-     * @returns {undefined}
+     * @param {Object}   params     Object containig profile ID (required), collect app (optional), section (optional), attribute name (optional) 
+     * @param {Function} callback   Function to be called after complete
+     * @returns {Array}             Array of requested attributes
      */
     getProfileAttributes: function (params, callback) {
         var self  = this,
@@ -238,11 +242,10 @@ InnoHelper.prototype = {
     },
 
     /**
-     * Set settings application
-     * @param {Object} settings
-     * @param {Object} [params]
-     * @param {Function} callback
-     * @returns {undefined}
+     * Saves provided settings in Cloud. Be carefull! It replaces existed settings, so you need to merge them manually before settings.
+     * @param {Object} settings     Key-value list of settings
+     * @param {Function} callback   Function to be called after complete
+     * @returns {Object}            Updated list of settings
      */
     setAppSettings: function (settings, callback) {
         var self  = this,
@@ -282,7 +285,8 @@ InnoHelper.prototype = {
     },
 
     /**
-     * Get settings application
+     * Gets settings of the application. 
+     * For settings there is one minute cache which can be disabled by settings noCache: true in config
      *
      *     Example of returning **app settings** object:
      *
@@ -293,9 +297,8 @@ InnoHelper.prototype = {
      *          option3: ['abc', 123]
      *     }
      *
-     * @param {Object} [params]
-     * @param {Function} callback
-     * @returns {undefined}
+     * @param {Function} callback   Function to be called after complete
+     * @returns {Object}            Updated list of settings
      */
     getAppSettings: function (callback) {
         var self = this,
@@ -366,6 +369,12 @@ InnoHelper.prototype = {
         return null;
     },
 
+    /**
+     * Checks that provided fields are existed in object and returns error if not
+     * @param  {[Object]} obj    Object to validate
+     * @param  {[Array]}  fields List of fields to check
+     * @return {[Error]}         Error object
+     */
     validateObject: function(obj, fields) {
         var error = null;
         if (!obj){
@@ -387,12 +396,12 @@ InnoHelper.prototype = {
     },
 
     /**
-     * Form URL to web profiles using App key
+     * Form URL to web profiles
      *
      *     @example
      *     http://api.innomdc.com/v1/companies/4/buckets/testbucket/profiles/vze0bxh4qpso67t2dxfc7u81a5nxvefc?app_key=8HJ3hnaxErdJJ62H
      *
-     * @param {Object} params
+     * @param {String} profileId Profile id for which to form URL
      * @returns {String}
      */
     getProfileUrl: function (profileId) {
@@ -410,7 +419,6 @@ InnoHelper.prototype = {
      *     @example
      *     http://api.innomdc.com/v1/companies/4/buckets/testbucket/apps/testapp/custom?app_key=8HJ3hnaxErdJJ62H
      *
-     * @param {Object} params
      * @returns {String}
      */
     getAppSettingsUrl: function () {
