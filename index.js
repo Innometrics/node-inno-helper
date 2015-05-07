@@ -333,7 +333,7 @@ InnoHelper.prototype = {
             if (!error) {
                 settings = response.body.custom;
                 if (allowCache) {
-                    cache.set('settings' + this.config.appName, settings);
+                    cache.set('settings' + self.config.appName, settings);
                 }
             }
             
