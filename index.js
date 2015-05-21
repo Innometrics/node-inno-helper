@@ -109,7 +109,7 @@ InnoHelper.prototype = {
      */
     setProfileAttributes: function (params, callback) {
         var self  = this,
-            error = null;
+            error;
 
         if (arguments.length < 2) {
             callback = params;
@@ -348,9 +348,9 @@ InnoHelper.prototype = {
     /**
      * Checks server response for common errors
      * @private
-     * @param  {[Object]} error    Server error argumnt
-     * @param  {[Object]} response Server response
-     * @return {[Object]}          Error object or null
+     * @param  {Object} error    Server error argument
+     * @param  {Object} response Server response
+     * @return {Object|null}          Error object or null
      */
     checkErrors: function(error, response) {
 
@@ -371,9 +371,9 @@ InnoHelper.prototype = {
 
     /**
      * Checks that provided fields are existed in object and returns error if not
-     * @param  {[Object]} obj    Object to validate
-     * @param  {[Array]}  fields List of fields to check
-     * @return {[Error]}         Error object
+     * @param  {Object} obj    Object to validate
+     * @param  {Array}  fields List of fields to check
+     * @return {Error}         Error object
      */
     validateObject: function(obj, fields) {
         var error = null;
