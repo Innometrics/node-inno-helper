@@ -115,7 +115,7 @@ InnoHelper.prototype = {
             callback = params;
             params = {};
         }
-        
+
         error = this.validateObject(params, ['profileId', 'section', 'attributes']);
         if (error) {
             callback(error, null);
@@ -136,7 +136,7 @@ InnoHelper.prototype = {
 
         request.post(opts, function (error, response) {
 
-            var profile    = null, 
+            var profile    = null,
                 attributes = null;
 
             error = self.checkErrors(error, response);
@@ -154,7 +154,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     * Gets attributes of the profile. Available filtration by collect app, section and name. 
+     * Gets attributes of the profile. Available filtration by collect app, section and name.
      * For attributes there is one minute cache which can be disabled by settings noCache: true in config
      *
      *     Example of returning **attributes** object:
@@ -171,7 +171,7 @@ InnoHelper.prototype = {
      *          modifiedAt: 1422271791719
      *     }
      *
-     * @param {Object}   params     Object containig profile ID (required), collect app (optional), section (optional), attribute name (optional) 
+     * @param {Object}   params     Object containig profile ID (required), collect app (optional), section (optional), attribute name (optional)
      * @param {Function} callback   Function to be called after complete
      * @returns {Array}             Array of requested attributes
      */
@@ -200,7 +200,7 @@ InnoHelper.prototype = {
             callback(error, null);
             return;
         }
-        
+
         allowCache = !this.config.noCache;
         if (allowCache) {
             cachedValue = cache.get('attributes' + params.profileId);
@@ -276,7 +276,7 @@ InnoHelper.prototype = {
                 settings = response.body.custom;
                 cache.expire('settings' + self.config.appName);
             }
-            
+
             if (typeof callback === 'function'){
                 callback(error, settings);
             }
@@ -285,7 +285,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     * Gets settings of the application. 
+     * Gets settings of the application.
      * For settings there is one minute cache which can be disabled by settings noCache: true in config
      *
      *     Example of returning **app settings** object:
@@ -336,7 +336,7 @@ InnoHelper.prototype = {
                     cache.set('settings' + self.config.appName, settings);
                 }
             }
-            
+
             if (typeof callback === 'function'){
                 callback(error, settings);
             }
@@ -364,7 +364,7 @@ InnoHelper.prototype = {
                 error = new Error(response.body.message);
                 error.name = 'Server failed with status code ' + response.statusCode;
                 return error;
-            } 
+            }
         }
         return null;
     },
@@ -405,11 +405,11 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getProfileUrl: function (profileId) {
-        return util.format('%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s', 
-            this.config.apiUrl, 
-            this.config.groupId, 
-            this.config.bucketName, 
-            profileId, 
+        return util.format('%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s',
+            this.config.apiUrl,
+            this.config.groupId,
+            this.config.bucketName,
+            profileId,
             this.config.appKey);
     },
 

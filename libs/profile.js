@@ -5,8 +5,8 @@ var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
 
-var Profile = function () {
-
+var Profile = function (profile) {
+    this.profile = profile;
 };
 
 Profile.Attribute = Attribute;
@@ -15,8 +15,10 @@ Profile.Session = Session;
 Profile.Segment = Segment;
 
 Profile.prototype = {
-    getId: function() {
+    profile: null,
 
+    getId: function() {
+        return this.profile && this.profile.id || null;
     },
 
     // attributes
