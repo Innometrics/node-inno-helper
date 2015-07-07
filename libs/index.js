@@ -67,14 +67,16 @@ InnoHelper.prototype = {
         }
         return error;
     },
-    checkErrors: function (error, response) {
+    checkErrors: function (error, response, successCode) {
+        successCode = successCode || 200;
+        
         if (error) {
             return error;
         } else {
             if (!response || !response.body) {
                 return new Error('Response does not contain data');
             }
-            if (response.statusCode !== 200) {
+            if (response.statusCode !== successCode) {
                 error = new Error(response.body.message);
                 error.name = 'Server failed with status code ' + response.statusCode;
                 return error;
@@ -271,23 +273,198 @@ InnoHelper.prototype = {
     // profile Cloud API
     // <InnoHelper> loadProfile(<string> profileId, <function> callback(error, <Profile> profile))
     loadProfile: function (profileId, callback) {
+        var self = this;
+        var opts = {
+            url: this.getProfileUrl(profileId),
+            json: true
+        };
 
+        request.get(opts, function (error, response) {
+
+            var data = null;
+            var profile = null;
+            
+            error = self.checkErrors(error, response);
+
+            if (!error) {
+                data = response.body;
+                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+                    profile = new Profile(data.profile);
+                }
+            }
+
+            if (typeof callback === 'function') {
+                callback(error, profile);
+            }
+
+        }); 
     },
     // <InnoHelper> deleteProfile(<string> profileId, <function> callback(error))
     deleteProfile: function (profileId, callback) {
+        var opts = {
+            url: this.getProfileUrl(profileId),
+            json: true
+        };
 
+        request.del(opts, function (error, response) {
+            if (!error) {
+                if (response.statusCode !== 204) {
+                    error = new Error(response.body ? response.body.message : '');
+                    error.name = 'Server failed with status code ' + response.statusCode;
+                }
+            }
+            
+            if (typeof callback === 'function') {
+                callback(error);
+            }
+
+        }); 
     },
     // <InnoHelper> saveProfile(<Profile> profile, <function> callback(error, <Profile> profile))
     saveProfile: function (profile, callback) {
+        var error = null;
+        var result = null;        
+        
+        if (!(profile instanceof Profile)) {
+            error = new Error('Argument "profile" should be a Profile instance');
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+            return;
+        }
+        
+        var profileId = profile.getId();
+        var opts = {
+            url: this.getProfileUrl(profileId),
+            json: true
+        };
 
+        request.get(opts, function (error, response) {
+            var data = response.body || {};
+            if (error) {
+                if (typeof callback === 'function') {
+                    callback(error, profile);
+                }
+                return;
+            }
+            
+            var profileNotFound = response.statusCode === 404;
+            var successCode = profileNotFound ? 201 : 200;
+            var wrongResponse = response.statusCode !== 200;
+            
+            if (wrongResponse && !profileNotFound) {
+                error = new Error(data ? data.message : '');
+                error.name = 'Server failed with status code ' + response.statusCode;
+
+                if (typeof callback === 'function') {
+                    callback(error, profile);
+                }
+                return;
+            }
+            
+            opts.body = profile.getData();
+            request.post(opts, function (error, response) {
+
+                var data = response.body || {};
+                if (!error) {
+                    if (response.statusCode !== successCode) {
+                        error = new Error(data ? data.message : '');
+                        error.name = 'Server failed with status code ' + response.statusCode;
+                    }
+                }
+
+                if (typeof callback === 'function') {
+                    if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+                        profile = new Profile(data.profile);
+                    }
+                    callback(error, profile);
+                }
+
+            });                
+        });
     },
     // <InnoHelper> mergeProfiles(<string|Profile> profile1, <string|Profile> profile2, <function> callback(error, profile1))
     mergeProfiles: function (profile1, profile2, callback) {
+        var error = null;
+        var result = null;        
+        
+        if (!(profile1 instanceof Profile)) {
+            error = new Error('Argument "profile1" should be a Profile instance');
+        }
+        
+        if (!(profile2 instanceof Profile)) {
+            error = new Error('Argument "profile2" should be a Profile instance');
+        }
+        
+        if (error) {
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+            return;
+        }
+        
+        var profileId = profile1.getId();
+        var opts = {
+            url: this.getProfileUrl(profileId),
+            body: {
+                id: profileId,
+                mergedProfiles: [
+                    profile2.getId()
+                ]
+            },
+            json: true
+        };
+        
+        request.post(opts, function (error, response) {
 
+            var data = response.body || {};
+            var code = response.statusCode;
+            var profile = null;
+            
+            if (!error) {
+                if (!(code === 200 || code === 201)) {
+                    error = new Error(data ? data.message : '');
+                    error.name = 'Server failed with status code ' + response.statusCode;
+                }
+            }
+
+            if (typeof callback === 'function') {
+                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+                    profile = new Profile(data.profile);
+                }
+                callback(error, profile);
+            }
+
+        });         
     },
     // <InnoHelper> refreshLocalProfile(<Profile> profile, <function> callback(error, <Profile> profile))
     refreshLocalProfile: function (profile, callback) {
+        var error = null;
+        var result = null;        
+        
+        if (!(profile instanceof Profile)) {
+            error = new Error('Argument "profile" should be a Profile instance');
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+            return;
+        }
+        
+        var profileId = profile.getId();
 
+        this.loadProfile(profileId, function (error, loadedProfile) {
+            var refreshedProfileData = null;
+            var refreshedProfile = null;
+            
+            if (!error) {
+                refreshedProfileData = util._extend(loadedProfile.getData(), profile.getData());
+                refreshedProfile = new Profile(refreshedProfileData);
+            }
+            
+            if (typeof callback === 'function') {
+                callback(error, refreshedProfile);
+            }
+        });
     },
 
     // <Profile> getProfileFromRequest(<string> requestBody)
