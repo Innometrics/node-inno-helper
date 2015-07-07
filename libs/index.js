@@ -2,7 +2,9 @@
 
 var request = require('request');
 var Profile = require('./profile');
+var Segment = require('./segment');
 var util = require('util');
+var querystring = require('querystring');
 
 // <InnoHelper> InnoHelper(<json> config)
 var InnoHelper = function (config) {
@@ -28,6 +30,23 @@ InnoHelper.prototype = {
             this.getBucket(),
             this.getCollectApp(),
             this.getAppKey());
+    },
+
+    getSegmentsUrl: function () {
+        return util.format('%s/v1/companies/%s/buckets/%s/segments?app_key=%s',
+            this.getApiHost(),
+            this.getCompany(),
+            this.getBucket(),
+            this.getAppKey());
+    },
+
+    getSegmentEvaluationUrl: function (params) {
+        return util.format('%s/v1/companies/%s/buckets/%s/segment-evaluation?app_key=%s&%s',
+            this.getApiHost(),
+            this.getCompany(),
+            this.getBucket(),
+            this.getAppKey(),
+            querystring.stringify(params));
     },
 
     validateObject: function (obj, fields) {
@@ -148,19 +167,105 @@ InnoHelper.prototype = {
     // segments
     // <InnoHelper> getSegments(<function> callback(error, array.<Segment> segments))
     getSegments: function (callback) {
+        var self = this;
+        var opts = {
+            url: this.getSegmentsUrl(),
+            json: true
+        };
 
+        request.get(opts, function (error, response) {
+
+            var data = null;
+            var segments = [];
+            
+            error = self.checkErrors(error, response);
+
+            if (!error) {
+                data = response.body;
+                data = util.isArray(data) ? data : [];
+                data.forEach(function (sgmData) {
+                    var sgmInstance = null;
+                    if (sgmData.hasOwnProperty('segment') && typeof sgmData.segment === 'object') {
+                        sgmInstance = new Segment(sgmData.segment);
+                        segments.push(sgmInstance);
+                    }
+                });
+            }
+
+            if (typeof callback === 'function') {
+                callback(error, segments);
+            }
+
+        });        
     },
     // <InnoHelper> evaluateProfileBySegment(<string|Profile> profile, <Segment> segment, <function> callback(error, <boolean> result))
     evaluateProfileBySegment: function (profile, segment, callback) {
-
+        var error = null;
+        var result = null;
+        if (!(segment instanceof Segment)) {
+            error = new Error('Argument "segment" should be a Segment instance');
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+            return;
+        }
+        
+        this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
     },
     // <InnoHelper> evaluateProfileBySegmentId(<string|Profile> profile, <string> segmentId, <function> callback(error, <boolean> result))
     evaluateProfileBySegmentId: function (profile, segmentId, callback) {
-
+        this._evaluateProfileByParams(profile, {
+            segment_id: segmentId
+        }, callback);
     },
     // <InnoHelper> evaluateProfileByIql(<string|Profile> profile, <string> iql, <function> callback(error, <boolean> result))
     evaluateProfileByIql: function (profile, iql, callback) {
+        this._evaluateProfileByParams(profile, {
+            iql: iql
+        }, callback);
+    },
+    _evaluateProfileByParams: function (profile, params, callback) {
+        var self = this;
+        var error = null;
+        var result = null;
+        
+        if (!(profile instanceof Profile)) {
+            error = new Error('Argument "profile" should be a Profile instance');
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+            return;
+        }
+        
+        var defParams = {
+            profile_id: profile.getId()            
+        };
+        
+        params = util._extend(params, defParams);
+        
+        var opts = {
+            url: this.getSegmentEvaluationUrl(params),
+            json: true
+        };
 
+        request.get(opts, function (error, response) {
+
+            var data = null;
+            
+            error = self.checkErrors(error, response);
+
+            if (!error) {
+                data = response.body;
+                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('result')) {
+                    result = data.segmentEvaluation.result;
+                }
+            }
+
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+
+        });    
     },
 
     // profile Cloud API
