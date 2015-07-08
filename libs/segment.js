@@ -1,19 +1,19 @@
 'use strict';
 
 var Segment = function (config) {
-    this.config = config;
+    this.data = config;
 };
 
 Segment.prototype = {
-    config: null,
+    data: null,
     
     // <string> getId()
     getId: function() {
-        return this.config && this.config.id;
+        return this.data && this.data.id;
     },
     // <string> getIql()
     getIql: function() {
-        return this.config && this.config.iql;
+        return this.data && this.data.iql;
     }
 };
 
