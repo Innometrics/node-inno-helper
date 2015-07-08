@@ -6,7 +6,7 @@ var Session = require('./session');
 var Segment = require('./segment');
 
 var Profile = function (profile) {
-    this.profile = profile;
+    this.data = profile;
 };
 
 Profile.Attribute = Attribute;
@@ -104,24 +104,70 @@ Profile.generateId = function () {
 };
 
 Profile.prototype = {
-    profile: null,
+    data: null,
 
     getId: function() {
         return this.profile && this.profile.id || null;
     },
 
     getData: function() {
-        return this.profile || null;
+        return this.data || null;
     },
 
     // attributes
     // array.<Attribute> createAttributes(<string> collectApp, <string> section, <object> attributes)
     createAttributes: function(collectApp, section, attributes) {
-
+        var instances = [];
+        var key;
+        for(key in attributes) {
+            if (attributes.hasOwnProperty(key)) {
+                instances.push(new Profile.Attribute({
+                    collectApp: collectApp,
+                    section: section,
+                    name: key,
+                    value: attributes[key]
+                }));
+            }
+        }
+        
+        return instances;
     },
     // array.<Attribute> getAttributes([<string> collectApp], [<string> section])
     getAttributes: function(collectApp, section) {
-
+        var attrs = [];
+        var profile = this.getData();
+        var checkCond = function (app, sec) {
+            var res = true;
+            if (collectApp && section) {
+                if (collectApp !== app || section !== sec) {
+                    res = false;
+                }
+            } else if (collectApp) {
+                if (collectApp !== app) {
+                    res = false;
+                }
+            } else if (section) {
+                if (section !== sec) {
+                    res = false;
+                }
+            }
+            
+            return res;
+        };
+        
+        if (profile.hasOwnProperty('attributes') && Array.isArray(profile.attributes)) {
+            profile.attributes.forEach(function (attrsData) {
+                if (checkCond(attrsData.collectApp, attrsData.section)) {
+                    attrs = attrs.concat(this.createAttributes(
+                        attrsData.collectApp,
+                        attrsData.section,
+                        attrsData.data
+                    ));
+                }
+            }, this);
+        }
+        
+        return attrs;
     },
     // <Attribute> getAttribute(<string> name, <string> collectApp, <string> section)
     getAttribute: function(name, collectApp, section) {
@@ -129,11 +175,42 @@ Profile.prototype = {
     },
     // <Profile> setAttribute(<object|Attribute> attribute)
     setAttribute: function(attribute) {
-
+        return this;
     },
     // <Profile> setAttributes(array.<Attribute> attributes)
     setAttributes: function(attributes) {
-
+        var data = this.getData();
+        var attrs = data.attributes || [];
+        attributes.forEach(function (attr) {
+            if (!(attr instanceof Attribute)) {
+                return;
+            }
+            
+            var app = attr.getCollectApp();
+            var sec = attr.getSection();
+            var currentAttrData = null;
+            
+            attrs.forEach(function (attrData) {
+                if (attrData.collectApp === app && attrData.section === sec) {
+                    currentAttrData = attrData;
+                }
+            });
+            
+            if (!currentAttrData) {
+                currentAttrData = {
+                    collectApp: app,
+                    section: sec,
+                    data: {}
+                };
+                attrs.push(currentAttrData);
+            }
+            
+            currentAttrData.data[attr.getName()] = attr.getValue();
+            
+        }, this);
+        
+        data.attributes = attrs;
+        return this;
     },
 
     //sessions
