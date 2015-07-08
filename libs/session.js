@@ -40,7 +40,7 @@ Session.prototype = {
     },
     // <Session> setData(<object> data)
     setData: function (data) {
-        this.session.data = data;
+        this.session.data = merge(this.session.data, data);
         return this;
     },
     // <Session> setDataValue(<string> name, <mixed> value)
@@ -108,11 +108,7 @@ Session.prototype = {
     },
     // <boolean> isValid()
     isValid: function () {
-        if (!this.session) {
-            throw new Error('Session is not defined');
-        } else if (!this.session.section) {
-            throw new Error('Section is not defined');
-        }
+        return !!this.getId() && !!this.getSection() && !!this.getCollectApp() && !!this.getCreatedAt();
     }
 };
 
