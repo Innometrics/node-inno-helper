@@ -117,9 +117,17 @@ Profile.prototype = {
     // attributes
     // array.<Attribute> createAttributes(<string> collectApp, <string> section, <object> attributes)
     createAttributes: function(collectApp, section, attributes) {
+        if (!collectApp || !section) {
+            throw new Error('collectApp and section should be filled to create attribute correctly');
+        }
+        
+        if (Object.keys(attributes).length) {
+            throw new Error('attributes should be an object');
+        }
+        
         var instances = [];
         var key;
-        for(key in attributes) {
+        for (key in attributes) {
             if (attributes.hasOwnProperty(key)) {
                 instances.push(new Profile.Attribute({
                     collectApp: collectApp,
@@ -151,7 +159,7 @@ Profile.prototype = {
                     res = false;
                 }
             }
-            
+
             return res;
         };
         
@@ -171,10 +179,23 @@ Profile.prototype = {
     },
     // <Attribute> getAttribute(<string> name, <string> collectApp, <string> section)
     getAttribute: function(name, collectApp, section) {
-
+        if (!name || !collectApp || !section) {
+            throw new Error('Name, collectApp and section should be filled to get attribute');
+        }
+        
+        var attribute = null;
+        var attrs = this.getAttributes(collectApp, section);
+        attrs.forEach(function (attr) {
+            if (attr.getName() === name) {
+                attribute = attr;
+            }
+        });
+        
+        return attribute;
     },
     // <Profile> setAttribute(<object|Attribute> attribute)
     setAttribute: function(attribute) {
+        this.setAttributes([attribute]);
         return this;
     },
     // <Profile> setAttributes(array.<Attribute> attributes)
@@ -182,7 +203,7 @@ Profile.prototype = {
         var data = this.getData();
         var attrs = data.attributes || [];
         attributes.forEach(function (attr) {
-            if (!(attr instanceof Attribute)) {
+            if (!(attr instanceof Attribute) || !attr.isValid()) {
                 return;
             }
             
