@@ -4,7 +4,6 @@ var Attribute = require('./attribute');
 var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
-var merge = require('merge');
 
 var Profile = function (profile) {
     this.data = profile;
@@ -238,30 +237,19 @@ Profile.prototype = {
     // Sessions
     // array.<Session> getSessions([<function> filter])
     getSessions: function (filter) {
-        var sessions = [];
+
         var profile = this.getData();
 
-        if (profile.hasOwnProperty('sessions') && Array.isArray(profile.sessions)) {
-            profile.sessions.forEach(function (session) {
-                var currentSession = new Session(session);
-
-                switch (typeof filter) {
-                    case 'function':
-                        if (filter(currentSession)) {
-                            sessions.push(currentSession);
-                        }
-                        break;
-                    case 'undefined':
-                        sessions.push(currentSession);
-                        break;
-                    default:
-                        throw new Error('Argument is not a function');
-                }
-
-            }, this);
+        if (!(typeof filter).match('undefined|function')) {
+            throw new Error('Argument is not a function');
         }
 
-        return sessions;
+        if (profile.hasOwnProperty('sessions') && Array.isArray(profile.sessions)) {
+            return filter === undefined ? profile.sessions : profile.sessions.filter(filter);
+        } else {
+            profile.sessions = [];
+            return profile.sessions;
+        }
     },
     // <Session> setSession([<object|Session> session])
     setSession: function (session) {
@@ -273,16 +261,16 @@ Profile.prototype = {
             throw new Error('Session is not valid');
         }
 
-        var sessionId = session.getId();
-        var sessions = this.getData().sessions;
+        var existSession = this.getSession(session.getId());
 
-        sessions.forEach(function (sess) {
-            if (sess.id === sessionId) {
-                sess = merge(sess, session.session);
-            }
-        });
-
-        return sessions;
+        if (existSession) {
+            existSession = session;
+            return existSession;
+        } else {
+            var sessions = this.getSessions();
+            sessions.push(session);
+            return sessions[sessions.length - 1];
+        }
     },
     // <Session> getSession(<string> sessionId)
     getSession: function (sessionId) {
@@ -293,7 +281,16 @@ Profile.prototype = {
     },
     // <Session> getLastSession()
     getLastSession: function () {
+        var sessions = this.getSessions();
 
+        if (sessions.length) {
+            var sorted = sessions.concat().sort(function (a, b) {
+                return b.getModifiedAt() - a.getModifiedAt();
+            });
+            return this.getSession(sorted[0].getId());
+        } else {
+            return null;
+        }
     }
 };
 

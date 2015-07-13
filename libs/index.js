@@ -198,7 +198,7 @@ InnoHelper.prototype = {
                 callback(error, segments);
             }
 
-        });        
+        });
     },
     // <InnoHelper> evaluateProfileBySegment(<string|Profile> profile, <Segment> segment, <function> callback(error, <boolean> result))
     evaluateProfileBySegment: function (profile, segment, callback) {
@@ -240,7 +240,7 @@ InnoHelper.prototype = {
         }
         
         var defParams = {
-            profile_id: profile.getId()            
+            profile_id: profile.getId()
         };
         
         params = util._extend(params, defParams);
@@ -267,7 +267,7 @@ InnoHelper.prototype = {
                 callback(error, result);
             }
 
-        });    
+        });
     },
 
     // profile Cloud API
@@ -297,7 +297,7 @@ InnoHelper.prototype = {
                 callback(error, profile);
             }
 
-        }); 
+        });
     },
     // <InnoHelper> deleteProfile(<string> profileId, <function> callback(error))
     deleteProfile: function (profileId, callback) {
@@ -318,12 +318,12 @@ InnoHelper.prototype = {
                 callback(error);
             }
 
-        }); 
+        });
     },
     // <InnoHelper> saveProfile(<Profile> profile, <function> callback(error, <Profile> profile))
     saveProfile: function (profile, callback) {
         var error = null;
-        var result = null;        
+        var result = null;
         
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
@@ -363,6 +363,7 @@ InnoHelper.prototype = {
             }
             
             opts.body = profile.getData();
+
             request.post(opts, function (error, response) {
 
                 var data = response.body || {};
@@ -380,13 +381,13 @@ InnoHelper.prototype = {
                     callback(error, profile);
                 }
 
-            });                
+            });
         });
     },
     // <InnoHelper> mergeProfiles(<string|Profile> profile1, <string|Profile> profile2, <function> callback(error, profile1))
     mergeProfiles: function (profile1, profile2, callback) {
         var error = null;
-        var result = null;        
+        var result = null;
         
         if (!(profile1 instanceof Profile)) {
             error = new Error('Argument "profile1" should be a Profile instance');
@@ -435,12 +436,12 @@ InnoHelper.prototype = {
                 callback(error, profile);
             }
 
-        });         
+        });
     },
     // <InnoHelper> refreshLocalProfile(<Profile> profile, <function> callback(error, <Profile> profile))
     refreshLocalProfile: function (profile, callback) {
         var error = null;
-        var result = null;        
+        var result = null;
         
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');

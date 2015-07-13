@@ -5,12 +5,14 @@ var idGenerator = require('./id-generator');
 
 // <Session> new Profile.Session({collectApp: web, section: sec, id: id, data: data, createdAt: timestamp})
 var Session = function (session) {
+    var now = (new Date()).getTime();
     this.session  = merge({
         id: idGenerator.generate(8),
         collectApp: "web",
         data: {},
         events: [],
-        createdAt: (new Date()).getTime()
+        createdAt: now,
+        modifiedAt: now
     }, session);
 };
 
@@ -18,9 +20,7 @@ Session.prototype = {
     session: null,
     // <Session> setId(<string> id)
     setId: function (id) {
-        if (this.session) {
-            this.session.id = id;
-        }
+        this.session.id = id;
         return this;
     },
     // <Session> setCollectApp(<string> collectApp)
