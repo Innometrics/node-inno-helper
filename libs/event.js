@@ -4,56 +4,60 @@ var merge = require('merge');
 var idGenerator = require('./id-generator');
 
 // <Event> new Profile.Event({id: id, definitionId: definitionId, data: data, createdAt: timestamp})
-var EventDefinition = function (config) {
-    this.object = merge({
+var Event = function (config) {
+    this.event = merge({
         id: idGenerator.generate(8),
         createdAt: (new Date()).getTime(),
         data: {}
     }, config);
 };
 
-EventDefinition.prototype = {
-    object: null,
+Event.prototype = {
+    event: null,
     // <Event> setId(<string> id)
     setId: function (id) {
-        this.object.id = id;
+        this.event.id = id;
         return this;
     },
     // <Event> setCreatedAt(<number|Date>)
     setCreatedAt: function (date) {
-        this.object.createdAt = date;
+        this.event.createdAt = date;
         return this;
     },
     // <Event> setDefinitionId(<string> definitionId)
     setDefinitionId: function (definitionId) {
-        this.object.definitionId = definitionId;
+        this.event.definitionId = definitionId;
         return this;
     },
     // <Event> setData(<object> data)
     setData: function (data) {
-        this.object.data = merge(this.object.data, data);
+        this.event.data = merge(this.event.data, data);
         return this;
     },
     // <Event> setDataValue(<string> name, <mixed> value)
     setDataValue: function (name, value) {
-        this.object.data[name] = value;
+        this.event.data[name] = value;
         return this;
+    },
+    // <string> getId
+    getId: function () {
+        return this.event && this.event.id || null;
     },
     // <number> getCreatedAt
     getCreatedAt: function () {
-        return this.object && this.object.createdAt || null;
+        return this.event && this.event.createdAt || null;
     },
     // <number> getCreatedAt
     getDefinitionId: function () {
-        return this.object && this.object.definitionId || null;
+        return this.event && this.event.definitionId || null;
     },
     // <object> getData()
     getData: function () {
-        return this.object && this.object.data || null;
+        return this.event && this.event.data || null;
     },
     // <mixed> getDataValue(<string> name)
     getDataValue: function (name) {
-        return this.object && this.object.data && this.object.data[name] || null;
+        return this.event && this.event.data && this.event.data[name] || null;
     },
     // <session> getSession()
     getSession: function () {
@@ -65,4 +69,4 @@ EventDefinition.prototype = {
     }
 };
 
-module.exports = EventDefinition;
+module.exports = Event;

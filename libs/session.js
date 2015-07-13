@@ -1,13 +1,13 @@
 'use strict';
 
 var merge = require('merge');
-var EventDefinition = require('./event');
+var Event = require('./event');
 var idGenerator = require('./id-generator');
 
 // <Session> new Profile.Session({collectApp: web, section: sec, id: id, data: data, createdAt: timestamp})
 var Session = function (session) {
     var now = (new Date()).getTime();
-    this.session  = merge({
+    this.session = merge({
         id: idGenerator.generate(8),
         collectApp: "web",
         data: {},
@@ -15,6 +15,12 @@ var Session = function (session) {
         createdAt: now,
         modifiedAt: now
     }, session);
+
+    if (session.hasOwnProperty('events') && Array.isArray(session.events)) {
+        this.session.events = session.events.map(function (event) {
+            return new Event(event);
+        });
+    }
 };
 
 Session.prototype = {
@@ -79,8 +85,8 @@ Session.prototype = {
     },
     // <event> addEvent(<object|Event> event)
     addEvent: function (event) {
-        if (!(event instanceof EventDefinition)) {
-            event = new EventDefinition(event);
+        if (!(event instanceof Event)) {
+            event = new Event(event);
         }
 
         if (!event.isValid()) {
@@ -101,8 +107,8 @@ Session.prototype = {
     // <event> getEvent(<string> eventId)
     getEvent: function (eventId) {
         var events = this.getEvents();
-        var result = events.filter(function (event)     {
-            return event.id === eventId;
+        var result = events.filter(function (event) {
+            return event.getId() === eventId;
         });
 
         return result.length ? result[0] : null;
@@ -115,7 +121,7 @@ Session.prototype = {
         }
 
         if (eventDefinitionId) {
-            return this.session.events.filter(function (event)     {
+            return this.session.events.filter(function (event) {
                 return event.getDefinitionId() === eventDefinitionId;
             });
         } else {
