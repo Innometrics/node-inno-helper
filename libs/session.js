@@ -1,6 +1,7 @@
 'use strict';
 
 var merge = require('merge');
+var EventDefinition = require('./event');
 var idGenerator = require('./id-generator');
 
 // <Session> new Profile.Session({collectApp: web, section: sec, id: id, data: data, createdAt: timestamp})
@@ -78,19 +79,29 @@ Session.prototype = {
     },
     // <event> addEvent(<object|Event> event)
     addEvent: function (event) {
-        if (!this.session.events) {
-            this.session.events = [];
+        if (!(event instanceof EventDefinition)) {
+            event = new EventDefinition(event);
         }
 
-        this.session.events.push(event);
+        if (!event.isValid()) {
+            throw new Error('Event is not valid');
+        }
+
+        var existEvent = this.getEvent(event.getId());
+
+        if (existEvent) {
+            existEvent = event;
+            return existEvent;
+        } else {
+            var events = this.getEvents();
+            events.push(event);
+            return events[events.length - 1];
+        }
     },
     // <event> getEvent(<string> eventId)
     getEvent: function (eventId) {
-        if (!this.session || !this.session.events) {
-            return null;
-        }
-
-        var result = this.session.events.filter(function (event)     {
+        var events = this.getEvents();
+        var result = events.filter(function (event)     {
             return event.id === eventId;
         });
 
@@ -98,13 +109,19 @@ Session.prototype = {
     },
     // array.<Event> getEvents([<string> eventDefinitionId])
     getEvents: function (eventDefinitionId) {
-        if (!this.session || !this.session.events) {
-            return null;
+        if (!this.session.events) {
+            this.session.events = [];
+            return this.session.events;
         }
 
-        return this.session.events.filter(function (event)     {
-            return event.definitionId === eventDefinitionId;
-        });
+        if (eventDefinitionId) {
+            return this.session.events.filter(function (event)     {
+                return event.getDefinitionId() === eventDefinitionId;
+            });
+        } else {
+            return this.session.events;
+        }
+
     },
     // <boolean> isValid()
     isValid: function () {
