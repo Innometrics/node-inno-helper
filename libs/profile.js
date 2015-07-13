@@ -106,17 +106,17 @@ Profile.generateId = function () {
 Profile.prototype = {
     data: null,
 
-    getId: function() {
-        return this.profile && this.profile.id || null;
+    getId: function () {
+        return this.data && this.data.id || null;
     },
 
-    getData: function() {
+    getData: function () {
         return this.data || null;
     },
 
     // attributes
     // array.<Attribute> createAttributes(<string> collectApp, <string> section, <object> attributes)
-    createAttributes: function(collectApp, section, attributes) {
+    createAttributes: function (collectApp, section, attributes) {
         if (!collectApp || !section) {
             throw new Error('collectApp and section should be filled to create attribute correctly');
         }
@@ -141,7 +141,7 @@ Profile.prototype = {
         return instances;
     },
     // array.<Attribute> getAttributes([<string> collectApp], [<string> section])
-    getAttributes: function(collectApp, section) {
+    getAttributes: function (collectApp, section) {
         var attrs = [];
         var profile = this.getData();
         var checkCond = function (app, sec) {
@@ -178,7 +178,7 @@ Profile.prototype = {
         return attrs;
     },
     // <Attribute> getAttribute(<string> name, <string> collectApp, <string> section)
-    getAttribute: function(name, collectApp, section) {
+    getAttribute: function (name, collectApp, section) {
         if (!name || !collectApp || !section) {
             throw new Error('Name, collectApp and section should be filled to get attribute');
         }
@@ -194,12 +194,12 @@ Profile.prototype = {
         return attribute;
     },
     // <Profile> setAttribute(<object|Attribute> attribute)
-    setAttribute: function(attribute) {
+    setAttribute: function (attribute) {
         this.setAttributes([attribute]);
         return this;
     },
     // <Profile> setAttributes(array.<Attribute> attributes)
-    setAttributes: function(attributes) {
+    setAttributes: function (attributes) {
         var data = this.getData();
         var attrs = data.attributes || [];
         attributes.forEach(function (attr) {
@@ -234,22 +234,63 @@ Profile.prototype = {
         return this;
     },
 
-    //sessions
+    // Sessions
     // array.<Session> getSessions([<function> filter])
-    getSessions: function(filter) {
+    getSessions: function (filter) {
 
+        var profile = this.getData();
+
+        if (!(typeof filter).match('undefined|function')) {
+            throw new Error('Argument is not a function');
+        }
+
+        if (profile.hasOwnProperty('sessions') && Array.isArray(profile.sessions)) {
+            return filter === undefined ? profile.sessions : profile.sessions.filter(filter);
+        } else {
+            profile.sessions = [];
+            return profile.sessions;
+        }
     },
     // <Session> setSession([<object|Session> session])
-    setSession: function(session) {
+    setSession: function (session) {
+        if (!(session instanceof Session)) {
+            session = new Session(session);
+        }
 
+        if (!session.isValid()) {
+            throw new Error('Session is not valid');
+        }
+
+        var existSession = this.getSession(session.getId());
+
+        if (existSession) {
+            existSession = session;
+            return existSession;
+        } else {
+            var sessions = this.getSessions();
+            sessions.push(session);
+            return sessions[sessions.length - 1];
+        }
     },
     // <Session> getSession(<string> sessionId)
-    getSession: function(sessionId) {
-
+    getSession: function (sessionId) {
+        var sessions = this.getSessions(function (session) {
+            return session.getId() === sessionId;
+        });
+        return sessions.length ? sessions[0] : null;
     },
     // <Session> getLastSession()
-    getLastSession: function() {
+    getLastSession: function () {
+        var sessions = this.getSessions();
 
+        if (sessions.length) {
+            var sorted = sessions.concat().sort(function (a, b) {
+                return b.getModifiedAt() - a.getModifiedAt();
+            });
+            return this.getSession(sorted[0].getId());
+        } else {
+            return null;
+        }
     }
 };
 

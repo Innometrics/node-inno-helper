@@ -1,9 +1,10 @@
 {
   "name": "innometrics-helper",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "merge": "^1.2.0",
     "request": "^2.45.0"
   },
   "engines": {
