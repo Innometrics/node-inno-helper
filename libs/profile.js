@@ -4,104 +4,54 @@ var Attribute = require('./attribute');
 var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
+var merge = require('merge');
+var deepmerge = require('deepmerge');
+var idGenerator = require('./id-generator');    
 
-var Profile = function (profile) {
-    this.data = profile;
+var Profile = function (config) {
+    
+    config = config || {};
+    
+    var now = (new Date()).getTime();
+    var attributes = [];
+    
+    this.data = merge({
+        id: idGenerator.generate(32),
+        attributes: [],
+        sessions: [],
+        createdAt: now
+    }, config);
+    
+    if (config.hasOwnProperty('attributes') && Array.isArray(config.attributes)) {
+        config.attributes.forEach(function (attr) {
+            var name;
+            for (name in attr.data) {
+                if (attr.data.hasOwnProperty(name)) {
+                    attributes.push(new Attribute({
+                        collectApp: attr.collectApp,
+                        section: attr.section,
+                        name: name,
+                        value: attr.data[name]
+                    }));
+                }
+            }
+        });
+        
+        this.data.attributes = attributes;
+    }    
+    
+    if (config.hasOwnProperty('sessions') && Array.isArray(config.sessions)) {
+        this.data.sessions = config.sessions.map(function (session) {
+            return new Session(session);
+        });
+    }    
+    
 };
 
 Profile.Attribute = Attribute;
 Profile.Event = Event;
 Profile.Session = Session;
 Profile.Segment = Segment;
-Profile.generateId = function () {
-    var randPart = "",
-        hashPart = "",
-    // Exact length of the id
-        idLgt = 32,
-    // ID string
-        idStr = "";
-
-    /**
-     * generate the random part of the hash thanks to hash already created and idLgt
-     * @param  {String} hashPart hash of environment variables
-     * @return {String}          Random string composed of [0-9a-z]
-     */
-    function getRandPart (hashPart) {
-        var nbRandGen = idLgt - hashPart.length,
-            randPart = "",
-            i;
-
-        for (i = 0; i < nbRandGen; i += 1) {
-            randPart += Math.floor(Math.random() * 36).toString(36);
-        }
-
-        return randPart;
-    }
-
-    /**
-     * create a 32 bit hash from a String
-     * @param  {String} envStr String composed from environment variables
-     * @return {String}        String composed of [0-9a-z]
-     */
-    function getHashPart (envStr) {
-        var hash = 0,
-            envLgt = envStr.length,
-            i;
-
-        for (i = 0; i < envLgt; i += 1) {
-            hash = hash * 31 + envStr.charCodeAt(i);
-            hash = hash & hash; // Convert to 32 bit integer
-        }
-        return ("" + Math.abs(hash).toString(36));
-    }
-
-    /**
-     * Get an object containing only values and return a String
-     * @param  {Object} envObj Object containing string representing browser environment values
-     * @return {String}        String to be hashed
-     */
-    function getEnvStr (envObj) {
-        var str = "",
-            envStr = "";
-
-        for (str in envObj) {
-            if (envObj.hasOwnProperty(str)) {
-                envStr += envObj[str];
-            }
-        }
-        return envStr;
-    }
-
-    /**
-     * Create an object from browser environment values
-     * @return {Object} Contains values as string from environment values or random number if absent
-     */
-    function getEnvObj () {
-        var envObj = {};
-
-        function rnd () {
-            return Math.floor(Math.random() * 10);
-        }
-
-        envObj.vr = process.version + rnd();
-        envObj.ah = process.arch + rnd();
-        envObj.pl = process.platform + rnd();
-
-        return envObj;
-    }
-
-    hashPart = getHashPart(getEnvStr(getEnvObj()));
-    randPart = getRandPart(hashPart);
-
-    // depending on the length of the hash, which is variable, we place it at the beginning or the end of the ID
-    if (hashPart.length % 2) {
-        idStr = hashPart + randPart;
-    } else {
-        idStr = randPart + hashPart;
-    }
-
-    return idStr;
-};
 
 Profile.prototype = {
     data: null,
@@ -121,7 +71,7 @@ Profile.prototype = {
             throw new Error('collectApp and section should be filled to create attribute correctly');
         }
         
-        if (Object.keys(attributes).length) {
+        if (typeof attributes !== 'object' || !Object.keys(attributes).length) {
             throw new Error('attributes should be an object');
         }
         
@@ -142,10 +92,12 @@ Profile.prototype = {
     },
     // array.<Attribute> getAttributes([<string> collectApp], [<string> section])
     getAttributes: function (collectApp, section) {
-        var attrs = [];
-        var profile = this.getData();
-        var checkCond = function (app, sec) {
+        var result = [];
+        var data = this.getData();
+        var checkCond = function (attr) {
             var res = true;
+            var app = attr.getCollectApp();
+            var sec = attr.getSection();
             if (collectApp && section) {
                 if (collectApp !== app || section !== sec) {
                     res = false;
@@ -163,19 +115,17 @@ Profile.prototype = {
             return res;
         };
         
-        if (profile.hasOwnProperty('attributes') && Array.isArray(profile.attributes)) {
-            profile.attributes.forEach(function (attrsData) {
-                if (checkCond(attrsData.collectApp, attrsData.section)) {
-                    attrs = attrs.concat(this.createAttributes(
-                        attrsData.collectApp,
-                        attrsData.section,
-                        attrsData.data
-                    ));
-                }
-            }, this);
+        if (data.hasOwnProperty('attributes') && Array.isArray(data.attributes)) {
+            if (!collectApp && !section) {
+                result = data.attributes;
+            } else {
+                result = data.attributes.filter(function (attr) {
+                    return checkCond(attr);
+                });
+            }
         }
         
-        return attrs;
+        return result;
     },
     // <Attribute> getAttribute(<string> name, <string> collectApp, <string> section)
     getAttribute: function (name, collectApp, section) {
@@ -183,15 +133,13 @@ Profile.prototype = {
             throw new Error('Name, collectApp and section should be filled to get attribute');
         }
         
-        var attribute = null;
-        var attrs = this.getAttributes(collectApp, section);
-        attrs.forEach(function (attr) {
-            if (attr.getName() === name) {
-                attribute = attr;
-            }
+        var result = null;
+        var attributes = this.getAttributes(collectApp, section);
+        var result = attributes.filter(function (attr) {
+            return attr.getName() === name;
         });
         
-        return attribute;
+        return result.length ? result[0] : null;        
     },
     // <Profile> setAttribute(<object|Attribute> attribute)
     setAttribute: function (attribute) {
@@ -203,31 +151,25 @@ Profile.prototype = {
         var data = this.getData();
         var attrs = data.attributes || [];
         attributes.forEach(function (attr) {
-            if (!(attr instanceof Attribute) || !attr.isValid()) {
-                return;
+            if (!(attr instanceof Attribute)) {
+                attr = new Attribute(attr);
+            }
+
+            if (!attr.isValid()) {
+                throw new Error('Attribute is not valid');
             }
             
-            var app = attr.getCollectApp();
-            var sec = attr.getSection();
-            var currentAttrData = null;
+            var foundAttr = this.getAttribute(
+                attr.getName(),
+                attr.getCollectApp(),
+                attr.getSection()
+            );
             
-            attrs.forEach(function (attrData) {
-                if (attrData.collectApp === app && attrData.section === sec) {
-                    currentAttrData = attrData;
-                }
-            });
-            
-            if (!currentAttrData) {
-                currentAttrData = {
-                    collectApp: app,
-                    section: sec,
-                    data: {}
-                };
-                attrs.push(currentAttrData);
+            if (foundAttr) {
+                foundAttr.setValue(attr.getValue());
+            } else {
+                attrs.push(attr);
             }
-            
-            currentAttrData.data[attr.getName()] = attr.getValue();
-            
         }, this);
         
         data.attributes = attrs;
@@ -238,17 +180,17 @@ Profile.prototype = {
     // array.<Session> getSessions([<function> filter])
     getSessions: function (filter) {
 
-        var profile = this.getData();
+        var data = this.getData();
 
         if (!(typeof filter).match('undefined|function')) {
             throw new Error('Argument is not a function');
         }
 
-        if (profile.hasOwnProperty('sessions') && Array.isArray(profile.sessions)) {
-            return filter === undefined ? profile.sessions : profile.sessions.filter(filter);
+        if (data.hasOwnProperty('sessions') && Array.isArray(data.sessions)) {
+            return filter === undefined ? data.sessions : data.sessions.filter(filter);
         } else {
-            profile.sessions = [];
-            return profile.sessions;
+            data.sessions = [];
+            return data.sessions;
         }
     },
     // <Session> setSession([<object|Session> session])
@@ -291,6 +233,72 @@ Profile.prototype = {
         } else {
             return null;
         }
+    },
+    serialize: function () {
+        var profileData = merge({}, this.getData());
+        var attributes = [];
+        profileData.attributes.forEach(function (attr) {
+            if (!(attr instanceof Attribute) || !attr.isValid()) {
+                return;
+            }
+
+            var app = attr.getCollectApp();
+            var sec = attr.getSection();
+            var currentAttrData = null;
+
+            attributes.forEach(function (attrData) {
+                if (attrData.collectApp === app && attrData.section === sec) {
+                    currentAttrData = attrData;
+                }
+            });
+
+            if (!currentAttrData) {
+                currentAttrData = {
+                    collectApp: app,
+                    section: sec,
+                    data: {}
+                };
+                attributes.push(currentAttrData);
+            }
+
+            currentAttrData.data[attr.getName()] = attr.getValue();
+        }, this);
+
+        profileData.attributes = attributes;
+
+        profileData.sessions = profileData.sessions.map(function (session) {
+            var sessionObj = session.session;
+            sessionObj.events = sessionObj.events.map(function (event) {
+                return event.event;
+            });
+            return sessionObj;
+        });
+
+        return profileData;
+    },
+    merge: function (profile) {
+        if (!(profile instanceof Profile)) {
+            throw new Error('Argument "profile" should be a Profile instance');
+        }
+        
+        var oldAttrs = deepmerge([], this.getAttributes());
+        var newAttrs = deepmerge([], profile.getAttributes());
+        
+        var oldSessions = deepmerge([], this.getSessions());
+        var newSessions = deepmerge([], profile.getSessions());
+        
+//        console.log(oldSessions);
+//        console.log(newSessions);
+        
+        console.log(oldAttrs);
+        console.log(newAttrs);
+        
+        profile.setAttributes(newAttrs);
+        profile.setAttributes(oldAttrs);
+        
+        console.log(profile.getAttributes());
+        
+        return this;
     }
 };
 

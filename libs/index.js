@@ -362,7 +362,8 @@ InnoHelper.prototype = {
                 return;
             }
             
-            opts.body = profile.getData();
+            // transform profile data object
+            opts.body = profile.serialize();
 
             request.post(opts, function (error, response) {
 
@@ -454,16 +455,12 @@ InnoHelper.prototype = {
         var profileId = profile.getId();
 
         this.loadProfile(profileId, function (error, loadedProfile) {
-            var refreshedProfileData = null;
-            var refreshedProfile = null;
-            
             if (!error) {
-                refreshedProfileData = util._extend(loadedProfile.getData(), profile.getData());
-                refreshedProfile = new Profile(refreshedProfileData);
+                profile.merge(loadedProfile);
             }
             
             if (typeof callback === 'function') {
-                callback(error, refreshedProfile);
+                callback(error, profile);
             }
         });
     },

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "deepmerge": "^0.2.10",
     "merge": "^1.2.0",
     "request": "^2.45.0"
   },
