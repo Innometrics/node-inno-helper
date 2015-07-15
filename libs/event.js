@@ -65,7 +65,7 @@ Event.prototype = {
     },
     // <boolean> isValid()
     isValid: function () {
-        return !!this.getId() && !!this.getData() && !!this.createdAt();
+        return !!this.getId() && !!this.getData() && !!this.getCreatedAt();
     }
 };
 

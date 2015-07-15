@@ -47,7 +47,7 @@ Attribute.prototype = {
     // <boolean> isValid()
     isValid: function() {
         var value = this.getValue();
-        return !!this.getName() && !!this.getCollectApp() && !!this.getSection() && (value !== null || value !== undefined);
+        return !!this.getName() && !!this.getCollectApp() && !!this.getSection() && value !== null && value !== undefined;
     }
 };
 

@@ -281,22 +281,49 @@ Profile.prototype = {
             throw new Error('Argument "profile" should be a Profile instance');
         }
         
-        var oldAttrs = deepmerge([], this.getAttributes());
+        var localAttrs = deepmerge([], this.getAttributes());
         var newAttrs = deepmerge([], profile.getAttributes());
         
-        var oldSessions = deepmerge([], this.getSessions());
+        var localSessions = deepmerge([], this.getSessions());
         var newSessions = deepmerge([], profile.getSessions());
         
-//        console.log(oldSessions);
-//        console.log(newSessions);
+        var data = this.getData();
         
-        console.log(oldAttrs);
-        console.log(newAttrs);
+        // merge full profile
+        // note: "merge" util instead of "deepmerge" - backref should be saved
+        data = merge(data, profile.getData());
         
-        profile.setAttributes(newAttrs);
-        profile.setAttributes(oldAttrs);
+        // merge attributes
+        this.setAttributes(newAttrs);
+        this.setAttributes(localAttrs);
         
-        console.log(profile.getAttributes());
+        // merge sessions
+        data.sessions = newSessions;
+        
+        localSessions.forEach(function (localSession) {
+            var newSession = this.getSession(localSession.getId());
+            
+            if (newSession) {
+                // session data
+                newSession.setData(localSession.getData());
+        
+                // events
+                var localEvents = localSession.getEvents();
+                
+                localEvents.forEach(function (localEvent) {
+                    var newEvent = newSession.getEvent(localEvent.getId());
+
+                    if (newEvent) {
+                        // event data
+                        newEvent.setData(localEvent.getData());
+                    } else {
+                        newSession.addEvent(localEvent);
+                    }
+                });
+            } else {
+                this.setSession(localSession);
+            }
+        }, this);
         
         return this;
     }
