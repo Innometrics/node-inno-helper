@@ -10,19 +10,31 @@ var idGenerator = require('./id-generator');
  * @constructor
  */
 var Event = function (config) {
-    this.event = merge({
-        id: idGenerator.generate(8),
-        createdAt: (new Date()).getTime(),
-        data: {}
-    }, config);
+
+    config = config || {};
+
+    this.id = config.id || idGenerator.generate(8);
+    this.data = config.data || {};
+    this.createdAt = config.createdAt || (new Date()).getTime();
+
 };
 
 Event.prototype = {
 
     /**
+     * @type {String}
+     */
+    id: null,
+
+    /**
      * @type {Object}
      */
-    event: null,
+    data: {},
+
+    /**
+     * @type {Number}
+     */
+    createdAt: null,
 
     /**
      *
@@ -30,7 +42,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setId: function (id) {
-        this.event.id = id;
+        this.id = id;
         return this;
     },
 
@@ -40,7 +52,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setCreatedAt: function (date) {
-        this.event.createdAt = +date;
+        this.createdAt = (new Date(date)).getTime();
         return this;
     },
 
@@ -50,7 +62,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setDefinitionId: function (definitionId) {
-        this.event.definitionId = definitionId;
+        this.definitionId = definitionId;
         return this;
     },
 
@@ -60,7 +72,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setData: function (data) {
-        this.event.data = merge(this.event.data, data);
+        this.data = merge(this.data, data);
         return this;
     },
 
@@ -71,16 +83,16 @@ Event.prototype = {
      * @returns {Event}
      */
     setDataValue: function (name, value) {
-        this.event.data[name] = value;
+        this.data[name] = value;
         return this;
     },
 
     /**
      *
-     * @returns {String}
+     * @returns {String|null}
      */
     getId: function () {
-        return this.event && this.event.id || null;
+        return this.id || null;
     },
 
     /**
@@ -88,7 +100,7 @@ Event.prototype = {
      * @returns {Number|null}
      */
     getCreatedAt: function () {
-        return this.event && this.event.createdAt || null;
+        return this.createdAt || null;
     },
 
     /**
@@ -96,7 +108,7 @@ Event.prototype = {
      * @returns {String|null}
      */
     getDefinitionId: function () {
-        return this.event && this.event.definitionId || null;
+        return this.definitionId || null;
     },
 
     /**
@@ -104,7 +116,7 @@ Event.prototype = {
      * @returns {Object|null}
      */
     getData: function () {
-        return this.event && this.event.data || null;
+        return this.data || {};
     },
 
     /**
@@ -113,20 +125,35 @@ Event.prototype = {
      * @returns {Object|null}
      */
     getDataValue: function (name) {
-        return this.event && this.event.data && this.event.data[name] || null;
+        return this.data && this.data[name] || null;
     },
 
-    // <session> getSession()
+    /**
+     *
+     * @return {Session}
+     */
     getSession: function () {
         // TODO?
     },
 
     /**
      *
-     * @returns {boolean}
+     * @returns {Boolean}
      */
     isValid: function () {
         return !!this.getId() && !!this.getData() && !!this.getCreatedAt();
+    },
+
+    /**
+     *
+     * @return {Object}
+     */
+    serialize: function () {
+        return {
+            id: this.getId(),
+            data: this.getData(),
+            createdAt: this.getCreatedAt()
+        };
     }
 };
 

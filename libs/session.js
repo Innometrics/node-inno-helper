@@ -5,83 +5,94 @@ var Event = require('./event');
 var idGenerator = require('./id-generator');
 
 // <Session> new Profile.Session({collectApp: web, section: sec, id: id, data: data, createdAt: timestamp})
-var Session = function (session) {
-    var now = (new Date()).getTime();
-    this.session = merge({
-        id: idGenerator.generate(8),
-        collectApp: "web",
-        data: {},
-        events: [],
-        createdAt: now,
-        modifiedAt: now
-    }, session);
+var Session = function (config) {
 
-    if (session.hasOwnProperty('events') && Array.isArray(session.events)) {
-        this.session.events = session.events.map(function (event) {
+    config = config || {};
+
+    var now = (new Date()).getTime();
+
+    this.id = config.id || idGenerator.generate(8);
+    this.data = config.data || {};
+    this.section = config.section;
+    this.events = [];
+    this.collectApp = config.collectApp || "web";
+    this.createdAt  = config.createdAt  || now;
+    this.modifiedAt = config.modifiedAt || now;
+
+    if (config.hasOwnProperty('events') && Array.isArray(config.events)) {
+        this.events = config.events.map(function (event) {
             return new Event(event);
         });
     }
 };
 
 Session.prototype = {
-    session: null,
+
+    id: null,
+    data: {},
+    events: [],
+    section: null,
+    collectApp: null,
+    createdAt: null,
+    modifiedAt: null,
+
     // <Session> setId(<string> id)
     setId: function (id) {
-        this.session.id = id;
+        this.id = id;
         return this;
     },
     // <Session> setCollectApp(<string> collectApp)
     setCollectApp: function (collectApp) {
-        this.session.collectApp = collectApp;
+        this.collectApp = collectApp;
         return this;
     },
     // <Session> setSection(<string> section)
     setSection: function (section) {
-        this.session.section = section;
+        this.section = section;
         return this;
     },
     // <Session> setCreatedAt(<number|Date>)
     setCreatedAt: function (date) {
-        this.session.createdAt = date;
+        this.createdAt = (new Date(date)).getTime();
         return this;
     },
     // <Session> setData(<object> data)
     setData: function (data) {
-        this.session.data = merge(this.session.data, data);
+        this.data = merge(this.data, data);
         return this;
     },
     // <Session> setDataValue(<string> name, <mixed> value)
     setDataValue: function (name, value) {
-        this.session.data[name] = value;
+        this.data[name] = value;
         return this;
     },
     // <string> getId()
     getId: function () {
-        return this.session && this.session.id || null;
+        return this.id || null;
     },
     // <string> getCollectApp()
     getCollectApp: function () {
-        return this.session && this.session.collectApp || null;
+        return this.collectApp || null;
     },
     // <string> getSection()
     getSection: function () {
-        return this.session && this.session.section || null;
+        return this.section || null;
     },
     // <number> getCreatedAt()
     getCreatedAt: function () {
-        return this.session && this.session.createdAt || null;
+        return this.createdAt || null;
     },
     // <number> getModifiedAt()
     getModifiedAt: function () {
-        return this.session && this.session.modifiedAt || null;
+        return this.modifiedAt || null;
     },
     // <object> getData()
     getData: function () {
-        return this.session && this.session.data || null;
+        return this.data || {};
     },
     // <mixed> getDataValue(<string> name)
     getDataValue: function (name) {
-        return this.session && this.session.data && this.session.data[name] || null;
+        return this.data && this.data[name] || null;
     },
     // <event> addEvent(<object|Event> event)
     addEvent: function (event) {
@@ -115,23 +126,35 @@ Session.prototype = {
     },
     // array.<Event> getEvents([<string> eventDefinitionId])
     getEvents: function (eventDefinitionId) {
-        if (!this.session.events) {
-            this.session.events = [];
-            return this.session.events;
+        if (!this.events) {
+            this.events = [];
+            return this.events;
         }
 
         if (eventDefinitionId) {
-            return this.session.events.filter(function (event) {
+            return this.events.filter(function (event) {
                 return event.getDefinitionId() === eventDefinitionId;
             });
         } else {
-            return this.session.events;
+            return this.events;
         }
 
     },
     // <boolean> isValid()
     isValid: function () {
         return !!this.getId() && !!this.getSection() && !!this.getCollectApp() && !!this.getCreatedAt();
+    },
+    // <object> serialize()
+    serialize: function () {
+        return {
+            id: this.getId(),
+            section: this.getSection(),
+            collectApp: this.getCollectApp(),
+            data: this.getData(),
+            events: this.getEvents(),
+            createdAt: this.getCreatedAt(),
+            modifiedAt: this.getModifiedAt()
+        };
     }
 };
 

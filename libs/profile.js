@@ -4,9 +4,9 @@ var Attribute = require('./attribute');
 var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
-var merge = require('merge');
 var deepmerge = require('deepmerge');
 var idGenerator = require('./id-generator');
+// var merge = require('merge');
 
 /**
  *
@@ -16,17 +16,12 @@ var idGenerator = require('./id-generator');
 var Profile = function (config) {
     
     config = config || {};
+
+    this.id = config.id || idGenerator.generate(32);
+    this.attributes = [];
+    this.sessions   = [];
     
-    var now = (new Date()).getTime();
     var attributes = [];
-    
-    this.data = merge({
-        id: idGenerator.generate(32),
-        attributes: [],
-        sessions: [],
-        createdAt: now
-    }, config);
-    
     if (config.hasOwnProperty('attributes') && Array.isArray(config.attributes)) {
         config.attributes.forEach(function (attr) {
             var name;
@@ -42,11 +37,11 @@ var Profile = function (config) {
             }
         });
         
-        this.data.attributes = attributes;
+        this.attributes = attributes;
     }
     
     if (config.hasOwnProperty('sessions') && Array.isArray(config.sessions)) {
-        this.data.sessions = config.sessions.map(function (session) {
+        this.sessions = config.sessions.map(function (session) {
             return new Session(session);
         });
     }
@@ -60,22 +55,30 @@ Profile.Segment = Segment;
 
 Profile.prototype = {
 
-    data: null,
+    /**
+     *
+     * @type {String}
+     */
+    id: null,
+
+    /**
+     *
+     * @type {Array}
+     */
+    attributes: [],
+
+    /**
+     *
+     * @type {Array}
+     */
+    sessions: [],
 
     /**
      *
      * @returns {String|null}
      */
     getId: function () {
-        return this.data && this.data.id || null;
-    },
-
-    /**
-     *
-     * @returns {Object|null}
-     */
-    getData: function () {
-        return this.data || null;
+        return this.id || null;
     },
 
     // attributes
@@ -118,8 +121,12 @@ Profile.prototype = {
      * @returns {Array}
      */
     getAttributes: function (collectApp, section) {
-        var result = [];
-        var data = this.getData();
+        
+        if (!this.attributes || !Array.isArray(this.attributes)) {
+            this.attributes = [];
+            return this.attributes;
+        }
+
         var checkCond = function (attr) {
             var res = true;
             var app = attr.getCollectApp();
@@ -137,21 +144,18 @@ Profile.prototype = {
                     res = false;
                 }
             }
-
             return res;
         };
+
         
-        if (data.hasOwnProperty('attributes') && Array.isArray(data.attributes)) {
-            if (!collectApp && !section) {
-                result = data.attributes;
-            } else {
-                result = data.attributes.filter(function (attr) {
-                    return checkCond(attr);
-                });
-            }
+        if (!collectApp && !section) {
+            return this.attributes;
+        } else {
+            return this.attributes.filter(function (attr) {
+                return checkCond(attr);
+            });
         }
-        
-        return result;
+
     },
 
     /**
@@ -190,8 +194,7 @@ Profile.prototype = {
      * @returns {Profile}
      */
     setAttributes: function (attributes) {
-        var data = this.getData();
-        var attrs = data.attributes || [];
+        var attrs = this.attributes || [];
         attributes.forEach(function (attr) {
             if (!(attr instanceof Attribute)) {
                 attr = new Attribute(attr);
@@ -214,12 +217,11 @@ Profile.prototype = {
             }
         }, this);
         
-        data.attributes = attrs;
+        this.attributes = attrs;
         return this;
     },
 
     // Sessions
-
     /**
      *
      * @param {Function} [filter]
@@ -227,17 +229,15 @@ Profile.prototype = {
      */
     getSessions: function (filter) {
 
-        var data = this.getData();
-
         if (!(typeof filter).match('undefined|function')) {
             throw new Error('Argument is not a function');
         }
 
-        if (data.hasOwnProperty('sessions') && Array.isArray(data.sessions)) {
-            return filter === undefined ? data.sessions : data.sessions.filter(filter);
+        if (this.sessions && Array.isArray(this.sessions)) {
+            return filter === undefined ? this.sessions : this.sessions.filter(filter);
         } else {
-            data.sessions = [];
-            return data.sessions;
+            this.sessions = [];
+            return this.sessions;
         }
     },
 
@@ -267,14 +267,22 @@ Profile.prototype = {
         }
     },
 
-    // <Session> getSession(<string> sessionId)
+    /**
+     *
+     * @param  {String} sessionId
+     * @return {Session}
+     */
     getSession: function (sessionId) {
         var sessions = this.getSessions(function (session) {
             return session.getId() === sessionId;
         });
         return sessions.length ? sessions[0] : null;
     },
-    // <Session> getLastSession()
+
+    /**
+     *
+     * @return {Session}
+     */
     getLastSession: function () {
         var sessions = this.getSessions();
 
@@ -287,8 +295,15 @@ Profile.prototype = {
             return null;
         }
     },
+    
     serialize: function () {
-        var profileData = merge({}, this.getData());
+
+        var profileData = {
+            id: this.id,
+            attributes: this.attributes,
+            sessions: this.sessions
+        };
+
         var attributes = [];
         profileData.attributes.forEach(function (attr) {
             if (!(attr instanceof Attribute) || !attr.isValid()) {
@@ -319,19 +334,25 @@ Profile.prototype = {
 
         profileData.attributes = attributes;
 
+
         profileData.sessions = profileData.sessions.map(function (session) {
-            var sessionObj = session.session;
+            var sessionObj = session.serialize();
             sessionObj.events = sessionObj.events.map(function (event) {
-                return event.event;
+                return event.serialize();
             });
             return sessionObj;
         });
 
         return profileData;
     },
+
     merge: function (profile) {
         if (!(profile instanceof Profile)) {
             throw new Error('Argument "profile" should be a Profile instance');
+        }
+
+        if (this.getId() !== profile.getId()) {
+            throw new Error('Profile IDs should be similar');
         }
         
         var localAttrs = deepmerge([], this.getAttributes());
@@ -340,18 +361,17 @@ Profile.prototype = {
         var localSessions = deepmerge([], this.getSessions());
         var newSessions = deepmerge([], profile.getSessions());
         
-        var data = this.getData();
-        
         // merge full profile
         // note: "merge" util instead of "deepmerge" - backref should be saved
-        data = merge(data, profile.getData());
+        // var data = this.getData();
+        // data = merge(data, profile.getData());
         
         // merge attributes
         this.setAttributes(newAttrs);
         this.setAttributes(localAttrs);
         
         // merge sessions
-        data.sessions = newSessions;
+        this.sessions = newSessions;
         
         localSessions.forEach(function (localSession) {
             var newSession = this.getSession(localSession.getId());
