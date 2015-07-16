@@ -8,6 +8,15 @@
     "merge": "^1.2.0",
     "request": "^2.45.0"
   },
+  "devDependencies": {
+    "istanbul": "^0.3.17",
+    "mocha": "^2.2.5"
+  },
+  "scripts": {
+    "test": "npm run test-node",
+    "test-node": "mocha -R spec --recursive",
+    "test-cov": "istanbul cover _mocha -- -R spec --recursive"
+  },
   "engines": {
     "node": "0.10.x"
   }
