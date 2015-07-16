@@ -14,6 +14,7 @@ var Session = function (config) {
     this.id = config.id || idGenerator.generate(8);
     this.data = config.data || {};
     this.section = config.section;
+    this.events = [];
     this.collectApp = config.collectApp || "web";
     this.createdAt  = config.createdAt  || now;
     this.modifiedAt = config.modifiedAt || now;
@@ -143,8 +144,8 @@ Session.prototype = {
     isValid: function () {
         return !!this.getId() && !!this.getSection() && !!this.getCollectApp() && !!this.getCreatedAt();
     },
-    // <object> serialie()
-    serialie: function () {
+    // <object> serialize()
+    serialize: function () {
         return {
             id: this.getId(),
             section: this.getSection(),
