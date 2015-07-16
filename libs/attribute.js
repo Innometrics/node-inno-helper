@@ -8,43 +8,83 @@ var Attribute = function (config) {
 Attribute.prototype = {
     data: null,
     
-    // <Attribute> setName(<string> name)
+    /**
+     *
+     * @param {String} name
+     * @returns {Attribute}
+     */
     setName: function (name) {
         this.data.name = name;
         return this;
     },
-    // <Attribute> setCollectApp(<string> collectApp)
+
+    /**
+     *
+     * @param {String} collectApp
+     * @returns {Attribute}
+     */
     setCollectApp: function (collectApp) {
         this.data.collectApp = collectApp;
         return this;
     },
-    // <Attribute> setSection(<string> section)
+
+
+    /**
+     *
+     * @param {String} section
+     * @returns {Attribute}
+     */
     setSection: function (section) {
         this.data.section = section;
         return this;
     },
-    // <Attribute> setValue(<mixed> value)
+
+    /**
+     *
+     * @param {*} value
+     * @returns {Attribute}
+     */
     setValue: function (value) {
         this.data.value = value;
         return this;
     },
-    // <string> getName()
+
+    /**
+     *
+     * @returns {String}
+     */
     getName: function () {
         return this.data && this.data.name;
     },
-    // <string> getCollectApp()
+
+    /**
+     *
+     * @returns {String}
+     */
     getCollectApp: function () {
         return this.data && this.data.collectApp;
     },
-    // <string> getSection()
+
+    /**
+     *
+     * @returns {String}
+     */
     getSection: function () {
         return this.data && this.data.section;
     },
-    // <mixed> getValue()
+
+    /**
+     *
+     * @returns {*}
+     */
     getValue: function () {
         return this.data && this.data.value;
     },
-    // <boolean> isValid()
+
+    /**
+     *
+     * @returns {boolean}
+     */
     isValid: function () {
         var value = this.getValue();
         return !!this.getName() && !!this.getCollectApp() && !!this.getSection() && value !== null && value !== undefined;
