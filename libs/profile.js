@@ -295,7 +295,12 @@ Profile.prototype = {
             return null;
         }
     },
-    
+
+    /**
+     *
+     * @private
+     * @return {Object}
+     */
     serialize: function () {
 
         var profileData = {
@@ -346,6 +351,11 @@ Profile.prototype = {
         return profileData;
     },
 
+    /**
+     *
+     * @private
+     * @return {Profile}
+     */
     merge: function (profile) {
         if (!(profile instanceof Profile)) {
             throw new Error('Argument "profile" should be a Profile instance');

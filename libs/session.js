@@ -4,7 +4,12 @@ var merge = require('merge');
 var Event = require('./event');
 var idGenerator = require('./id-generator');
 
-// <Session> new Profile.Session({collectApp: web, section: sec, id: id, data: data, createdAt: timestamp})
+/**
+ *
+ * @param {Object} config
+ * config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp, modifiedAt: modifiedAt }
+ * @constructor
+ */
 var Session = function (config) {
 
     config = config || {};
@@ -28,73 +33,170 @@ var Session = function (config) {
 
 Session.prototype = {
 
+    /**
+     *
+     * @type {String}
+     */
     id: null,
+
+    /**
+     *
+     * @type {Object}
+     */
     data: {},
+
+    /**
+     *
+     * @type {Array}
+     */
     events: [],
+
+    /**
+     *
+     * @type {String}
+     */
     section: null,
+
+    /**
+     *
+     * @type {String}
+     */
     collectApp: null,
+
+    /**
+     *
+     * @type {Number}
+     */
     createdAt: null,
+
+    /**
+     *
+     * @type {Number}
+     */
     modifiedAt: null,
 
-    // <Session> setId(<string> id)
+    /**
+     *
+     * @param {String} id
+     * @return {Session}
+     */
     setId: function (id) {
         this.id = id;
         return this;
     },
-    // <Session> setCollectApp(<string> collectApp)
+    
+    /**
+     *
+     * @param {String} collectApp
+     * @return {Session}
+     */
     setCollectApp: function (collectApp) {
         this.collectApp = collectApp;
         return this;
     },
-    // <Session> setSection(<string> section)
+    
+    /**
+     *
+     * @param {String} section
+     * @return {Session}
+     */
     setSection: function (section) {
         this.section = section;
         return this;
     },
-    // <Session> setCreatedAt(<number|Date>)
+    
+    /**
+     *
+     * @param {Date|Number} date
+     * @return {Session}
+     */
     setCreatedAt: function (date) {
         this.createdAt = (new Date(date)).getTime();
         return this;
     },
-    // <Session> setData(<object> data)
+    
+    /**
+     *
+     * @param {Object} data
+     * @return {Session}
+     */
     setData: function (data) {
         this.data = merge(this.data, data);
         return this;
     },
-    // <Session> setDataValue(<string> name, <mixed> value)
+    
+    /**
+     *
+     * @param {String} name
+     * @param {String} value
+     * @return {Session}
+     */
     setDataValue: function (name, value) {
         this.data[name] = value;
         return this;
     },
-    // <string> getId()
+    
+    /**
+     *
+     * @return {String|null}
+     */
     getId: function () {
         return this.id || null;
     },
-    // <string> getCollectApp()
+    
+    /**
+     *
+     * @return {String|null}
+     */
     getCollectApp: function () {
         return this.collectApp || null;
     },
-    // <string> getSection()
+    
+    /**
+     *
+     * @return {String|null}
+     */
     getSection: function () {
         return this.section || null;
     },
-    // <number> getCreatedAt()
+    
+    /**
+     *
+     * @return {Number|null}
+     */
     getCreatedAt: function () {
         return this.createdAt || null;
     },
-    // <number> getModifiedAt()
+    
+    /**
+     *
+     * @return {Number|null}
+     */
     getModifiedAt: function () {
         return this.modifiedAt || null;
     },
-    // <object> getData()
+    
+    /**
+     *
+     * @return {Object}
+     */
     getData: function () {
         return this.data || {};
     },
-    // <mixed> getDataValue(<string> name)
+    
+    /**
+     *
+     * @return {String}
+     */
     getDataValue: function (name) {
         return this.data && this.data[name] || null;
     },
-    // <event> addEvent(<object|Event> event)
+    
+    /**
+     *
+     * @param {Event|Object} event
+     * @return {Event}
+     */
     addEvent: function (event) {
         if (!(event instanceof Event)) {
             event = new Event(event);
@@ -115,7 +217,12 @@ Session.prototype = {
             return events[events.length - 1];
         }
     },
-    // <event> getEvent(<string> eventId)
+    
+    /**
+     *
+     * @param  {String} eventId
+     * @return {Event|null}
+     */
     getEvent: function (eventId) {
         var events = this.getEvents();
         var result = events.filter(function (event) {
@@ -124,7 +231,12 @@ Session.prototype = {
 
         return result.length ? result[0] : null;
     },
-    // array.<Event> getEvents([<string> eventDefinitionId])
+
+    /**
+     *
+     * @param  {String} eventDefinitionId
+     * @return {Array}
+     */
     getEvents: function (eventDefinitionId) {
         if (!this.events) {
             this.events = [];
@@ -140,11 +252,20 @@ Session.prototype = {
         }
 
     },
-    // <boolean> isValid()
+    
+    /**
+     *
+     * @return {Boolean}
+     */
     isValid: function () {
         return !!this.getId() && !!this.getSection() && !!this.getCollectApp() && !!this.getCreatedAt();
     },
-    // <object> serialize()
+    
+    /**
+     *
+     * @private
+     * @return {Object}
+     */
     serialize: function () {
         return {
             id: this.getId(),

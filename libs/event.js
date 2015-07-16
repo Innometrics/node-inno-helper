@@ -146,6 +146,7 @@ Event.prototype = {
 
     /**
      *
+     * @private
      * @return {Object}
      */
     serialize: function () {
