@@ -12,7 +12,8 @@
     "istanbul": "^0.3.17",
     "jscs": "^1.13.1",
     "jshint": "^2.8.0",
-    "mocha": "^2.2.5"
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4"
   },
   "scripts": {
     "test": "npm run test-node",

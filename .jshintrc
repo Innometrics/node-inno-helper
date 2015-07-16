@@ -1,7 +1,13 @@
 {
-  "globals": [
-    "JSON"
-  ],
+  "globals": {
+    "JSON": false,
+    "describe": false,
+    "it": false,
+    "before": false,
+    "beforeEach": false,
+    "after": false,
+    "afterEach": false
+  },
   "multistr": false,
   "maxerr": 50,
   "node": true,
