@@ -15,6 +15,7 @@ var Event = function (config) {
 
     this.id = config.id || idGenerator.generate(8);
     this.data = config.data || {};
+    this.definitionId = config.definitionId || null;
     this.createdAt = config.createdAt || (new Date()).getTime();
 
 };
@@ -25,6 +26,12 @@ Event.prototype = {
      * @type {String}
      */
     id: null,
+
+    /**
+     *
+     * @type {String}
+     */
+    definitionId: null,
 
     /**
      * @type {Object}
