@@ -3,7 +3,12 @@
 var merge = require('merge');
 var idGenerator = require('./id-generator');
 
-// <Event> new Profile.Event({id: id, definitionId: definitionId, data: data, createdAt: timestamp})
+/**
+ *
+ * @param {Object} config
+ * config equals to {id: id, definitionId: definitionId, data: data, createdAt: timestamp}
+ * @constructor
+ */
 var Event = function (config) {
     this.event = merge({
         id: idGenerator.generate(8),
@@ -13,57 +18,113 @@ var Event = function (config) {
 };
 
 Event.prototype = {
+
+    /**
+     * @type {Object}
+     */
     event: null,
-    // <Event> setId(<string> id)
+
+    /**
+     *
+     * @param {String} id
+     * @returns {Event}
+     */
     setId: function (id) {
         this.event.id = id;
         return this;
     },
-    // <Event> setCreatedAt(<number|Date>)
+
+    /**
+     *
+     * @param {Number|Date} date
+     * @returns {Event}
+     */
     setCreatedAt: function (date) {
-        this.event.createdAt = date;
+        this.event.createdAt = +date;
         return this;
     },
-    // <Event> setDefinitionId(<string> definitionId)
+
+    /**
+     *
+     * @param {String} definitionId
+     * @returns {Event}
+     */
     setDefinitionId: function (definitionId) {
         this.event.definitionId = definitionId;
         return this;
     },
-    // <Event> setData(<object> data)
+
+    /**
+     *
+     * @param {Object} data
+     * @returns {Event}
+     */
     setData: function (data) {
         this.event.data = merge(this.event.data, data);
         return this;
     },
-    // <Event> setDataValue(<string> name, <mixed> value)
+
+    /**
+     *
+     * @param {String} name
+     * @param {*} value
+     * @returns {Event}
+     */
     setDataValue: function (name, value) {
         this.event.data[name] = value;
         return this;
     },
-    // <string> getId
+
+    /**
+     *
+     * @returns {String}
+     */
     getId: function () {
         return this.event && this.event.id || null;
     },
-    // <number> getCreatedAt
+
+    /**
+     *
+     * @returns {Number|null}
+     */
     getCreatedAt: function () {
         return this.event && this.event.createdAt || null;
     },
-    // <number> getCreatedAt
+
+    /**
+     *
+     * @returns {String|null}
+     */
     getDefinitionId: function () {
         return this.event && this.event.definitionId || null;
     },
-    // <object> getData()
+
+    /**
+     *
+     * @returns {Object|null}
+     */
     getData: function () {
         return this.event && this.event.data || null;
     },
-    // <mixed> getDataValue(<string> name)
+
+    /**
+     *
+     * @param {String} name
+     * @returns {Object|null}
+     */
     getDataValue: function (name) {
         return this.event && this.event.data && this.event.data[name] || null;
     },
+
     // <session> getSession()
     getSession: function () {
-
+        // TODO?
     },
-    // <boolean> isValid()
+
+    /**
+     *
+     * @returns {boolean}
+     */
     isValid: function () {
         return !!this.getId() && !!this.getData() && !!this.getCreatedAt();
     }
