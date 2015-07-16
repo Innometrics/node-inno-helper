@@ -8,6 +8,11 @@ var merge = require('merge');
 var deepmerge = require('deepmerge');
 var idGenerator = require('./id-generator');
 
+/**
+ *
+ * @param {Object} config
+ * @constructor
+ */
 var Profile = function (config) {
     
     config = config || {};
@@ -54,18 +59,33 @@ Profile.Session = Session;
 Profile.Segment = Segment;
 
 Profile.prototype = {
+
     data: null,
 
+    /**
+     *
+     * @returns {String|null}
+     */
     getId: function () {
         return this.data && this.data.id || null;
     },
 
+    /**
+     *
+     * @returns {Object|null}
+     */
     getData: function () {
         return this.data || null;
     },
 
     // attributes
-    // array.<Attribute> createAttributes(<string> collectApp, <string> section, <object> attributes)
+    /**
+     *
+     * @param {String} collectApp
+     * @param {String} section
+     * @param {Object} attributes
+     * @returns {Array}
+     */
     createAttributes: function (collectApp, section, attributes) {
         if (!collectApp || !section) {
             throw new Error('collectApp and section should be filled to create attribute correctly');
@@ -90,7 +110,13 @@ Profile.prototype = {
         
         return instances;
     },
-    // array.<Attribute> getAttributes([<string> collectApp], [<string> section])
+
+    /**
+     *
+     * @param {String} [collectApp]
+     * @param {String} [section]
+     * @returns {Array}
+     */
     getAttributes: function (collectApp, section) {
         var result = [];
         var data = this.getData();
@@ -127,7 +153,14 @@ Profile.prototype = {
         
         return result;
     },
-    // <Attribute> getAttribute(<string> name, <string> collectApp, <string> section)
+
+    /**
+     *
+     * @param {String} name
+     * @param {String} collectApp
+     * @param {String} section
+     * @returns {Attribute|null}
+     */
     getAttribute: function (name, collectApp, section) {
         if (!name || !collectApp || !section) {
             throw new Error('Name, collectApp and section should be filled to get attribute');
@@ -140,12 +173,22 @@ Profile.prototype = {
         
         return result.length ? result[0] : null;
     },
-    // <Profile> setAttribute(<object|Attribute> attribute)
+
+    /**
+     *
+     * @param {Attribute|Object} attribute
+     * @returns {Profile}
+     */
     setAttribute: function (attribute) {
         this.setAttributes([attribute]);
         return this;
     },
-    // <Profile> setAttributes(array.<Attribute> attributes)
+
+    /**
+     *
+     * @param {Array.<Attribute>} attributes
+     * @returns {Profile}
+     */
     setAttributes: function (attributes) {
         var data = this.getData();
         var attrs = data.attributes || [];
@@ -176,7 +219,12 @@ Profile.prototype = {
     },
 
     // Sessions
-    // array.<Session> getSessions([<function> filter])
+
+    /**
+     *
+     * @param {Function} [filter]
+     * @returns {*}
+     */
     getSessions: function (filter) {
 
         var data = this.getData();
@@ -192,7 +240,12 @@ Profile.prototype = {
             return data.sessions;
         }
     },
-    // <Session> setSession([<object|Session> session])
+
+    /**
+     *
+     * @param {Session|Object} session
+     * @returns {Session}
+     */
     setSession: function (session) {
         if (!(session instanceof Session)) {
             session = new Session(session);
@@ -213,6 +266,7 @@ Profile.prototype = {
             return sessions[sessions.length - 1];
         }
     },
+
     // <Session> getSession(<string> sessionId)
     getSession: function (sessionId) {
         var sessions = this.getSessions(function (session) {
