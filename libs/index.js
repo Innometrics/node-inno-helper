@@ -12,8 +12,17 @@ var InnoHelper = function (config) {
 };
 
 InnoHelper.prototype = {
+
+    /**
+     * @type {Object}
+     */
     config: null,
 
+    /**
+     *
+     * @param {String} profileId
+     * @returns {String}
+     */
     getProfileUrl: function (profileId) {
         return util.format('%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s',
             this.getApiHost(),
@@ -23,6 +32,9 @@ InnoHelper.prototype = {
             this.getAppKey());
     },
 
+    /**
+     * @returns {String}
+     */
     getAppSettingsUrl: function () {
         return util.format('%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s',
             this.getApiHost(),
@@ -32,6 +44,9 @@ InnoHelper.prototype = {
             this.getAppKey());
     },
 
+    /**
+     * @returns {String}
+     */
     getSegmentsUrl: function () {
         return util.format('%s/v1/companies/%s/buckets/%s/segments?app_key=%s',
             this.getApiHost(),
@@ -40,6 +55,11 @@ InnoHelper.prototype = {
             this.getAppKey());
     },
 
+    /**
+     *
+     * @param {Object} params
+     * @returns {String}
+     */
     getSegmentEvaluationUrl: function (params) {
         return util.format('%s/v1/companies/%s/buckets/%s/segment-evaluation?app_key=%s&%s',
             this.getApiHost(),
@@ -49,6 +69,12 @@ InnoHelper.prototype = {
             querystring.stringify(params));
     },
 
+    /**
+     *
+     * @param obj
+     * @param fields
+     * @returns {*}
+     */
     validateObject: function (obj, fields) {
         var error = null;
         if (!obj) {
@@ -67,6 +93,14 @@ InnoHelper.prototype = {
         }
         return error;
     },
+
+    /**
+     *
+     * @param {Error}error
+     * @param {Object} response
+     * @param {Number} successCode
+     * @returns {Error|null}
+     */
     checkErrors: function (error, response, successCode) {
         successCode = successCode || 200;
         
@@ -85,24 +119,51 @@ InnoHelper.prototype = {
         return null;
     },
 
+    /**
+     *
+     * @returns {Object|string}
+     */
     getCollectApp: function () {
         return this.config && this.config.appName;
     },
+
+    /**
+     *
+     * @returns {String}
+     */
     getBucket: function () {
         return this.config && this.config.bucketName;
     },
+
+    /**
+     *
+     * @returns {String|Number}
+     */
     getCompany: function () {
         return this.config && this.config.groupId;
     },
+
+    /**
+     *
+     * @returns {String}
+     */
     getAppKey: function () {
         return this.config && this.config.appKey;
     },
+
+    /**
+     *
+     * @returns {String}
+     */
     getApiHost: function () {
         return this.config && this.config.apiUrl;
     },
 
-    // app settings
-    // <InnoHelper> setAppSettings(<object> settings, <function> callback(error))
+    /**
+     *
+     * @param {Object} settings
+     * @param {Function} callback
+     */
     setAppSettings: function (settings, callback) {
         var self = this,
             error = null;
@@ -138,7 +199,11 @@ InnoHelper.prototype = {
 
         });
     },
-    // <InnoHelper> getAppSettings(<function> callback(error, <object> settings))
+
+    /**
+     *
+     * @param {Function} callback
+     */
     getAppSettings: function (callback) {
         var self = this;
         var opts = {
@@ -166,8 +231,10 @@ InnoHelper.prototype = {
         });
     },
 
-    // segments
-    // <InnoHelper> getSegments(<function> callback(error, array.<Segment> segments))
+    /**
+     *
+     * @param {Function} callback
+     */
     getSegments: function (callback) {
         var self = this;
         var opts = {
@@ -200,7 +267,13 @@ InnoHelper.prototype = {
 
         });
     },
-    // <InnoHelper> evaluateProfileBySegment(<string|Profile> profile, <Segment> segment, <function> callback(error, <boolean> result))
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {Segment} segment
+     * @param {Function} callback
+     */
     evaluateProfileBySegment: function (profile, segment, callback) {
         var error = null;
         var result = null;
@@ -214,18 +287,38 @@ InnoHelper.prototype = {
         
         this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
     },
-    // <InnoHelper> evaluateProfileBySegmentId(<string|Profile> profile, <string> segmentId, <function> callback(error, <boolean> result))
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {String} segmentId
+     * @param {Function} callback
+     */
     evaluateProfileBySegmentId: function (profile, segmentId, callback) {
         this._evaluateProfileByParams(profile, {
             segment_id: segmentId
         }, callback);
     },
-    // <InnoHelper> evaluateProfileByIql(<string|Profile> profile, <string> iql, <function> callback(error, <boolean> result))
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {String} iql
+     * @param {Function} callback
+     */
     evaluateProfileByIql: function (profile, iql, callback) {
         this._evaluateProfileByParams(profile, {
             iql: iql
         }, callback);
     },
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {Object} params
+     * @param {Function} callback
+     * @private
+     */
     _evaluateProfileByParams: function (profile, params, callback) {
         var self = this;
         var error = null;
@@ -271,7 +364,12 @@ InnoHelper.prototype = {
     },
 
     // profile Cloud API
-    // <InnoHelper> loadProfile(<string> profileId, <function> callback(error, <Profile> profile))
+
+    /**
+     *
+     * @param {String} profileId
+     * @param {Function} callback
+     */
     loadProfile: function (profileId, callback) {
         var self = this;
         var opts = {
@@ -299,7 +397,12 @@ InnoHelper.prototype = {
 
         });
     },
-    // <InnoHelper> deleteProfile(<string> profileId, <function> callback(error))
+
+    /**
+     *
+     * @param {String} profileId
+     * @param {Function} callback
+     */
     deleteProfile: function (profileId, callback) {
         var opts = {
             url: this.getProfileUrl(profileId),
@@ -320,7 +423,12 @@ InnoHelper.prototype = {
 
         });
     },
-    // <InnoHelper> saveProfile(<Profile> profile, <function> callback(error, <Profile> profile))
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {Function} callback
+     */
     saveProfile: function (profile, callback) {
         var error = null;
         var result = null;
@@ -385,7 +493,13 @@ InnoHelper.prototype = {
             });
         });
     },
-    // <InnoHelper> mergeProfiles(<string|Profile> profile1, <string|Profile> profile2, <function> callback(error, profile1))
+
+    /**
+     *
+     * @param {Profile} profile1
+     * @param {Profile} profile2
+     * @param {Function} callback
+     */
     mergeProfiles: function (profile1, profile2, callback) {
         var error = null;
         var result = null;
@@ -439,7 +553,13 @@ InnoHelper.prototype = {
 
         });
     },
+
     // <InnoHelper> refreshLocalProfile(<Profile> profile, <function> callback(error, <Profile> profile))
+    /**
+     *
+     * @param {Profile} profile
+     * @param {Function} callback
+     */
     refreshLocalProfile: function (profile, callback) {
         var error = null;
         var result = null;
@@ -465,7 +585,11 @@ InnoHelper.prototype = {
         });
     },
 
-    // <Profile> getProfileFromRequest(<string> requestBody)
+    /**
+     *
+     * @param {String }requestBody
+     * @returns {Profile}
+     */
     getProfileFromRequest: function (requestBody) {
         try {
             if (typeof data !== 'object') {
@@ -480,7 +604,12 @@ InnoHelper.prototype = {
         }
         return new Profile(profile);
     },
-    // <object> getMetaFromRequest(<string> requestBody)
+
+    /**
+     *
+     * @param {String} requestBody
+     * @returns {Object}
+     */
     getMetaFromRequest: function (requestBody) {
         try {
             if (typeof data !== 'object') {
@@ -495,7 +624,12 @@ InnoHelper.prototype = {
         }
         return meta;
     },
-    // <Profile> createProfile([<string> profileId])
+
+    /**
+     *
+     * @param {String} profileId
+     * @returns {Profile}
+     */
     createProfile: function (profileId) {
         return new Profile({
             id: profileId,

@@ -1,6 +1,11 @@
 'use strict';
 
-// <Attribute> new Profile.Attribute({collectApp: web, section: sec, name: name, value: val})
+/**
+ *
+ * @param {Object} config
+ * config equals to {collectApp: web, section: sec, name: name, value: val}
+ * @constructor
+ */
 var Attribute = function (config) {
     this.data = config;
 };

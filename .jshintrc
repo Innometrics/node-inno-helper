@@ -1,31 +1,30 @@
 {
-  "globals": {
-    "JSON": false
-  },
-  "multistr": false, // *
+  "globals": [
+    "JSON"
+  ],
+  "multistr": false,
   "maxerr": 50,
   "node": true,
-  "es5": false, //*
-  "es3": true, //*
-  "esnext": false, //*
-  "browser": true,
+  "es5": false,
+  "es3": true,
+  "esnext": false,
+  "browser": false,
   "boss": false,
-  "curly": true, // *
+  "curly": true,
   "debug": false,
-  "devel": true, //*
+  "devel": true,
   "eqeqeq": true,
   "evil": true,
-  "forin": true, // *
+  "forin": true,
   "immed": true,
   "laxbreak": false,
   "newcap": true,
   "noarg": true,
-  "noempty": true, //*
-  "nonew": true, //*
+  "noempty": true,
+  "nonew": true,
   "nomen": false,
-  "onevar": false, //*
+  "onevar": false,
   "plusplus": false,
-  "regexp": false,
   "undef": true,
   "sub": true,
   "strict": false,
