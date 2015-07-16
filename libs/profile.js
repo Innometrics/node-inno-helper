@@ -266,9 +266,9 @@ Profile.prototype = {
         profileData.attributes = attributes;
 
         profileData.sessions = profileData.sessions.map(function (session) {
-            var sessionObj = session.session;
+            var sessionObj = session.serialize();
             sessionObj.events = sessionObj.events.map(function (event) {
-                return event.event;
+                return event.serialize();
             });
             return sessionObj;
         });
