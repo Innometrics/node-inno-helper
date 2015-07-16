@@ -1,4 +1,7 @@
 {
+  "globals": {
+    "JSON": false
+  },
   "multistr": false, // *
   "maxerr": 50,
   "node": true,
