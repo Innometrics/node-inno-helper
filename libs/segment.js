@@ -8,11 +8,11 @@ Segment.prototype = {
     data: null,
     
     // <string> getId()
-    getId: function() {
+    getId: function () {
         return this.data && this.data.id;
     },
     // <string> getIql()
-    getIql: function() {
+    getIql: function () {
         return this.data && this.data.iql;
     }
 };

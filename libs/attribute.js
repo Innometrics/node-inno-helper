@@ -9,43 +9,43 @@ Attribute.prototype = {
     data: null,
     
     // <Attribute> setName(<string> name)
-    setName: function(name) {
+    setName: function (name) {
         this.data.name = name;
         return this;
     },
     // <Attribute> setCollectApp(<string> collectApp)
-    setCollectApp: function(collectApp) {
+    setCollectApp: function (collectApp) {
         this.data.collectApp = collectApp;
         return this;
     },
     // <Attribute> setSection(<string> section)
-    setSection: function(section) {
+    setSection: function (section) {
         this.data.section = section;
         return this;
     },
     // <Attribute> setValue(<mixed> value)
-    setValue: function(value) {
+    setValue: function (value) {
         this.data.value = value;
         return this;
     },
     // <string> getName()
-    getName: function() {
+    getName: function () {
         return this.data && this.data.name;
     },
     // <string> getCollectApp()
-    getCollectApp: function() {
+    getCollectApp: function () {
         return this.data && this.data.collectApp;
     },
     // <string> getSection()
-    getSection: function() {
+    getSection: function () {
         return this.data && this.data.section;
     },
     // <mixed> getValue()
-    getValue: function() {
+    getValue: function () {
         return this.data && this.data.value;
     },
     // <boolean> isValid()
-    isValid: function() {
+    isValid: function () {
         var value = this.getValue();
         return !!this.getName() && !!this.getCollectApp() && !!this.getSection() && value !== null && value !== undefined;
     }

@@ -6,7 +6,7 @@ var Session = require('./session');
 var Segment = require('./segment');
 var merge = require('merge');
 var deepmerge = require('deepmerge');
-var idGenerator = require('./id-generator');    
+var idGenerator = require('./id-generator');
 
 var Profile = function (config) {
     
@@ -38,13 +38,13 @@ var Profile = function (config) {
         });
         
         this.data.attributes = attributes;
-    }    
+    }
     
     if (config.hasOwnProperty('sessions') && Array.isArray(config.sessions)) {
         this.data.sessions = config.sessions.map(function (session) {
             return new Session(session);
         });
-    }    
+    }
     
 };
 
@@ -133,13 +133,12 @@ Profile.prototype = {
             throw new Error('Name, collectApp and section should be filled to get attribute');
         }
         
-        var result = null;
         var attributes = this.getAttributes(collectApp, section);
         var result = attributes.filter(function (attr) {
             return attr.getName() === name;
         });
         
-        return result.length ? result[0] : null;        
+        return result.length ? result[0] : null;
     },
     // <Profile> setAttribute(<object|Attribute> attribute)
     setAttribute: function (attribute) {
