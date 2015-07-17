@@ -2,7 +2,7 @@ var inno = require('../'),
     Profile = inno.Profile,
     assert = require('assert');
 
-describe('Segment tests', function () {
+describe('Segment', function () {
 
     function createSegment (conf) {
         return new Profile.Segment(conf);

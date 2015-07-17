@@ -2,7 +2,7 @@ var inno = require('../'),
     Profile = inno.Profile,
     assert = require('assert');
 
-describe('Event tests', function () {
+describe('Event', function () {
 
     function createEvent (conf) {
         return new Profile.Event(conf);
