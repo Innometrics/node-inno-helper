@@ -6,9 +6,20 @@ var Segment = require('./segment');
 var util = require('util');
 var querystring = require('querystring');
 
-// <InnoHelper> InnoHelper(<json> config)
+/**
+ *
+ * @param {Object} config
+ * @constructor
+ */
 var InnoHelper = function (config) {
-    this.config = config;
+    this.config = config; // TODO remove
+
+    this.validateConfig(config);
+    this.groupId = config.groupId;
+    this.apiUrl = config.apiUrl;
+    this.bucketName = config.bucketName;
+    this.appName = config.appName;
+    this.appKey = config.appKey;
 };
 
 InnoHelper.prototype = {
@@ -17,6 +28,64 @@ InnoHelper.prototype = {
      * @type {Object}
      */
     config: null,
+
+    /**
+     * @type {String}
+     */
+    bucketName: null,
+
+    /**
+     * @type {String}
+     */
+    appName: null,
+
+    /**
+     * @type {Number}
+     */
+    groupId: null,
+
+    /**
+     * @type {String}
+     */
+    appKey: null,
+
+    /**
+     * @type: {String}
+     */
+    apiUrl: null,
+
+
+    validateConfig: function (config) {
+        if (!config) {
+            throw new Error('Config should be defined');
+        }
+
+        if (typeof config !== 'object') {
+            throw new Error('Config should be an object');
+        }
+
+        ['bucketName', 'appName', 'appKey', 'apiUrl'].forEach(function (field) {
+            if (!(field in config)) {
+                throw new Error('Property "' + field + '" in config should be defined');
+            }
+            if (typeof config[field] !== 'string') {
+                throw new Error('Property "' + field + '" in config should be a string');
+            }
+            if (!config[field].trim()) {
+                throw new Error('Property "' + field + '" in config can not be empty');
+            }
+        });
+
+        if (!('groupId' in config)) {
+            throw new Error('Property "groupId" in config should be defined');
+        }
+        if (['string', 'number'].indexOf(typeof config.groupId) === -1) {
+            throw new Error('Property "groupId" in config should be a string or a number');
+        }
+        if (!String(config.groupId).trim()) {
+            throw new Error('Property "groupId" in config can not be empty');
+        }
+    },
 
     /**
      *
