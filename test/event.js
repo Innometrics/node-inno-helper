@@ -58,15 +58,17 @@ describe('Event tests', function () {
             value: 'my-event'
         }
     ].forEach(function (test) {
-        var event = createEvent(),
-            field = test.field,
-            value = test.value,
-            getter = 'get' + field,
-            setter = 'set' + field;
+        it('should get/set ' + test.field, function () {
+            var event = createEvent(),
+                field = test.field,
+                value = test.value,
+                getter = 'get' + field,
+                setter = 'set' + field;
 
-        assert.notEqual(event[getter](), value);
-        event[setter](value);
-        assert.equal(event[getter](), value);
+            assert.notEqual(event[getter](), value);
+            event[setter](value);
+            assert.equal(event[getter](), value);
+        });
     });
 
     it('should properly get data', function () {

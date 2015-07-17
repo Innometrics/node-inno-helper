@@ -6,19 +6,51 @@
  * @constructor
  */
 var Segment = function (config) {
-    this.data = config;
+    this.validateConfig(config);
+    this.id = config.id;
+    this.id = config.iql;
 };
 
 Segment.prototype = {
 
-    data: null,
-    
+    /**
+     *
+     */
+    id: null,
+
+    /**
+     *
+     */
+    iql: null,
+
+    validateConfig: function (config) {
+        if (!config) {
+            throw new Error('Config should be defined');
+        }
+
+        if (typeof config !== 'object') {
+            throw new Error('Config should be an object');
+        }
+
+        ['id', 'iql'].forEach(function (field) {
+            if (!(field in config)) {
+                throw new Error('Property "' + field + '" in config should be defined');
+            }
+            if (typeof config[field] !== 'string') {
+                throw new Error('Property "' + field + '" in config should be a string');
+            }
+            if (!config[field].trim()) {
+                throw new Error('Property "' + field + '" in config can not be empty');
+            }
+        });
+    },
+
     /**
      *
      * @returns {String}
      */
     getId: function () {
-        return this.data && this.data.id;
+        return this.id;
     },
 
     /**
@@ -26,7 +58,15 @@ Segment.prototype = {
      * @returns {String}
      */
     getIql: function () {
-        return this.data && this.data.iql;
+        return this.iql;
+    },
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    isValid: function () {
+        return !!(this.id && this.iql);
     }
 };
 
