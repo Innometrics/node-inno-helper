@@ -104,7 +104,26 @@ describe('Event tests', function () {
             test: 2
         });
 
+    });
 
+    it('should serialize event', function () {
+        var event = createEvent({
+            id: 'qwe',
+            definitionId: 'my-event',
+            data: {
+                my: 'cat'
+            },
+            createdAt: 123456789
+        });
+        
+        assert.deepEqual(event.serialize(), {
+            id: 'qwe',
+            definitionId: 'my-event',
+            data: {
+                my: 'cat'
+            },
+            createdAt: 123456789
+        });
     });
 
 
