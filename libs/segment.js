@@ -8,7 +8,7 @@
 var Segment = function (config) {
     this.validateConfig(config);
     this.id = config.id;
-    this.id = config.iql;
+    this.iql = config.iql;
 };
 
 Segment.prototype = {
