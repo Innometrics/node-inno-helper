@@ -12,8 +12,6 @@ var querystring = require('querystring');
  * @constructor
  */
 var InnoHelper = function (config) {
-    this.config = config; // TODO remove
-
     this.validateConfig(config);
     this.groupId = config.groupId;
     this.apiUrl = config.apiUrl;
@@ -23,11 +21,6 @@ var InnoHelper = function (config) {
 };
 
 InnoHelper.prototype = {
-
-    /**
-     * @type {Object}
-     */
-    config: null,
 
     /**
      * @type {String}
@@ -40,7 +33,7 @@ InnoHelper.prototype = {
     appName: null,
 
     /**
-     * @type {Number}
+     * @type {Number|String}
      */
     groupId: null,
 
@@ -54,7 +47,10 @@ InnoHelper.prototype = {
      */
     apiUrl: null,
 
-
+    /**
+     * Checks if config is valid
+     * @param {Object} config
+     */
     validateConfig: function (config) {
         if (!config) {
             throw new Error('Config should be defined');
@@ -190,10 +186,10 @@ InnoHelper.prototype = {
 
     /**
      *
-     * @returns {Object|string}
+     * @returns {String}
      */
     getCollectApp: function () {
-        return this.config && this.config.appName;
+        return this.appName;
     },
 
     /**
@@ -201,15 +197,15 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getBucket: function () {
-        return this.config && this.config.bucketName;
+        return this.bucketName;
     },
 
     /**
      *
-     * @returns {String|Number}
+     * @returns {Number|String}
      */
     getCompany: function () {
-        return this.config && this.config.groupId;
+        return this.groupId;
     },
 
     /**
@@ -217,7 +213,7 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getAppKey: function () {
-        return this.config && this.config.appKey;
+        return this.appKey;
     },
 
     /**
@@ -225,7 +221,7 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getApiHost: function () {
-        return this.config && this.config.apiUrl;
+        return this.apiUrl;
     },
 
     /**
