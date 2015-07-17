@@ -7,11 +7,41 @@
  * @constructor
  */
 var Attribute = function (config) {
-    this.data = config;
+    
+    config = config || {};
+
+    this.name = config.name || null;
+    this.value = config.value;
+    this.section = config.section || null;
+    this.collectApp = config.collectApp || 'web';
+
 };
 
 Attribute.prototype = {
-    data: null,
+
+    /**
+     *
+     * @type {String}
+     */
+    name: null,
+
+    /**
+     *
+     * @type {String}
+     */
+    collectApp: null,
+
+    /**
+     *
+     * @type {String}
+     */
+    section: null,
+
+    /**
+     *
+     * @type {mixed}
+     */
+    value: null,
     
     /**
      *
@@ -19,7 +49,7 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setName: function (name) {
-        this.data.name = name;
+        this.name = name;
         return this;
     },
 
@@ -29,7 +59,7 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setCollectApp: function (collectApp) {
-        this.data.collectApp = collectApp;
+        this.collectApp = collectApp;
         return this;
     },
 
@@ -40,7 +70,7 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setSection: function (section) {
-        this.data.section = section;
+        this.section = section;
         return this;
     },
 
@@ -50,40 +80,40 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setValue: function (value) {
-        this.data.value = value;
+        this.value = value;
         return this;
     },
 
     /**
      *
-     * @returns {String}
+     * @returns {String|null}
      */
     getName: function () {
-        return this.data && this.data.name;
+        return this.name || null;
     },
 
     /**
      *
-     * @returns {String}
+     * @returns {String|null}
      */
     getCollectApp: function () {
-        return this.data && this.data.collectApp;
+        return this.collectApp || null;
     },
 
     /**
      *
-     * @returns {String}
+     * @returns {String|null}
      */
     getSection: function () {
-        return this.data && this.data.section;
+        return this.section || null;
     },
 
     /**
      *
-     * @returns {*}
+     * @returns {mixed|null}
      */
     getValue: function () {
-        return this.data && this.data.value;
+        return this.value;
     },
 
     /**
