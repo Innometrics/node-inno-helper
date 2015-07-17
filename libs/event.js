@@ -148,7 +148,7 @@ Event.prototype = {
      * @returns {Boolean}
      */
     isValid: function () {
-        return !!this.getId() && !!this.getData() && !!this.getCreatedAt();
+        return !!this.getId() && !!this.getDefinitionId() && !!this.getData() && !!this.getCreatedAt();
     },
 
     /**
