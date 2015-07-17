@@ -79,7 +79,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setData: function (data) {
-        this.data = merge(this.data, data);
+        this.data = merge(this.data, data || {});
         return this;
     },
 

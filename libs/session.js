@@ -121,7 +121,7 @@ Session.prototype = {
      * @return {Session}
      */
     setData: function (data) {
-        this.data = merge(this.data, data);
+        this.data = merge(this.data, data || {});
         return this;
     },
     
@@ -189,7 +189,7 @@ Session.prototype = {
      * @return {String}
      */
     getDataValue: function (name) {
-        return this.data && this.data[name] || null;
+        return this.data && this.data[name] !== undefined ? this.data[name] : null;
     },
     
     /**
