@@ -21,7 +21,7 @@ describe('Attribute tests', function () {
         assert.equal(attr.getValue(), 'v1');
         assert.equal(attr.isValid(), true);
 
-    });    
+    });
     
     it('Should invalid if it ...', function () {
         
@@ -54,6 +54,6 @@ describe('Attribute tests', function () {
             value: 'v3'
         });
 
-    });    
+    });
     
 });

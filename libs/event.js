@@ -132,15 +132,7 @@ Event.prototype = {
      * @returns {Object|null}
      */
     getDataValue: function (name) {
-        return this.data && this.data[name] || null;
-    },
-
-    /**
-     *
-     * @return {Session}
-     */
-    getSession: function () {
-        // TODO?
+        return this.data && this.data[name] !== undefined ? this.data[name] : null;
     },
 
     /**
@@ -160,6 +152,7 @@ Event.prototype = {
         return {
             id: this.getId(),
             data: this.getData(),
+            definitionId: this.getDefinitionId(),
             createdAt: this.getCreatedAt()
         };
     }
