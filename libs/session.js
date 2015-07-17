@@ -209,7 +209,8 @@ Session.prototype = {
         var existEvent = this.getEvent(event.getId());
 
         if (existEvent) {
-            existEvent = event;
+            existEvent.setData(event.getData());
+            existEvent.setDefinitionId(event.getDefinitionId());
             return existEvent;
         } else {
             var events = this.getEvents();
