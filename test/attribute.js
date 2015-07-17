@@ -2,7 +2,7 @@ var inno = require('../'),
     Profile = inno.Profile,
     assert = require('assert');
     
-describe('Attribute tests', function () {
+describe('Attribute', function () {
 
     function createAttribute (conf) {
         return new Profile.Attribute(conf);

@@ -2,7 +2,7 @@ var inno = require('../'),
     Profile = inno.Profile,
     assert = require('assert');
 
-describe('Session tests', function () {
+describe('Session', function () {
 
     function createSession (conf) {
         return new Profile.Session(conf);
