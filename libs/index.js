@@ -168,6 +168,9 @@ InnoHelper.prototype = {
      */
     checkErrors: function (error, response, successCode) {
         successCode = successCode || 200;
+        if (!(successCode instanceof Array)) {
+            successCode = [successCode];
+        }
         
         if (error) {
             return error;
@@ -177,7 +180,7 @@ InnoHelper.prototype = {
             return new Error('Response does not contain data');
         }
 
-        if (response.statusCode !== successCode) {
+        if (successCode.indexOf(response.statusCode) === -1) {
             error = new Error(response.body.message);
             error.name = 'Server failed with status code ' + response.statusCode;
             return error;
@@ -559,14 +562,13 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     mergeProfiles: function (profile1, profile2, callback) {
+        var self = this;
         var error = null;
         var result = null;
         
         if (!(profile1 instanceof Profile)) {
             error = new Error('Argument "profile1" should be a Profile instance');
-        }
-        
-        if (!(profile2 instanceof Profile)) {
+        } else if (!(profile2 instanceof Profile)) {
             error = new Error('Argument "profile2" should be a Profile instance');
         }
         
@@ -590,22 +592,29 @@ InnoHelper.prototype = {
         };
         
         request.post(opts, function (error, response) {
-
-            var data = response.body || {};
-            var code = response.statusCode;
+            var data;
             var profile = null;
-            
+
+            error = self.checkErrors(error, response, [200, 201]);
+
+            /*
+            //var code = response.statusCode;
             if (!error) {
                 if (!(code === 200 || code === 201)) {
                     error = new Error(data ? data.message : '');
                     error.name = 'Server failed with status code ' + response.statusCode;
                 }
             }
+            */
 
-            if (typeof callback === 'function') {
+            if (!error) {
+                data = response.body;
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     profile = new Profile(data.profile);
                 }
+            }
+
+            if (typeof callback === 'function') {
                 callback(error, profile);
             }
 
