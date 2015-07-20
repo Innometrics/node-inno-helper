@@ -14,40 +14,11 @@ var idGenerator = require('./id-generator');
  * @constructor
  */
 var Profile = function (config) {
-    
     config = config || {};
 
     this.id = config.id || idGenerator.generate(32);
-    this.attributes = [];
-    this.sessions   = [];
-
-    // TODO make initAttributes(*) method
-    var attributes = [];
-    if (config.hasOwnProperty('attributes') && Array.isArray(config.attributes)) {
-        config.attributes.forEach(function (attr) {
-            var name;
-            for (name in attr.data) {
-                if (attr.data.hasOwnProperty(name)) {
-                    attributes.push(new Attribute({
-                        collectApp: attr.collectApp,
-                        section: attr.section,
-                        name: name,
-                        value: attr.data[name]
-                    }));
-                }
-            }
-        });
-        
-        this.attributes = attributes;
-    }
-
-    // TODO make initSessions(*) method
-    if (config.hasOwnProperty('sessions') && Array.isArray(config.sessions)) {
-        this.sessions = config.sessions.map(function (session) {
-            return new Session(session);
-        });
-    }
-    
+    this.initAttributes(config.attributes);
+    this.initSession(config.sessions);
 };
 
 Profile.Attribute = Attribute;
@@ -67,13 +38,13 @@ Profile.prototype = {
      *
      * @type {Array}
      */
-    attributes: [],
+    attributes: null,
 
     /**
      *
      * @type {Array}
      */
-    sessions: [],
+    sessions: null,
 
     /**
      *
@@ -83,7 +54,37 @@ Profile.prototype = {
         return this.id || null;
     },
 
-    // attributes
+
+    /**
+     *
+     * @param {Object} rawAttributesData
+     * @returns {Profile}
+     */
+    initAttributes: function (rawAttributesData) {
+        var attributes = this.attributes = [];
+
+        if (Array.isArray(rawAttributesData)) {
+            rawAttributesData.forEach(function (attr) {
+                var collectApp = attr.collectApp,
+                    section = attr.section,
+                    name,
+                    data = attr.data || {};
+
+                Object.keys(data).forEach(function () {
+                    var attribute = new Attribute({
+                        collectApp: collectApp,
+                        section: section,
+                        name: name,
+                        value: data[name]
+                    });
+                    attributes.push(attribute);
+                });
+            });
+        }
+
+        return this;
+    },
+
     /**
      *
      * @param {String} collectApp
@@ -223,7 +224,23 @@ Profile.prototype = {
         return this;
     },
 
-    // Sessions
+
+    /**
+     *
+     * @param {Object} rawSessionsData
+     * @returns {Profile}
+     */
+    initSession: function (rawSessionsData) {
+        if (Array.isArray(rawSessionsData)) {
+            this.sessions = rawSessionsData.map(function (session) {
+                return new Session(session);
+            });
+        } else {
+            this.sessions = [];
+        }
+        return this;
+    },
+
     /**
      *
      * @param {Function} [filter]
