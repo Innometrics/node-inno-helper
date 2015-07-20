@@ -491,6 +491,7 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     saveProfile: function (profile, callback) {
+        var self = this;
         var error = null;
         var result = null;
         
@@ -505,53 +506,25 @@ InnoHelper.prototype = {
         var profileId = profile.getId();
         var opts = {
             url: this.getProfileUrl(profileId),
+            body: profile.serialize(),
             json: true
         };
 
-        request.get(opts, function (error, response) {
-            var data = response.body || {};
-            if (error) {
-                if (typeof callback === 'function') {
-                    callback(error, profile);
+        request.post(opts, function (error, response) {
+            var data;
+            error = self.checkErrors(error, response, [200, 201]);
+
+            if (!error) {
+                data = response.body;
+                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+                    profile = new Profile(data.profile);
                 }
-                return;
             }
-            
-            var profileNotFound = response.statusCode === 404;
-            var successCode = profileNotFound ? 201 : 200;
-            var wrongResponse = response.statusCode !== 200;
-            
-            if (wrongResponse && !profileNotFound) {
-                error = new Error(data ? data.message : '');
-                error.name = 'Server failed with status code ' + response.statusCode;
 
-                if (typeof callback === 'function') {
-                    callback(error, profile);
-                }
-                return;
+            if (typeof callback === 'function') {
+                callback(error, profile);
             }
-            
-            // transform profile data object
-            opts.body = profile.serialize();
 
-            request.post(opts, function (error, response) {
-
-                var data = response.body || {};
-                if (!error) {
-                    if (response.statusCode !== successCode) {
-                        error = new Error(data ? data.message : '');
-                        error.name = 'Server failed with status code ' + response.statusCode;
-                    }
-                }
-
-                if (typeof callback === 'function') {
-                    if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-                        profile = new Profile(data.profile);
-                    }
-                    callback(error, profile);
-                }
-
-            });
         });
     },
 

@@ -262,17 +262,86 @@ describe('Inno Helper', function () {
                 it('should make properly request to save profile', function () {
                     var profile = helper.createProfile('pid');
 
-                    sinon.stub(request, 'get');
+                    sinon.stub(request, 'post');
+                    sinon.spy(profile, 'serialize');
 
                     helper.saveProfile(profile, function () {});
-                    assert(request.get.calledWith({
+                    assert(request.post.calledWith({
                         url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
+                        body: {id: 'pid', attributes: [], sessions: []},
                         json: true
                     }));
-                    request.get.restore();
+                    request.post.restore();
+                    assert(profile.serialize.called);
+                    profile.serialize.restore();
                 });
 
-                // TODO
+                it('should return error if occurred while request', function (done) {
+                    var profile = helper.createProfile('pid');
+
+                    sinon.stub(request, 'post', function (opts, callback) {
+                        callback(new Error('request error'));
+                    });
+                    sinon.spy(profile, 'serialize');
+
+                    helper.saveProfile(profile, function (error) {
+                        assert(error);
+                        assert(error.message, 'request error');
+                        request.post.restore();
+                        assert(profile.serialize.called);
+                        profile.serialize.restore();
+                        done();
+                    });
+                });
+
+                it('should return same profile if in received response no profile data', function (done) {
+                    var profile = helper.createProfile('pid');
+
+                    sinon.stub(request, 'post', function (opts, callback) {
+                        var response = {
+                            statusCode: 200,
+                            body: {}
+                        };
+                        callback(null, response);
+                    });
+                    sinon.spy(profile, 'serialize');
+
+                    helper.saveProfile(profile, function (error, returnedProfile) {
+                        assert.ifError(error);
+                        assert.strictEqual(returnedProfile, profile);
+                        request.post.restore();
+                        assert(profile.serialize.called);
+                        profile.serialize.restore();
+                        done();
+                    });
+                });
+
+                it('should return profile received after merge request', function (done) {
+                    var profile = helper.createProfile('pid');
+
+                    sinon.stub(request, 'post', function (opts, callback) {
+                        var response = {
+                            statusCode: 200,
+                            body: {
+                                profile: {
+                                    id: 'pidSaved'
+                                }
+                            }
+                        };
+                        callback(null, response);
+                    });
+                    sinon.spy(profile, 'serialize');
+
+                    helper.saveProfile(profile, function (error, returnedProfile) {
+                        assert.ifError(error);
+                        assert(returnedProfile);
+                        assert.equal(returnedProfile.getId(), 'pidSaved');
+                        request.post.restore();
+                        assert(profile.serialize.called);
+                        profile.serialize.restore();
+                        done();
+                    });
+                });
 
             });
 
@@ -907,13 +976,5 @@ describe('Inno Helper', function () {
         });
 
     });
-
-
-
-
-
-
-
-
 
 });
