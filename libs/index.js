@@ -142,13 +142,13 @@ InnoHelper.prototype = {
      */
     validateObject: function (obj, fields) {
         var error = null;
-        if (!obj) {
+        if (typeof obj !== 'object') {
             error = new Error('Object is not defined');
         } else {
             try {
                 fields = Array.isArray(fields) ? fields : [fields];
                 fields.forEach(function (key) {
-                    if (!obj[key]) {
+                    if (!(key in obj)) {
                         throw new Error(key.toUpperCase() + ' not found');
                     }
                 });
@@ -171,16 +171,18 @@ InnoHelper.prototype = {
         
         if (error) {
             return error;
-        } else {
-            if (!response || !response.body) {
-                return new Error('Response does not contain data');
-            }
-            if (response.statusCode !== successCode) {
-                error = new Error(response.body.message);
-                error.name = 'Server failed with status code ' + response.statusCode;
-                return error;
-            }
         }
+
+        if (!response || !response.body) {
+            return new Error('Response does not contain data');
+        }
+
+        if (response.statusCode !== successCode) {
+            error = new Error(response.body.message);
+            error.name = 'Server failed with status code ' + response.statusCode;
+            return error;
+        }
+
         return null;
     },
 

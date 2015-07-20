@@ -2,6 +2,7 @@ var InnoHelper = require('..').InnoHelper,
     assert = require('assert');
 
 describe.only('Inno Helper', function () {
+    var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4};
 
     function createHelper (conf) {
         return new InnoHelper(conf);
@@ -71,8 +72,7 @@ describe.only('Inno Helper', function () {
     });
 
     describe('interface', function () {
-        var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4},
-            helper;
+        var helper;
 
         beforeEach(function () {
             helper = createHelper(config);
@@ -181,5 +181,93 @@ describe.only('Inno Helper', function () {
         });
 
     });
+
+    describe('object validation', function () {
+        var helper;
+
+        beforeEach(function () {
+            helper = createHelper(config);
+        });
+
+        it('should return error on non-object', function () {
+            var err;
+
+            err = helper.validateObject('non obj');
+            assert(err);
+            assert.equal(err.message, 'Object is not defined');
+        });
+
+        it('should return error if required field does not exist', function () {
+            var err;
+
+            err = helper.validateObject({foo: 'bar'}, 'baz');
+            assert(err);
+            assert.equal(err.message, 'BAZ not found');
+
+            err = helper.validateObject({foo: 'bar'}, ['cat']);
+            assert(err);
+            assert.equal(err.message, 'CAT not found');
+        });
+
+        it('should return null all required field present', function () {
+            var err;
+
+            err = helper.validateObject({foo: 'bar', test: false}, 'test');
+            assert.strictEqual(err, null);
+            err = helper.validateObject({foo: 'bar', test: false}, ['test', 'foo']);
+            assert.strictEqual(err, null);
+        });
+
+    });
+
+    describe('error checker', function () {
+        var helper;
+
+        beforeEach(function () {
+            helper = createHelper(config);
+        });
+
+        it('should return error if it presents', function () {
+            var error = new Error('crash');
+            assert.strictEqual(helper.checkErrors(error, 'some response', 200), error);
+        });
+
+        it('should return error if response is empty or has not body', function () {
+            var error;
+            error = helper.checkErrors(null, false);
+            assert.equal(error.message, 'Response does not contain data');
+
+            error = helper.checkErrors(null, {no: 'body'});
+            assert.equal(error.message, 'Response does not contain data');
+        });
+
+        [
+            null,
+            201
+        ].forEach(function (code) {
+            var msg = code || 'default 200';
+            it('should return error it current status code does not equal to ' + msg, function () {
+                var error;
+                error = helper.checkErrors(null, {body: {message: 'error message'}, statusCode: 418}, code);
+                assert.equal(error.message, 'error message');
+                assert.equal(error.name, 'Server failed with status code 418');
+            });
+        });
+
+        it('should return null if no error found', function () {
+            var error;
+            error = helper.checkErrors(null, {body: {some: 'data'}, statusCode: 418}, 418);
+            assert.strictEqual(error, null);
+        });
+
+    });
+
+
+
+
+
+
+
+
 
 });
