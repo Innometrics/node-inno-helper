@@ -6,17 +6,82 @@ var Segment = require('./segment');
 var util = require('util');
 var querystring = require('querystring');
 
-// <InnoHelper> InnoHelper(<json> config)
+/**
+ *
+ * @param {Object} config
+ * @constructor
+ */
 var InnoHelper = function (config) {
-    this.config = config;
+    this.validateConfig(config);
+    this.groupId = config.groupId;
+    this.apiUrl = config.apiUrl;
+    this.bucketName = config.bucketName;
+    this.appName = config.appName;
+    this.appKey = config.appKey;
 };
 
 InnoHelper.prototype = {
 
     /**
-     * @type {Object}
+     * @type {String}
      */
-    config: null,
+    bucketName: null,
+
+    /**
+     * @type {String}
+     */
+    appName: null,
+
+    /**
+     * @type {Number|String}
+     */
+    groupId: null,
+
+    /**
+     * @type {String}
+     */
+    appKey: null,
+
+    /**
+     * @type: {String}
+     */
+    apiUrl: null,
+
+    /**
+     * Checks if config is valid
+     * @param {Object} config
+     */
+    validateConfig: function (config) {
+        if (!config) {
+            throw new Error('Config should be defined');
+        }
+
+        if (typeof config !== 'object') {
+            throw new Error('Config should be an object');
+        }
+
+        ['bucketName', 'appName', 'appKey', 'apiUrl'].forEach(function (field) {
+            if (!(field in config)) {
+                throw new Error('Property "' + field + '" in config should be defined');
+            }
+            if (typeof config[field] !== 'string') {
+                throw new Error('Property "' + field + '" in config should be a string');
+            }
+            if (!config[field].trim()) {
+                throw new Error('Property "' + field + '" in config can not be empty');
+            }
+        });
+
+        if (!('groupId' in config)) {
+            throw new Error('Property "groupId" in config should be defined');
+        }
+        if (['string', 'number'].indexOf(typeof config.groupId) === -1) {
+            throw new Error('Property "groupId" in config should be a string or a number');
+        }
+        if (!String(config.groupId).trim()) {
+            throw new Error('Property "groupId" in config can not be empty');
+        }
+    },
 
     /**
      *
@@ -77,13 +142,13 @@ InnoHelper.prototype = {
      */
     validateObject: function (obj, fields) {
         var error = null;
-        if (!obj) {
+        if (typeof obj !== 'object') {
             error = new Error('Object is not defined');
         } else {
             try {
                 fields = Array.isArray(fields) ? fields : [fields];
                 fields.forEach(function (key) {
-                    if (!obj[key]) {
+                    if (!(key in obj)) {
                         throw new Error(key.toUpperCase() + ' not found');
                     }
                 });
@@ -106,25 +171,27 @@ InnoHelper.prototype = {
         
         if (error) {
             return error;
-        } else {
-            if (!response || !response.body) {
-                return new Error('Response does not contain data');
-            }
-            if (response.statusCode !== successCode) {
-                error = new Error(response.body.message);
-                error.name = 'Server failed with status code ' + response.statusCode;
-                return error;
-            }
         }
+
+        if (!response || !response.body) {
+            return new Error('Response does not contain data');
+        }
+
+        if (response.statusCode !== successCode) {
+            error = new Error(response.body.message);
+            error.name = 'Server failed with status code ' + response.statusCode;
+            return error;
+        }
+
         return null;
     },
 
     /**
      *
-     * @returns {Object|string}
+     * @returns {String}
      */
     getCollectApp: function () {
-        return this.config && this.config.appName;
+        return this.appName;
     },
 
     /**
@@ -132,15 +199,15 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getBucket: function () {
-        return this.config && this.config.bucketName;
+        return this.bucketName;
     },
 
     /**
      *
-     * @returns {String|Number}
+     * @returns {Number|String}
      */
     getCompany: function () {
-        return this.config && this.config.groupId;
+        return this.groupId;
     },
 
     /**
@@ -148,7 +215,7 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getAppKey: function () {
-        return this.config && this.config.appKey;
+        return this.appKey;
     },
 
     /**
@@ -156,7 +223,7 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getApiHost: function () {
-        return this.config && this.config.apiUrl;
+        return this.apiUrl;
     },
 
     /**
@@ -224,10 +291,7 @@ InnoHelper.prototype = {
                 settings = response.body.custom;
             }
 
-            if (typeof callback === 'function') {
-                callback(error, settings);
-            }
-
+            callback(error, settings);
         });
     },
 
@@ -587,12 +651,12 @@ InnoHelper.prototype = {
 
     /**
      *
-     * @param {String }requestBody
+     * @param {String} requestBody
      * @returns {Profile}
      */
     getProfileFromRequest: function (requestBody) {
         try {
-            if (typeof data !== 'object') {
+            if (typeof requestBody !== 'object') {
                 requestBody = JSON.parse(requestBody);
             }
         } catch (e) {
@@ -612,7 +676,7 @@ InnoHelper.prototype = {
      */
     getMetaFromRequest: function (requestBody) {
         try {
-            if (typeof data !== 'object') {
+            if (typeof requestBody !== 'object') {
                 requestBody = JSON.parse(requestBody);
             }
         } catch (e) {
