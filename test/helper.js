@@ -310,6 +310,78 @@ describe('Inno Helper', function () {
 
         describe('Segments', function () {
 
+            it('should make properly request to get segmensts', function (done) {
+                sinon.stub(request, 'get', function (opts, callback) {
+                    callback();
+                });
+                helper.getSegments(function () {
+                    assert(request.get.calledWith({
+                        url: 'apiUrl/v1/companies/4/buckets/bucketName/segments?app_key=appKey',
+                        json: true
+                    }));
+                    request.get.restore();
+                    done();
+                });
+            });
+
+            it('should return error if occurred while request', function (done) {
+                sinon.stub(request, 'get', function (opts, callback) {
+                    callback(new Error('request error'));
+                });
+                helper.getSegments(function (error) {
+                    assert(error);
+                    assert(error.message, 'request error');
+                    request.get.restore();
+                    done();
+                });
+            });
+
+            [
+                {
+                    body: [{
+                        segment: {
+                            id: '1',
+                            iql: 'test1'
+                        }
+                    }, {
+                        segment: {
+                            id: '1',
+                            noiql: 'HAHA'
+                        }
+                    }, {
+                        no: 'segment'
+                    },
+                        'non object!!'
+                    ],
+                    count: 1
+                }, {
+                    body: {
+                        non: {
+                            array: 'data'
+                        }
+                    },
+                    count: 0
+                }
+            ].forEach(function (test) {
+                it('should return array of segments', function (done) {
+                    sinon.stub(request, 'get', function (opts, callback) {
+                        var response = {
+                            statusCode: 200,
+                            body: test.body
+                        };
+                        callback(null, response);
+                    });
+                    helper.getSegments(function (error, segments) {
+                        assert.ifError(error);
+                        assert(segments);
+                        assert(segments instanceof Array);
+                        assert.equal(segments.length, test.count);
+                        request.get.restore();
+                        done();
+                    });
+                });
+            });
+
         });
     });
 

@@ -307,7 +307,6 @@ InnoHelper.prototype = {
         };
 
         request.get(opts, function (error, response) {
-
             var data = null;
             var segments = [];
             
@@ -319,16 +318,17 @@ InnoHelper.prototype = {
                 data.forEach(function (sgmData) {
                     var sgmInstance = null;
                     if (sgmData.hasOwnProperty('segment') && typeof sgmData.segment === 'object') {
-                        sgmInstance = new Segment(sgmData.segment);
-                        segments.push(sgmInstance);
+                        try {
+                            sgmInstance = new Segment(sgmData.segment);
+                            segments.push(sgmInstance);
+                        }catch (e) {
+                            console.error(e);
+                        }
                     }
                 });
             }
 
-            if (typeof callback === 'function') {
-                callback(error, segments);
-            }
-
+            callback(error, segments);
         });
     },
 
