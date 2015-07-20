@@ -437,7 +437,80 @@ describe('Inno Helper', function () {
                 helper._evaluateProfileByParams.restore();
             });
 
+            it('should return error from Profile evaluation if profile is not instance of Profile', function (done) {
+                var fakeProfile = {id: 1};
 
+                helper._evaluateProfileByParams(fakeProfile, {}, function (error) {
+                    assert(error);
+                    assert.equal(error.message, 'Argument "profile" should be a Profile instance');
+                    done();
+                });
+            });
+
+            it('should make properly request while evaluate Profile', function (done) {
+                var profile = helper.createProfile('pid');
+
+                sinon.stub(request, 'get', function (params, callback) {
+                    callback();
+                });
+
+                helper._evaluateProfileByParams(profile, {some: 'params', are: 'here'}, function () {
+                    assert(request.get.calledWith({
+                        url: 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
+                        json: true
+                    }));
+                    request.get.restore();
+                    done();
+                });
+            });
+
+            it('should return error if occurred while request', function (done) {
+                var profile = helper.createProfile('pid');
+                sinon.stub(request, 'get', function (opts, callback) {
+                    callback(new Error('request error'));
+                });
+                helper._evaluateProfileByParams(profile, {}, function (error) {
+                    assert(error);
+                    assert(error.message, 'request error');
+                    request.get.restore();
+                    done();
+                });
+            });
+
+            [{
+                body: {
+                    segmentEvaluation: {
+                        noresult: 'here'
+                    }
+                },
+                result: null
+            }, {
+                body: {
+                    segmentEvaluation: {
+                        result: 'some result'
+                    }
+                },
+                result: 'some result'
+            }].forEach(function (test) {
+                it('should return Profile evaluation result', function (done) {
+                    var profile = helper.createProfile('pid');
+
+                    sinon.stub(request, 'get', function (opts, callback) {
+                        var responce = {
+                            statusCode: 200,
+                            body: test.body
+                        };
+                        callback(null, responce);
+                    });
+
+                    helper._evaluateProfileByParams(profile, {}, function (error, result) {
+                        assert.ifError(error);
+                        assert.equal(result, test.result);
+                        request.get.restore();
+                        done();
+                    });
+                });
+            });
 
         });
     });

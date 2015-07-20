@@ -387,10 +387,7 @@ InnoHelper.prototype = {
         
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
-            if (typeof callback === 'function') {
-                callback(error, result);
-            }
-            return;
+            return callback(error, result);
         }
         
         var defParams = {
@@ -406,7 +403,7 @@ InnoHelper.prototype = {
 
         request.get(opts, function (error, response) {
 
-            var data = null;
+            var data;
             
             error = self.checkErrors(error, response);
 
