@@ -446,10 +446,7 @@ InnoHelper.prototype = {
                 }
             }
 
-            if (typeof callback === 'function') {
-                callback(error, profile);
-            }
-
+            callback(error, profile);
         });
     },
 
@@ -459,19 +456,25 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     deleteProfile: function (profileId, callback) {
+        var self = this;
         var opts = {
             url: this.getProfileUrl(profileId),
             json: true
         };
 
         request.del(opts, function (error, response) {
+
+            error = self.checkErrors(error, response, 204);
+
+            /*
             if (!error) {
                 if (response.statusCode !== 204) {
                     error = new Error(response.body ? response.body.message : '');
                     error.name = 'Server failed with status code ' + response.statusCode;
                 }
             }
-            
+            */
+
             if (typeof callback === 'function') {
                 callback(error);
             }

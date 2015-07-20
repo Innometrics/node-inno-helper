@@ -124,6 +124,131 @@ describe('Inno Helper', function () {
                 assert.deepEqual(profile.getAttributes(), []);
             });
 
+            describe('Load', function () {
+
+                it('should make properly request to load profile', function (done) {
+                    var pid = 'pid';
+
+                    sinon.stub(request, 'get', function (opts, callback) {
+                        callback();
+                    });
+
+                    helper.loadProfile(pid, function () {
+
+                        assert(request.get.calledWith({
+                            url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
+                            json: true
+                        }));
+
+                        request.get.restore();
+                        done();
+                    });
+                });
+
+                it('should return error if occurred while request', function (done) {
+                    sinon.stub(request, 'get', function (opts, callback) {
+                        callback(new Error('request error'));
+                    });
+                    helper.loadProfile('pid', function (error) {
+                        assert(error);
+                        assert(error.message, 'request error');
+                        request.get.restore();
+                        done();
+                    });
+                });
+
+                [{
+                    body: {}
+                }, {
+                    body: {profile: true}
+                }].forEach(function (test) {
+                        it('should return null if profile data corrupted', function (done) {
+                            sinon.stub(request, 'get', function (opts, callback) {
+                                var response = {
+                                    statusCode: 200,
+                                    body: test.body
+                                };
+                                callback(null, response);
+                            });
+                            helper.loadProfile('pid', function (error, profile) {
+                                assert.ifError(error);
+                                assert.strictEqual(profile, null);
+                                request.get.restore();
+                                done();
+                            });
+                        });
+                    });
+
+                it('should return profile', function (done) {
+                    sinon.stub(request, 'get', function (opts, callback) {
+                        var response = {
+                            statusCode: 200,
+                            body: {
+                                profile: {id: 'pid'}
+                            }
+                        };
+                        callback(null, response);
+                    });
+                    helper.loadProfile('pid', function (error, profile) {
+                        assert.ifError(error);
+                        assert(profile);
+                        assert.equal(profile.getId(), 'pid');
+                        request.get.restore();
+                        done();
+                    });
+                });
+
+            });
+
+            describe('Delete', function () {
+
+                it('should make properly request to delete profile', function (done) {
+                    var pid = 'pid';
+
+                    sinon.stub(request, 'del', function (opts, callback) {
+                        callback();
+                    });
+
+                    helper.deleteProfile(pid, function () {
+                        assert(request.del.calledWith({
+                            url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
+                            json: true
+                        }));
+                        request.del.restore();
+                        done();
+                    });
+                });
+
+                it('should return error if occurred while request', function (done) {
+                    sinon.stub(request, 'del', function (opts, callback) {
+                        callback(new Error('request error'));
+                    });
+                    helper.deleteProfile('pid', function (error) {
+                        assert(error);
+                        assert(error.message, 'request error');
+                        request.del.restore();
+                        done();
+                    });
+                });
+
+                it('should not return error if success', function (done) {
+                    sinon.stub(request, 'del', function (opts, callback) {
+                        var response = {
+                            statusCode: 204,
+                            body: {}
+                        };
+                        callback(null, response);
+                    });
+                    helper.deleteProfile('pid', function (error) {
+                        assert.ifError(error);
+                        request.del.restore();
+                        done();
+                    });
+                });
+
+            });
+
+
             describe('Profile Stream', function () {
 
                 it('should throw error on wrong data', function () {
