@@ -48,12 +48,11 @@ Profile.prototype = {
 
     /**
      *
-     * @returns {String|null}
+     * @returns {String}
      */
     getId: function () {
-        return this.id || null;
+        return this.id;
     },
-
 
     /**
      *
@@ -65,21 +64,12 @@ Profile.prototype = {
 
         if (Array.isArray(rawAttributesData)) {
             rawAttributesData.forEach(function (attr) {
-                var collectApp = attr.collectApp,
-                    section = attr.section,
-                    name,
-                    data = attr.data || {};
-
-                Object.keys(data).forEach(function () {
-                    var attribute = new Attribute({
-                        collectApp: collectApp,
-                        section: section,
-                        name: name,
-                        value: data[name]
-                    });
-                    attributes.push(attribute);
-                });
-            });
+                attributes = attributes.concat(this.createAttributes(
+                    attr.collectApp,
+                    attr.section,
+                    attr.data
+                ));
+            }, this);
         }
 
         return this;
@@ -89,32 +79,45 @@ Profile.prototype = {
      *
      * @param {String} collectApp
      * @param {String} section
-     * @param {Object} attributes
+     * @param {Object} attributesData
      * @returns {Array}
      */
-    createAttributes: function (collectApp, section, attributes) {
+    createAttributes: function (collectApp, section, attributesData) {
+        var names;
+
         if (!collectApp || !section) {
             throw new Error('collectApp and section should be filled to create attribute correctly');
         }
         
-        if (typeof attributes !== 'object' || !Object.keys(attributes).length) {
+        if (typeof attributesData !== 'object' || !((names = Object.keys(attributesData)).length)) {
             throw new Error('attributes should be an object');
         }
         
-        var instances = [];
-        var key;
-        for (key in attributes) {
-            if (attributes.hasOwnProperty(key)) {
-                instances.push(new Profile.Attribute({
-                    collectApp: collectApp,
-                    section: section,
-                    name: key,
-                    value: attributes[key]
-                }));
-            }
-        }
-        
-        return instances;
+        return names.map(function (name) {
+            return this.createAttribute(
+                collectApp,
+                section,
+                name,
+                attributesData[name]
+            );
+        }, this);
+    },
+
+    /**
+     *
+     * @param {String} collectApp
+     * @param {String} section
+     * @param {String} name
+     * @param {*} value
+     * @returns {Attribute}
+     */
+    createAttribute: function (collectApp, section, name, value) {
+        return new Attribute({
+            collectApp: collectApp,
+            section:    section,
+            name:       name,
+            value:      value
+        });
     },
 
     /**
@@ -232,8 +235,8 @@ Profile.prototype = {
      */
     initSession: function (rawSessionsData) {
         if (Array.isArray(rawSessionsData)) {
-            this.sessions = rawSessionsData.map(function (session) {
-                return new Session(session);
+            this.sessions = rawSessionsData.map(function (rawSessionData) {
+                return new Session(rawSessionData);
             });
         } else {
             this.sessions = [];
