@@ -291,10 +291,7 @@ InnoHelper.prototype = {
                 settings = response.body.custom;
             }
 
-            if (typeof callback === 'function') {
-                callback(error, settings);
-            }
-
+            callback(error, settings);
         });
     },
 
