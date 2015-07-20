@@ -20,7 +20,8 @@ var Profile = function (config) {
     this.id = config.id || idGenerator.generate(32);
     this.attributes = [];
     this.sessions   = [];
-    
+
+    // TODO make initAttributes(*) method
     var attributes = [];
     if (config.hasOwnProperty('attributes') && Array.isArray(config.attributes)) {
         config.attributes.forEach(function (attr) {
@@ -39,7 +40,8 @@ var Profile = function (config) {
         
         this.attributes = attributes;
     }
-    
+
+    // TODO make initSessions(*) method
     if (config.hasOwnProperty('sessions') && Array.isArray(config.sessions)) {
         this.sessions = config.sessions.map(function (session) {
             return new Session(session);
