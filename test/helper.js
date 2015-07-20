@@ -1,4 +1,5 @@
 var InnoHelper = require('..').InnoHelper,
+    Profile = require('..').Profile,
     assert = require('assert'),
     sinon = require('sinon'),
     request = require('request');
@@ -381,6 +382,62 @@ describe('Inno Helper', function () {
                     });
                 });
             });
+
+        });
+
+        describe('Segment evaluation', function () {
+
+            it('should return error if segment is not an instance of Segment', function () {
+                var fakeSegment = {id: 1},
+                    fakeProfile = {id: 2};
+                helper.evaluateProfileBySegment(fakeProfile, fakeSegment, function (error) {
+                    assert(error);
+                    assert.equal(error.message, 'Argument "segment" should be a Segment instance');
+                });
+            });
+
+            it('should delegate evaluation ProfileBySegment', function () {
+                var profile = helper.createProfile('pid'),
+                    segment = new Profile.Segment({
+                        id: "1",
+                        iql: 'my-iql'
+                    }),
+                    callback = function () {};
+
+                sinon.stub(helper, 'evaluateProfileBySegmentId');
+
+                helper.evaluateProfileBySegment(profile, segment, callback);
+                assert(helper.evaluateProfileBySegmentId.calledWith(profile, "1", callback));
+                helper.evaluateProfileBySegmentId.restore();
+            });
+
+            it('should delegate evaluation ProfileBySegmentId', function () {
+                var profile = helper.createProfile('pid'),
+                    segmentId = "1",
+                    callback = function () {};
+
+                sinon.stub(helper, '_evaluateProfileByParams');
+                helper.evaluateProfileBySegmentId(profile, segmentId, callback);
+                assert(helper._evaluateProfileByParams.calledWith(profile, {
+                    segment_id: segmentId
+                }, callback));
+                helper._evaluateProfileByParams.restore();
+            });
+
+            it('should delegate evaluation ProfileByIql', function () {
+                var profile = helper.createProfile('pid'),
+                    segmentIql = "my-iql",
+                    callback = function () {};
+
+                sinon.stub(helper, '_evaluateProfileByParams');
+                helper.evaluateProfileByIql(profile, segmentIql, callback);
+                assert(helper._evaluateProfileByParams.calledWith(profile, {
+                    iql: segmentIql
+                }, callback));
+                helper._evaluateProfileByParams.restore();
+            });
+
+
 
         });
     });

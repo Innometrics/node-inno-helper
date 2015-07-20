@@ -343,10 +343,7 @@ InnoHelper.prototype = {
         var result = null;
         if (!(segment instanceof Segment)) {
             error = new Error('Argument "segment" should be a Segment instance');
-            if (typeof callback === 'function') {
-                callback(error, result);
-            }
-            return;
+            return callback(error, result);
         }
         
         this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
@@ -420,10 +417,7 @@ InnoHelper.prototype = {
                 }
             }
 
-            if (typeof callback === 'function') {
-                callback(error, result);
-            }
-
+            callback(error, result);
         });
     },
 
