@@ -110,7 +110,7 @@ describe.only('Inno Helper', function () {
 
         });
 
-        describe('profile', function () {
+        describe('Profile', function () {
 
             it('should properly create new profile', function () {
                 var id = 'profile-id',
@@ -121,10 +121,63 @@ describe.only('Inno Helper', function () {
                 assert.deepEqual(profile.getAttributes(), []);
             });
 
-            // it('should properly create profile from Profile Stream', function () {
+            describe('Profile Stream', function () {
 
-            // });
+                it('should throw error on wrong data', function () {
+                    var rawBody = 'some non json data';
+                    assert['throws'](function () {
+                        helper.getProfileFromRequest(rawBody);
+                    }, /Wrong stream data/);
+                });
 
+                it('should throw error if data has not "profile" property', function () {
+                    var jsonBody = {noprofile: 'hahaha'};
+                    assert['throws'](function () {
+                        helper.getProfileFromRequest(jsonBody);
+                    }, /Profile not found/);
+                });
+
+                it('should properly create profile from Profile Stream', function () {
+                    var id = 'profile-id',
+                        jsonBody = {profile: {id: id}},
+                        profile;
+
+                    profile = helper.getProfileFromRequest(jsonBody);
+                    assert(profile);
+                    assert.equal(profile.getId(), id);
+
+                    profile = helper.getProfileFromRequest(JSON.stringify(jsonBody));
+                    assert(profile);
+                    assert.equal(profile.getId(), id);
+                });
+
+                describe('meta', function () {
+
+                    it('should throw error on wrong meta data', function () {
+                        var rawBody = 'some non json data';
+                        assert['throws'](function () {
+                            helper.getMetaFromRequest(rawBody);
+                        }, /Wrong stream data/);
+                    });
+
+                    it('should throw error if data has not "meta" property', function () {
+                        var jsonBody = {nometa: 'hahaha'};
+                        assert['throws'](function () {
+                            helper.getMetaFromRequest(jsonBody);
+                        }, /Meta not found/);
+                    });
+
+                    it('should properly create profile from Profile Stream', function () {
+                        var meta = {some: 'data', or: 'ip', and: 42},
+                            jsonBody = {meta: meta};
+
+                        assert.deepEqual(helper.getMetaFromRequest(jsonBody), meta);
+                        assert.deepEqual(helper.getMetaFromRequest(JSON.stringify(jsonBody)), meta);
+                    });
+
+                });
+
+            });
         });
 
     });

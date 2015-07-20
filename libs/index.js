@@ -652,12 +652,12 @@ InnoHelper.prototype = {
 
     /**
      *
-     * @param {String }requestBody
+     * @param {String} requestBody
      * @returns {Profile}
      */
     getProfileFromRequest: function (requestBody) {
         try {
-            if (typeof data !== 'object') {
+            if (typeof requestBody !== 'object') {
                 requestBody = JSON.parse(requestBody);
             }
         } catch (e) {
@@ -677,7 +677,7 @@ InnoHelper.prototype = {
      */
     getMetaFromRequest: function (requestBody) {
         try {
-            if (typeof data !== 'object') {
+            if (typeof requestBody !== 'object') {
                 requestBody = JSON.parse(requestBody);
             }
         } catch (e) {
