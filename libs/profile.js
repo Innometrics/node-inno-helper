@@ -92,10 +92,16 @@ Profile.prototype = {
             throw new Error('collectApp and section should be filled to create attribute correctly');
         }
         
-        if (typeof attributesData !== 'object' || !((names = Object.keys(attributesData)).length)) {
+        if (!attributesData || typeof attributesData !== 'object') {
             throw new Error('attributes should be an object');
         }
-        
+
+        names = Object.keys(attributesData);
+
+        if (!names.length) {
+            throw new Error('attributes are empty');
+        }
+
         return names.map(function (name) {
             return this.createAttribute(
                 collectApp,
