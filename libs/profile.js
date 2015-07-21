@@ -60,9 +60,11 @@ Profile.prototype = {
      * @returns {Profile}
      */
     initAttributes: function (rawAttributesData) {
-        var attributes = this.attributes = [];
+        var attributes;
+        this.attributes = [];
 
         if (Array.isArray(rawAttributesData)) {
+            attributes = [];
             rawAttributesData.forEach(function (attr) {
                 attributes = attributes.concat(this.createAttributes(
                     attr.collectApp,
@@ -70,6 +72,7 @@ Profile.prototype = {
                     attr.data
                 ));
             }, this);
+            this.attributes = attributes;
         }
 
         return this;
@@ -399,7 +402,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * TODO make code review
      * @private
      * @return {Profile}
      */
