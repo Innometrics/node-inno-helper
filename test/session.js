@@ -39,6 +39,8 @@ describe('Session', function () {
 
         it('should be valid if all required fields exist', function () {
             var sess = createSession({
+                id: 'sid',
+                collectApp: 'app',
                 section: 'section'
             });
             assert(sess.isValid());
@@ -49,6 +51,8 @@ describe('Session', function () {
         ].forEach(function (field) {
             it('should be invalid if required field "' + field + '" not defined', function () {
                 var event = createSession({
+                    id: 'sid',
+                    collectApp: 'app',
                     section: 'section'
                 });
                 assert(event.isValid());

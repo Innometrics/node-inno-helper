@@ -269,4 +269,266 @@ describe('Profile', function () {
 
     });
 
+    describe('Sessions', function () {
+        var profile;
+
+        beforeEach(function () {
+            profile = createProfile();
+        });
+
+        describe('Create', function () {
+
+            it('should create session instance', function () {
+                var sessionData = {
+                        id: 'sid',
+                        collectApp: 'app',
+                        section: 'sec'
+                    },
+                    session = profile.createSession(sessionData);
+
+                assert(session);
+                assert.equal(session.getId(), sessionData.id);
+                assert.equal(session.getCollectApp(), sessionData.collectApp);
+                assert.equal(session.getSection(), sessionData.section);
+            });
+
+        });
+
+        describe('Set', function () {
+
+            it('it should throw error if session is invalid', function () {
+                assert['throws'](function () {
+                    profile.setSession({id: "asd"});
+                }, /Session is not valid/);
+            });
+
+            it('should set session', function () {
+                var session1 = {
+                        id: 'qwe',
+                        collectApp: 'app',
+                        section: 'sec'
+                    },
+                    session2 = new Profile.Session({
+                        id: 'asd',
+                        collectApp: 'app2',
+                        section: 'sec2'
+                    });
+                assert.equal(profile.getSessions().length, 0);
+                profile.setSession(session1);
+                assert.equal(profile.getSessions().length, 1);
+                profile.setSession(session2);
+                assert.equal(profile.getSessions().length, 2);
+            });
+
+            it('should replace session if exists with same id', function () {
+                var session1 = {
+                        id: 'qwe',
+                        collectApp: 'app',
+                        section: 'sec'
+                    },
+                    session2 = new Profile.Session({
+                        id: 'qwe',
+                        collectApp: 'app2',
+                        section: 'sec2'
+                    }),
+                    session;
+                assert.equal(profile.getSessions().length, 0);
+                profile.setSession(session1);
+                assert.equal(profile.getSessions().length, 1);
+                profile.setSession(session2);
+                assert.equal(profile.getSessions().length, 1);
+                session = profile.getSessions()[0];
+                assert.equal(session.getCollectApp(), 'app2');
+                assert.equal(session.getSection(), 'sec2');
+            });
+
+            it('should ignore session if this one already in profile', function () {
+                var session1 = new Profile.Session({
+                        id: 'qwe',
+                        collectApp: 'app',
+                        section: 'sec'
+                    }),
+                    session;
+                assert.equal(profile.getSessions().length, 0);
+                profile.setSession(session1);
+                assert.equal(profile.getSessions().length, 1);
+                profile.setSession(session1);
+                assert.equal(profile.getSessions().length, 1);
+                session = profile.getSessions()[0];
+                assert.strictEqual(session, session1);
+            });
+
+        });
+
+        describe('Get', function () {
+
+            it('should return session', function () {
+                assert.strictEqual(profile.getSession('no existing'), null);
+                profile.setSession({
+                    id: 'sid',
+                    collectApp: 'app',
+                    section: 'sec'
+                });
+                assert.strictEqual(profile.getSession('no existing'), null);
+                assert(profile.getSession('sid'));
+            });
+
+            it('should throw error if filter no a function', function () {
+                assert['throws'](function () {
+                    profile.getSessions(null);
+                }, /filter should be a function/);
+
+                assert['throws'](function () {
+                    profile.getSessions(true);
+                }, /filter should be a function/);
+
+                assert['throws'](function () {
+                    profile.getSessions({});
+                }, /filter should be a function/);
+            });
+
+            it('should return all sessions if no filter function', function () {
+                var sessions = profile.getSessions();
+
+                assert(sessions);
+                assert.equal(sessions.length, 0);
+
+                profile.setSession({
+                    id: 'sid1',
+                    collectApp: 'app1',
+                    section: 'sec1'
+                });
+
+                profile.setSession({
+                    id: 'sid2',
+                    collectApp: 'app2',
+                    section: 'sec2'
+                });
+
+                sessions = profile.getSessions();
+
+                assert(sessions);
+                assert.equal(sessions.length, 2);
+            });
+
+
+            it('should return only filtered sessions', function () {
+                var sessions = profile.getSessions(),
+                    session;
+
+                assert(sessions);
+                assert.equal(sessions.length, 0);
+
+                profile.setSession({
+                    id: 'sid1',
+                    collectApp: 'app1',
+                    section: 'sec1'
+                });
+
+                profile.setSession({
+                    id: 'sid2',
+                    collectApp: 'app2',
+                    section: 'sec2'
+                });
+
+                sessions = profile.getSessions(function (session) {
+                    return session.getCollectApp() === 'app2';
+                });
+
+                assert(sessions);
+                assert.equal(sessions.length, 1);
+                session = sessions[0];
+                assert.equal(session.getId(), 'sid2');
+                assert.equal(session.getCollectApp(), 'app2');
+                assert.equal(session.getSection(), 'sec2');
+            });
+
+            it('should return null if no last session', function () {
+                assert.strictEqual(profile.getLastSession(), null);
+            });
+
+            it('should return last session (with newer modifiedAt value)', function () {
+                var session;
+
+                profile.setSession({
+                    id: 'sid1',
+                    collectApp: 'app1',
+                    section: 'sec1',
+                    modifiedAt: 100
+                });
+
+                profile.setSession({
+                    id: 'sid2',
+                    collectApp: 'app2',
+                    section: 'sec2',
+                    modifiedAt: 50
+                });
+
+                session = profile.getLastSession();
+                assert(session);
+                assert.strictEqual(session.getId(), 'sid1');
+            });
+
+        });
+
+    });
+
+    describe('Serialization', function () {
+
+        it('should properly serialize profile', function () {
+            var profileData = {
+                    id: 'pid',
+                    attributes: [{
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        data: {
+                            foo: 'bar',
+                            test: 1
+                        }
+                    }, {
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        data: {
+                            cat: 'dog',
+                            hi: 'bye'
+                        }
+                    }],
+                    sessions: [{
+                        id: 'sid1',
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        createdAt: 1,
+                        modifiedAt: 2,
+                        data: {
+                            data1: 'value1'
+                        },
+                        events: []
+                    }, {
+                        id: 'sid2',
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        createdAt: 3,
+                        modifiedAt: 4,
+                        data: {},
+                        events: [{
+                            id: 'ev1',
+                            definitionId: 'def1',
+                            createdAt: 5,
+                            data: {
+                                spider: 'man'
+                            }
+                        }]
+                    }]
+                },
+                profile = new Profile(profileData);
+
+            assert.deepEqual(profile.serialize(), profileData);
+        });
+
+    });
+
+    describe('Merge', function () {
+        // TODO
+    });
+
 });

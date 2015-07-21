@@ -350,7 +350,7 @@ Profile.prototype = {
             var sorted = sessions.concat().sort(function (a, b) {
                 return b.getModifiedAt() - a.getModifiedAt();
             });
-            lastSession = sorted[0] || null;
+            lastSession = sorted[0];
         }
 
         return lastSession;
