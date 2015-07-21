@@ -127,41 +127,30 @@ Profile.prototype = {
      * @returns {Array}
      */
     getAttributes: function (collectApp, section) {
-        
-        if (!this.attributes || !Array.isArray(this.attributes)) {
-            this.attributes = [];
-            return this.attributes;
-        }
+        var attributes = this.attributes,
+            filters = [];
 
-        var checkCond = function (attr) {
-            var res = true;
-            var app = attr.getCollectApp();
-            var sec = attr.getSection();
-            if (collectApp && section) {
-                if (collectApp !== app || section !== sec) {
-                    res = false;
-                }
-            } else if (collectApp) {
-                if (collectApp !== app) {
-                    res = false;
-                }
-            } else if (section) {
-                if (section !== sec) {
-                    res = false;
-                }
-            }
-            return res;
-        };
-
-        
-        if (!collectApp && !section) {
-            return this.attributes;
-        } else {
-            return this.attributes.filter(function (attr) {
-                return checkCond(attr);
+        if (collectApp) {
+            filters.push(function (attribute) {
+                return attribute.getCollectApp() === collectApp;
             });
         }
 
+        if (section) {
+            filters.push(function (attribute) {
+                return attribute.getSection() === section;
+            });
+        }
+
+        if (filters.length) {
+            attributes = attributes.filter(function (attribute) {
+                return filters.every(function (filter) {
+                    return filter(attribute);
+                });
+            });
+        }
+
+        return attributes;
     },
 
     /**
@@ -177,11 +166,11 @@ Profile.prototype = {
         }
         
         var attributes = this.getAttributes(collectApp, section);
-        var result = attributes.filter(function (attr) {
+        attributes = attributes.filter(function (attr) {
             return attr.getName() === name;
         });
         
-        return result.length ? result[0] : null;
+        return attributes[0] || null;
     },
 
     /**
@@ -196,14 +185,26 @@ Profile.prototype = {
 
     /**
      *
-     * @param {Array.<Attribute>} attributes
+     * @param {Array.<Attribute>} newAttributes
      * @returns {Profile}
      */
-    setAttributes: function (attributes) {
-        var attrs = this.attributes || [];
-        attributes.forEach(function (attr) {
+    setAttributes: function (newAttributes) {
+        var attributes;
+
+        if (!Array.isArray(newAttributes)) {
+            throw new Error('attributes should be an array');
+        }
+
+        attributes = this.getAttributes();
+
+        newAttributes.forEach(function (attr) {
             if (!(attr instanceof Attribute)) {
-                attr = new Attribute(attr);
+                attr = this.createAttribute(
+                    attr.collectApp,
+                    attr.section,
+                    attr.name,
+                    attr.value
+                );
             }
 
             if (!attr.isValid()) {
@@ -219,11 +220,10 @@ Profile.prototype = {
             if (foundAttr) {
                 foundAttr.setValue(attr.getValue());
             } else {
-                attrs.push(attr);
+                attributes.push(attr);
             }
         }, this);
         
-        this.attributes = attrs;
         return this;
     },
 
@@ -234,13 +234,14 @@ Profile.prototype = {
      * @returns {Profile}
      */
     initSession: function (rawSessionsData) {
+        this.sessions = [];
+
         if (Array.isArray(rawSessionsData)) {
             this.sessions = rawSessionsData.map(function (rawSessionData) {
-                return new Session(rawSessionData);
-            });
-        } else {
-            this.sessions = [];
+                return this.createSession(rawSessionData);
+            }, this);
         }
+
         return this;
     },
 
@@ -250,17 +251,16 @@ Profile.prototype = {
      * @returns {*}
      */
     getSessions: function (filter) {
+        var sessions = this.sessions;
 
-        if (!(typeof filter).match('undefined|function')) {
-            throw new Error('Argument is not a function');
+        if (arguments.length) {
+            if (typeof filter !== 'function') {
+                throw new Error('filter should be a function');
+            }
+            sessions = sessions.filter(filter);
         }
 
-        if (this.sessions && Array.isArray(this.sessions)) {
-            return filter === undefined ? this.sessions : this.sessions.filter(filter);
-        } else {
-            this.sessions = [];
-            return this.sessions;
-        }
+        return sessions;
     },
 
     /**
@@ -270,7 +270,7 @@ Profile.prototype = {
      */
     setSession: function (session) {
         if (!(session instanceof Session)) {
-            session = new Session(session);
+            session = this.createSession(session);
         }
 
         if (!session.isValid()) {
@@ -279,6 +279,7 @@ Profile.prototype = {
 
         var existSession = this.getSession(session.getId());
 
+        // TODO wrong behaviour
         if (existSession) {
             existSession = session;
             return existSession;
@@ -298,7 +299,16 @@ Profile.prototype = {
         var sessions = this.getSessions(function (session) {
             return session.getId() === sessionId;
         });
-        return sessions.length ? sessions[0] : null;
+        return sessions[0] || null;
+    },
+
+    /**
+     *
+     * @param {Object} rawSessionData
+     * @returns {Session}
+     */
+    createSession: function (rawSessionData) {
+        return new Session(rawSessionData);
     },
 
     /**
@@ -306,16 +316,17 @@ Profile.prototype = {
      * @return {Session}
      */
     getLastSession: function () {
-        var sessions = this.getSessions();
+        var sessions = this.getSessions(),
+            lastSession = null;
 
         if (sessions.length) {
             var sorted = sessions.concat().sort(function (a, b) {
                 return b.getModifiedAt() - a.getModifiedAt();
             });
-            return this.getSession(sorted[0].getId());
-        } else {
-            return null;
+            lastSession = sorted[0];
         }
+
+        return lastSession;
     },
 
     /**
@@ -324,53 +335,49 @@ Profile.prototype = {
      * @return {Object}
      */
     serialize: function () {
-
-        var profileData = {
-            id: this.id,
-            attributes: this.attributes,
-            sessions: this.sessions
+        return {
+            id:         this.getId(),
+            attributes: this.serializeAttributes(),
+            sessions:   this.serializeSessions()
         };
+    },
 
-        var attributes = [];
-        profileData.attributes.forEach(function (attr) {
-            if (!(attr instanceof Attribute) || !attr.isValid()) {
-                return;
-            }
+    /**
+     * @private
+     * @returns {Array}
+     */
+    serializeAttributes: function () {
+        var attributesMap = {},
+            attributes = [];
 
-            var app = attr.getCollectApp();
-            var sec = attr.getSection();
-            var currentAttrData = null;
+        this.getAttributes().forEach(function (attribute) {
+            var collectApp = attribute.getCollectApp(),
+                section = attribute.getSection(),
+                key = collectApp + '/' + section;
 
-            attributes.forEach(function (attrData) {
-                if (attrData.collectApp === app && attrData.section === sec) {
-                    currentAttrData = attrData;
-                }
-            });
-
-            if (!currentAttrData) {
-                currentAttrData = {
-                    collectApp: app,
-                    section: sec,
+            if (!attributesMap[key]) {
+                attributesMap[key] = {
+                    collectApp: collectApp,
+                    section: section,
                     data: {}
                 };
-                attributes.push(currentAttrData);
+                attributes.push(attributesMap[key]);
             }
 
-            currentAttrData.data[attr.getName()] = attr.getValue();
-        }, this);
-
-        profileData.attributes = attributes;
-
-
-        profileData.sessions = profileData.sessions.map(function (session) {
-            var sessionObj = session.serialize();
-            sessionObj.events = sessionObj.events.map(function (event) {
-                return event.serialize();
-            });
-            return sessionObj;
+            attributesMap[key].data[attribute.getName()] = attribute.getValue();
         });
 
-        return profileData;
+        return attributes;
+    },
+
+    /**
+     * @private
+     * @returns {Array}
+     */
+    serializeSessions: function () {
+        return this.getSessions().map(function (session) {
+            return session.serialize();
+        });
     },
 
     /**
