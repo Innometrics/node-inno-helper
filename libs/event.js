@@ -13,10 +13,10 @@ var Event = function (config) {
 
     config = config || {};
 
-    this.id = config.id || idGenerator.generate(8);
-    this.data = config.data || {};
-    this.definitionId = config.definitionId || null;
-    this.createdAt = config.createdAt || (new Date()).getTime();
+    this.setId(config.id || idGenerator.generate(8));
+    this.setData(config.data);
+    this.setDefinitionId(config.definitionId || null);
+    this.setCreatedAt(config.createdAt || +new Date());
 
 };
 
@@ -36,7 +36,7 @@ Event.prototype = {
     /**
      * @type {Object}
      */
-    data: {},
+    data: null,
 
     /**
      * @type {Number}
@@ -120,10 +120,10 @@ Event.prototype = {
 
     /**
      *
-     * @returns {Object|null}
+     * @returns {Object}
      */
     getData: function () {
-        return this.data || {};
+        return this.data;
     },
 
     /**

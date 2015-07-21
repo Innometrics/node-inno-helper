@@ -14,21 +14,15 @@ var Session = function (config) {
 
     config = config || {};
 
-    var now = (new Date()).getTime();
+    var now = +new Date();
 
-    this.id = config.id || idGenerator.generate(8);
-    this.data = config.data || {};
-    this.section = config.section;
-    this.events = [];
-    this.collectApp = config.collectApp || "web";
-    this.createdAt  = config.createdAt  || now;
+    this.setId(config.id || idGenerator.generate(8));
+    this.setData(config.data);
+    this.setCollectApp(config.collectApp || "web");
+    this.setSection(config.section);
+    this.setCreatedAt(config.createdAt  || now);
     this.modifiedAt = config.modifiedAt || now;
-
-    if (config.hasOwnProperty('events') && Array.isArray(config.events)) {
-        this.events = config.events.map(function (event) {
-            return new Event(event);
-        });
-    }
+    this.initEvents(config.events);
 };
 
 Session.prototype = {
@@ -43,13 +37,13 @@ Session.prototype = {
      *
      * @type {Object}
      */
-    data: {},
+    data: null,
 
     /**
      *
      * @type {Array}
      */
-    events: [],
+    events: null,
 
     /**
      *
@@ -111,7 +105,7 @@ Session.prototype = {
      * @return {Session}
      */
     setCreatedAt: function (date) {
-        this.createdAt = (new Date(date)).getTime();
+        this.createdAt = +new Date(date);
         return this;
     },
     
@@ -138,42 +132,42 @@ Session.prototype = {
     
     /**
      *
-     * @return {String|null}
+     * @return {String}
      */
     getId: function () {
-        return this.id || null;
+        return this.id;
     },
     
     /**
      *
-     * @return {String|null}
+     * @return {String}
      */
     getCollectApp: function () {
-        return this.collectApp || null;
+        return this.collectApp;
     },
     
     /**
      *
-     * @return {String|null}
+     * @return {String}
      */
     getSection: function () {
-        return this.section || null;
+        return this.section;
     },
     
     /**
      *
-     * @return {Number|null}
+     * @return {Number}
      */
     getCreatedAt: function () {
-        return this.createdAt || null;
+        return this.createdAt;
     },
     
     /**
      *
-     * @return {Number|null}
+     * @return {Number}
      */
     getModifiedAt: function () {
-        return this.modifiedAt || null;
+        return this.modifiedAt;
     },
     
     /**
@@ -181,7 +175,7 @@ Session.prototype = {
      * @return {Object}
      */
     getData: function () {
-        return this.data || {};
+        return this.data;
     },
     
     /**
@@ -190,6 +184,23 @@ Session.prototype = {
      */
     getDataValue: function (name) {
         return this.data && this.data[name] !== undefined ? this.data[name] : null;
+    },
+
+    /**
+     *
+     * @param {Array} rawEventsData
+     * @returns {Session}
+     */
+    initEvents: function (rawEventsData) {
+        this.events = [];
+
+        if (Array.isArray(rawEventsData)) {
+            this.events = rawEventsData.map(function (rawEventData) {
+                return new Event(rawEventData);
+            });
+        }
+
+        return this;
     },
     
     /**
@@ -209,6 +220,7 @@ Session.prototype = {
         var existEvent = this.getEvent(event.getId());
 
         if (existEvent) {
+            // TODO wrong behaviour
             existEvent.setData(event.getData());
             existEvent.setDefinitionId(event.getDefinitionId());
             return existEvent;
@@ -273,7 +285,7 @@ Session.prototype = {
             section:    this.getSection(),
             collectApp: this.getCollectApp(),
             data:       this.getData(),
-            events:     this.serializeEvent(),
+            events:     this.serializeEvents(),
             createdAt:  this.getCreatedAt(),
             modifiedAt: this.getModifiedAt()
         };
@@ -283,7 +295,7 @@ Session.prototype = {
      * @private
      * @returns {Array}
      */
-    serializeEvent: function () {
+    serializeEvents: function () {
         return this.getEvents().map(function (event) {
             return event.serialize();
         });
