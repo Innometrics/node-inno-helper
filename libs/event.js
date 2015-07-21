@@ -150,10 +150,10 @@ Event.prototype = {
      */
     serialize: function () {
         return {
-            id: this.getId(),
-            data: this.getData(),
-            definitionId: this.getDefinitionId(),
-            createdAt: this.getCreatedAt()
+            id:             this.getId(),
+            data:           this.getData(),
+            definitionId:   this.getDefinitionId(),
+            createdAt:      this.getCreatedAt()
         };
     }
 };

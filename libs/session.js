@@ -269,14 +269,24 @@ Session.prototype = {
      */
     serialize: function () {
         return {
-            id: this.getId(),
-            section: this.getSection(),
+            id:         this.getId(),
+            section:    this.getSection(),
             collectApp: this.getCollectApp(),
-            data: this.getData(),
-            events: this.getEvents(),
-            createdAt: this.getCreatedAt(),
+            data:       this.getData(),
+            events:     this.serializeEvent(),
+            createdAt:  this.getCreatedAt(),
             modifiedAt: this.getModifiedAt()
         };
+    },
+
+    /**
+     * @private
+     * @returns {Array}
+     */
+    serializeEvent: function () {
+        return this.getEvents().map(function (event) {
+            return event.serialize();
+        });
     }
 };
 
