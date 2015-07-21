@@ -14,38 +14,11 @@ var idGenerator = require('./id-generator');
  * @constructor
  */
 var Profile = function (config) {
-    
     config = config || {};
 
     this.id = config.id || idGenerator.generate(32);
-    this.attributes = [];
-    this.sessions   = [];
-    
-    var attributes = [];
-    if (config.hasOwnProperty('attributes') && Array.isArray(config.attributes)) {
-        config.attributes.forEach(function (attr) {
-            var name;
-            for (name in attr.data) {
-                if (attr.data.hasOwnProperty(name)) {
-                    attributes.push(new Attribute({
-                        collectApp: attr.collectApp,
-                        section: attr.section,
-                        name: name,
-                        value: attr.data[name]
-                    }));
-                }
-            }
-        });
-        
-        this.attributes = attributes;
-    }
-    
-    if (config.hasOwnProperty('sessions') && Array.isArray(config.sessions)) {
-        this.sessions = config.sessions.map(function (session) {
-            return new Session(session);
-        });
-    }
-    
+    this.initAttributes(config.attributes);
+    this.initSessions(config.sessions);
 };
 
 Profile.Attribute = Attribute;
@@ -65,53 +38,89 @@ Profile.prototype = {
      *
      * @type {Array}
      */
-    attributes: [],
+    attributes: null,
 
     /**
      *
      * @type {Array}
      */
-    sessions: [],
+    sessions: null,
 
     /**
      *
-     * @returns {String|null}
+     * @returns {String}
      */
     getId: function () {
-        return this.id || null;
+        return this.id;
     },
 
-    // attributes
+    /**
+     *
+     * @param {Object} rawAttributesData
+     * @returns {Profile}
+     */
+    initAttributes: function (rawAttributesData) {
+        var attributes;
+        this.attributes = [];
+
+        if (Array.isArray(rawAttributesData)) {
+            attributes = [];
+            rawAttributesData.forEach(function (attr) {
+                attributes = attributes.concat(this.createAttributes(
+                    attr.collectApp,
+                    attr.section,
+                    attr.data
+                ));
+            }, this);
+            this.attributes = attributes;
+        }
+
+        return this;
+    },
+
     /**
      *
      * @param {String} collectApp
      * @param {String} section
-     * @param {Object} attributes
+     * @param {Object} attributesData
      * @returns {Array}
      */
-    createAttributes: function (collectApp, section, attributes) {
+    createAttributes: function (collectApp, section, attributesData) {
+        var names;
+
         if (!collectApp || !section) {
             throw new Error('collectApp and section should be filled to create attribute correctly');
         }
         
-        if (typeof attributes !== 'object' || !Object.keys(attributes).length) {
+        if (typeof attributesData !== 'object' || !((names = Object.keys(attributesData)).length)) {
             throw new Error('attributes should be an object');
         }
         
-        var instances = [];
-        var key;
-        for (key in attributes) {
-            if (attributes.hasOwnProperty(key)) {
-                instances.push(new Profile.Attribute({
-                    collectApp: collectApp,
-                    section: section,
-                    name: key,
-                    value: attributes[key]
-                }));
-            }
-        }
-        
-        return instances;
+        return names.map(function (name) {
+            return this.createAttribute(
+                collectApp,
+                section,
+                name,
+                attributesData[name]
+            );
+        }, this);
+    },
+
+    /**
+     *
+     * @param {String} collectApp
+     * @param {String} section
+     * @param {String} name
+     * @param {*} value
+     * @returns {Attribute}
+     */
+    createAttribute: function (collectApp, section, name, value) {
+        return new Attribute({
+            collectApp: collectApp,
+            section:    section,
+            name:       name,
+            value:      value
+        });
     },
 
     /**
@@ -121,41 +130,30 @@ Profile.prototype = {
      * @returns {Array}
      */
     getAttributes: function (collectApp, section) {
-        
-        if (!this.attributes || !Array.isArray(this.attributes)) {
-            this.attributes = [];
-            return this.attributes;
-        }
+        var attributes = this.attributes,
+            filters = [];
 
-        var checkCond = function (attr) {
-            var res = true;
-            var app = attr.getCollectApp();
-            var sec = attr.getSection();
-            if (collectApp && section) {
-                if (collectApp !== app || section !== sec) {
-                    res = false;
-                }
-            } else if (collectApp) {
-                if (collectApp !== app) {
-                    res = false;
-                }
-            } else if (section) {
-                if (section !== sec) {
-                    res = false;
-                }
-            }
-            return res;
-        };
-
-        
-        if (!collectApp && !section) {
-            return this.attributes;
-        } else {
-            return this.attributes.filter(function (attr) {
-                return checkCond(attr);
+        if (collectApp) {
+            filters.push(function (attribute) {
+                return attribute.getCollectApp() === collectApp;
             });
         }
 
+        if (section) {
+            filters.push(function (attribute) {
+                return attribute.getSection() === section;
+            });
+        }
+
+        if (filters.length) {
+            attributes = attributes.filter(function (attribute) {
+                return filters.every(function (filter) {
+                    return filter(attribute);
+                });
+            });
+        }
+
+        return attributes;
     },
 
     /**
@@ -171,11 +169,11 @@ Profile.prototype = {
         }
         
         var attributes = this.getAttributes(collectApp, section);
-        var result = attributes.filter(function (attr) {
+        attributes = attributes.filter(function (attr) {
             return attr.getName() === name;
         });
         
-        return result.length ? result[0] : null;
+        return attributes[0] || null;
     },
 
     /**
@@ -190,14 +188,26 @@ Profile.prototype = {
 
     /**
      *
-     * @param {Array.<Attribute>} attributes
+     * @param {Array.<Attribute>} newAttributes
      * @returns {Profile}
      */
-    setAttributes: function (attributes) {
-        var attrs = this.attributes || [];
-        attributes.forEach(function (attr) {
+    setAttributes: function (newAttributes) {
+        var attributes;
+
+        if (!Array.isArray(newAttributes)) {
+            throw new Error('attributes should be an array');
+        }
+
+        attributes = this.getAttributes();
+
+        newAttributes.forEach(function (attr) {
             if (!(attr instanceof Attribute)) {
-                attr = new Attribute(attr);
+                attr = this.createAttribute(
+                    attr.collectApp,
+                    attr.section,
+                    attr.name,
+                    attr.value
+                );
             }
 
             if (!attr.isValid()) {
@@ -213,32 +223,47 @@ Profile.prototype = {
             if (foundAttr) {
                 foundAttr.setValue(attr.getValue());
             } else {
-                attrs.push(attr);
+                attributes.push(attr);
             }
         }, this);
         
-        this.attributes = attrs;
         return this;
     },
 
-    // Sessions
+
+    /**
+     *
+     * @param {Object} rawSessionsData
+     * @returns {Profile}
+     */
+    initSessions: function (rawSessionsData) {
+        this.sessions = [];
+
+        if (Array.isArray(rawSessionsData)) {
+            this.sessions = rawSessionsData.map(function (rawSessionData) {
+                return this.createSession(rawSessionData);
+            }, this);
+        }
+
+        return this;
+    },
+
     /**
      *
      * @param {Function} [filter]
      * @returns {*}
      */
     getSessions: function (filter) {
+        var sessions = this.sessions;
 
-        if (!(typeof filter).match('undefined|function')) {
-            throw new Error('Argument is not a function');
+        if (arguments.length) {
+            if (typeof filter !== 'function') {
+                throw new Error('filter should be a function');
+            }
+            sessions = sessions.filter(filter);
         }
 
-        if (this.sessions && Array.isArray(this.sessions)) {
-            return filter === undefined ? this.sessions : this.sessions.filter(filter);
-        } else {
-            this.sessions = [];
-            return this.sessions;
-        }
+        return sessions;
     },
 
     /**
@@ -248,7 +273,7 @@ Profile.prototype = {
      */
     setSession: function (session) {
         if (!(session instanceof Session)) {
-            session = new Session(session);
+            session = this.createSession(session);
         }
 
         if (!session.isValid()) {
@@ -257,14 +282,33 @@ Profile.prototype = {
 
         var existSession = this.getSession(session.getId());
 
-        if (existSession) {
-            existSession = session;
-            return existSession;
-        } else {
-            var sessions = this.getSessions();
-            sessions.push(session);
-            return sessions[sessions.length - 1];
+        if (!existSession) {
+            // add as new session
+            this.getSessions().push(session);
+
+        } else if (existSession !== session) {
+            // replace existing with new one
+            this.replaceSession(existSession, session);
         }
+
+        return session;
+    },
+
+    /**
+     *
+     * @param {Session} oldSession
+     * @param {Session} newSession
+     * @returns {Profile}
+     */
+    replaceSession: function (oldSession, newSession) {
+        var sessions = this.getSessions(),
+            index = sessions.indexOf(oldSession);
+
+        if (index !== -1) {
+            sessions[index] = newSession;
+        }
+
+        return this;
     },
 
     /**
@@ -276,7 +320,16 @@ Profile.prototype = {
         var sessions = this.getSessions(function (session) {
             return session.getId() === sessionId;
         });
-        return sessions.length ? sessions[0] : null;
+        return sessions[0] || null;
+    },
+
+    /**
+     *
+     * @param {Object} rawSessionData
+     * @returns {Session}
+     */
+    createSession: function (rawSessionData) {
+        return new Session(rawSessionData);
     },
 
     /**
@@ -284,16 +337,17 @@ Profile.prototype = {
      * @return {Session}
      */
     getLastSession: function () {
-        var sessions = this.getSessions();
+        var sessions = this.getSessions(),
+            lastSession = null;
 
         if (sessions.length) {
             var sorted = sessions.concat().sort(function (a, b) {
                 return b.getModifiedAt() - a.getModifiedAt();
             });
-            return this.getSession(sorted[0].getId());
-        } else {
-            return null;
+            lastSession = sorted[0] || null;
         }
+
+        return lastSession;
     },
 
     /**
@@ -302,57 +356,53 @@ Profile.prototype = {
      * @return {Object}
      */
     serialize: function () {
-
-        var profileData = {
-            id: this.id,
-            attributes: this.attributes,
-            sessions: this.sessions
+        return {
+            id:         this.getId(),
+            attributes: this.serializeAttributes(),
+            sessions:   this.serializeSessions()
         };
-
-        var attributes = [];
-        profileData.attributes.forEach(function (attr) {
-            if (!(attr instanceof Attribute) || !attr.isValid()) {
-                return;
-            }
-
-            var app = attr.getCollectApp();
-            var sec = attr.getSection();
-            var currentAttrData = null;
-
-            attributes.forEach(function (attrData) {
-                if (attrData.collectApp === app && attrData.section === sec) {
-                    currentAttrData = attrData;
-                }
-            });
-
-            if (!currentAttrData) {
-                currentAttrData = {
-                    collectApp: app,
-                    section: sec,
-                    data: {}
-                };
-                attributes.push(currentAttrData);
-            }
-
-            currentAttrData.data[attr.getName()] = attr.getValue();
-        }, this);
-
-        profileData.attributes = attributes;
-
-
-        profileData.sessions = profileData.sessions.map(function (session) {
-            var sessionObj = session.serialize();
-            sessionObj.events = sessionObj.events.map(function (event) {
-                return event.serialize();
-            });
-            return sessionObj;
-        });
-
-        return profileData;
     },
 
     /**
-     *
+     * @private
+     * @returns {Array}
+     */
+    serializeAttributes: function () {
+        var attributesMap = {},
+            attributes = [];
+
+        this.getAttributes().forEach(function (attribute) {
+            var collectApp = attribute.getCollectApp(),
+                section = attribute.getSection(),
+                key = collectApp + '/' + section;
+
+            if (!attributesMap[key]) {
+                attributesMap[key] = {
+                    collectApp: collectApp,
+                    section: section,
+                    data: {}
+                };
+                attributes.push(attributesMap[key]);
+            }
+
+            attributesMap[key].data[attribute.getName()] = attribute.getValue();
+        });
+
+        return attributes;
+    },
+
+    /**
+     * @private
+     * @returns {Array}
+     */
+    serializeSessions: function () {
+        return this.getSessions().map(function (session) {
+            return session.serialize();
+        });
+    },
+
+    /**
+     * TODO make code review
      * @private
      * @return {Profile}
      */

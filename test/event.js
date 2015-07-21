@@ -109,23 +109,17 @@ describe('Event', function () {
     });
 
     it('should serialize event', function () {
-        var event = createEvent({
-            id: 'qwe',
-            definitionId: 'my-event',
-            data: {
-                my: 'cat'
+        var rawData = {
+                id: 'qwe',
+                definitionId: 'my-event',
+                data: {
+                    my: 'cat'
+                },
+                createdAt: 123456789
             },
-            createdAt: 123456789
-        });
+            event = createEvent(rawData);
         
-        assert.deepEqual(event.serialize(), {
-            id: 'qwe',
-            definitionId: 'my-event',
-            data: {
-                my: 'cat'
-            },
-            createdAt: 123456789
-        });
+        assert.deepEqual(event.serialize(), rawData);
     });
 
 

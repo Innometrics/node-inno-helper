@@ -6,17 +6,82 @@ var Segment = require('./segment');
 var util = require('util');
 var querystring = require('querystring');
 
-// <InnoHelper> InnoHelper(<json> config)
+/**
+ *
+ * @param {Object} config
+ * @constructor
+ */
 var InnoHelper = function (config) {
-    this.config = config;
+    this.validateConfig(config);
+    this.groupId = config.groupId;
+    this.apiUrl = config.apiUrl;
+    this.bucketName = config.bucketName;
+    this.appName = config.appName;
+    this.appKey = config.appKey;
 };
 
 InnoHelper.prototype = {
 
     /**
-     * @type {Object}
+     * @type {String}
      */
-    config: null,
+    bucketName: null,
+
+    /**
+     * @type {String}
+     */
+    appName: null,
+
+    /**
+     * @type {Number|String}
+     */
+    groupId: null,
+
+    /**
+     * @type {String}
+     */
+    appKey: null,
+
+    /**
+     * @type: {String}
+     */
+    apiUrl: null,
+
+    /**
+     * Checks if config is valid
+     * @param {Object} config
+     */
+    validateConfig: function (config) {
+        if (!config) {
+            throw new Error('Config should be defined');
+        }
+
+        if (typeof config !== 'object') {
+            throw new Error('Config should be an object');
+        }
+
+        ['bucketName', 'appName', 'appKey', 'apiUrl'].forEach(function (field) {
+            if (!(field in config)) {
+                throw new Error('Property "' + field + '" in config should be defined');
+            }
+            if (typeof config[field] !== 'string') {
+                throw new Error('Property "' + field + '" in config should be a string');
+            }
+            if (!config[field].trim()) {
+                throw new Error('Property "' + field + '" in config can not be empty');
+            }
+        });
+
+        if (!('groupId' in config)) {
+            throw new Error('Property "groupId" in config should be defined');
+        }
+        if (['string', 'number'].indexOf(typeof config.groupId) === -1) {
+            throw new Error('Property "groupId" in config should be a string or a number');
+        }
+        if (!String(config.groupId).trim()) {
+            throw new Error('Property "groupId" in config can not be empty');
+        }
+    },
 
     /**
      *
@@ -77,13 +142,13 @@ InnoHelper.prototype = {
      */
     validateObject: function (obj, fields) {
         var error = null;
-        if (!obj) {
+        if (typeof obj !== 'object') {
             error = new Error('Object is not defined');
         } else {
             try {
                 fields = Array.isArray(fields) ? fields : [fields];
                 fields.forEach(function (key) {
-                    if (!obj[key]) {
+                    if (!(key in obj)) {
                         throw new Error(key.toUpperCase() + ' not found');
                     }
                 });
@@ -103,28 +168,33 @@ InnoHelper.prototype = {
      */
     checkErrors: function (error, response, successCode) {
         successCode = successCode || 200;
+        if (!(successCode instanceof Array)) {
+            successCode = [successCode];
+        }
         
         if (error) {
             return error;
-        } else {
-            if (!response || !response.body) {
-                return new Error('Response does not contain data');
-            }
-            if (response.statusCode !== successCode) {
-                error = new Error(response.body.message);
-                error.name = 'Server failed with status code ' + response.statusCode;
-                return error;
-            }
         }
+
+        if (!response || !response.body) {
+            return new Error('Response does not contain data');
+        }
+
+        if (successCode.indexOf(response.statusCode) === -1) {
+            error = new Error(response.body.message);
+            error.name = 'Server failed with status code ' + response.statusCode;
+            return error;
+        }
+
         return null;
     },
 
     /**
      *
-     * @returns {Object|string}
+     * @returns {String}
      */
     getCollectApp: function () {
-        return this.config && this.config.appName;
+        return this.appName;
     },
 
     /**
@@ -132,15 +202,15 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getBucket: function () {
-        return this.config && this.config.bucketName;
+        return this.bucketName;
     },
 
     /**
      *
-     * @returns {String|Number}
+     * @returns {Number|String}
      */
     getCompany: function () {
-        return this.config && this.config.groupId;
+        return this.groupId;
     },
 
     /**
@@ -148,7 +218,7 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getAppKey: function () {
-        return this.config && this.config.appKey;
+        return this.appKey;
     },
 
     /**
@@ -156,7 +226,7 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getApiHost: function () {
-        return this.config && this.config.apiUrl;
+        return this.apiUrl;
     },
 
     /**
@@ -224,10 +294,7 @@ InnoHelper.prototype = {
                 settings = response.body.custom;
             }
 
-            if (typeof callback === 'function') {
-                callback(error, settings);
-            }
-
+            callback(error, settings);
         });
     },
 
@@ -243,7 +310,6 @@ InnoHelper.prototype = {
         };
 
         request.get(opts, function (error, response) {
-
             var data = null;
             var segments = [];
             
@@ -255,16 +321,17 @@ InnoHelper.prototype = {
                 data.forEach(function (sgmData) {
                     var sgmInstance = null;
                     if (sgmData.hasOwnProperty('segment') && typeof sgmData.segment === 'object') {
-                        sgmInstance = new Segment(sgmData.segment);
-                        segments.push(sgmInstance);
+                        try {
+                            sgmInstance = new Segment(sgmData.segment);
+                            segments.push(sgmInstance);
+                        }catch (e) {
+                            console.error(e);
+                        }
                     }
                 });
             }
 
-            if (typeof callback === 'function') {
-                callback(error, segments);
-            }
-
+            callback(error, segments);
         });
     },
 
@@ -279,10 +346,7 @@ InnoHelper.prototype = {
         var result = null;
         if (!(segment instanceof Segment)) {
             error = new Error('Argument "segment" should be a Segment instance');
-            if (typeof callback === 'function') {
-                callback(error, result);
-            }
-            return;
+            return callback(error, result);
         }
         
         this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
@@ -326,10 +390,7 @@ InnoHelper.prototype = {
         
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
-            if (typeof callback === 'function') {
-                callback(error, result);
-            }
-            return;
+            return callback(error, result);
         }
         
         var defParams = {
@@ -345,7 +406,7 @@ InnoHelper.prototype = {
 
         request.get(opts, function (error, response) {
 
-            var data = null;
+            var data;
             
             error = self.checkErrors(error, response);
 
@@ -356,10 +417,7 @@ InnoHelper.prototype = {
                 }
             }
 
-            if (typeof callback === 'function') {
-                callback(error, result);
-            }
-
+            callback(error, result);
         });
     },
 
@@ -391,10 +449,7 @@ InnoHelper.prototype = {
                 }
             }
 
-            if (typeof callback === 'function') {
-                callback(error, profile);
-            }
-
+            callback(error, profile);
         });
     },
 
@@ -404,19 +459,25 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     deleteProfile: function (profileId, callback) {
+        var self = this;
         var opts = {
             url: this.getProfileUrl(profileId),
             json: true
         };
 
         request.del(opts, function (error, response) {
+
+            error = self.checkErrors(error, response, 204);
+
+            /*
             if (!error) {
                 if (response.statusCode !== 204) {
                     error = new Error(response.body ? response.body.message : '');
                     error.name = 'Server failed with status code ' + response.statusCode;
                 }
             }
-            
+            */
+
             if (typeof callback === 'function') {
                 callback(error);
             }
@@ -430,6 +491,7 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     saveProfile: function (profile, callback) {
+        var self = this;
         var error = null;
         var result = null;
         
@@ -444,53 +506,25 @@ InnoHelper.prototype = {
         var profileId = profile.getId();
         var opts = {
             url: this.getProfileUrl(profileId),
+            body: profile.serialize(),
             json: true
         };
 
-        request.get(opts, function (error, response) {
-            var data = response.body || {};
-            if (error) {
-                if (typeof callback === 'function') {
-                    callback(error, profile);
+        request.post(opts, function (error, response) {
+            var data;
+            error = self.checkErrors(error, response, [200, 201]);
+
+            if (!error) {
+                data = response.body;
+                if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
+                    profile = new Profile(data.profile);
                 }
-                return;
             }
-            
-            var profileNotFound = response.statusCode === 404;
-            var successCode = profileNotFound ? 201 : 200;
-            var wrongResponse = response.statusCode !== 200;
-            
-            if (wrongResponse && !profileNotFound) {
-                error = new Error(data ? data.message : '');
-                error.name = 'Server failed with status code ' + response.statusCode;
 
-                if (typeof callback === 'function') {
-                    callback(error, profile);
-                }
-                return;
+            if (typeof callback === 'function') {
+                callback(error, profile);
             }
-            
-            // transform profile data object
-            opts.body = profile.serialize();
 
-            request.post(opts, function (error, response) {
-
-                var data = response.body || {};
-                if (!error) {
-                    if (response.statusCode !== successCode) {
-                        error = new Error(data ? data.message : '');
-                        error.name = 'Server failed with status code ' + response.statusCode;
-                    }
-                }
-
-                if (typeof callback === 'function') {
-                    if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-                        profile = new Profile(data.profile);
-                    }
-                    callback(error, profile);
-                }
-
-            });
         });
     },
 
@@ -501,14 +535,13 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     mergeProfiles: function (profile1, profile2, callback) {
+        var self = this;
         var error = null;
         var result = null;
         
         if (!(profile1 instanceof Profile)) {
             error = new Error('Argument "profile1" should be a Profile instance');
-        }
-        
-        if (!(profile2 instanceof Profile)) {
+        } else if (!(profile2 instanceof Profile)) {
             error = new Error('Argument "profile2" should be a Profile instance');
         }
         
@@ -532,22 +565,29 @@ InnoHelper.prototype = {
         };
         
         request.post(opts, function (error, response) {
-
-            var data = response.body || {};
-            var code = response.statusCode;
+            var data;
             var profile = null;
-            
+
+            error = self.checkErrors(error, response, [200, 201]);
+
+            /*
+            //var code = response.statusCode;
             if (!error) {
                 if (!(code === 200 || code === 201)) {
                     error = new Error(data ? data.message : '');
                     error.name = 'Server failed with status code ' + response.statusCode;
                 }
             }
+            */
 
-            if (typeof callback === 'function') {
+            if (!error) {
+                data = response.body;
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     profile = new Profile(data.profile);
                 }
+            }
+
+            if (typeof callback === 'function') {
                 callback(error, profile);
             }
 
@@ -587,12 +627,12 @@ InnoHelper.prototype = {
 
     /**
      *
-     * @param {String }requestBody
+     * @param {String} requestBody
      * @returns {Profile}
      */
     getProfileFromRequest: function (requestBody) {
         try {
-            if (typeof data !== 'object') {
+            if (typeof requestBody !== 'object') {
                 requestBody = JSON.parse(requestBody);
             }
         } catch (e) {
@@ -612,7 +652,7 @@ InnoHelper.prototype = {
      */
     getMetaFromRequest: function (requestBody) {
         try {
-            if (typeof data !== 'object') {
+            if (typeof requestBody !== 'object') {
                 requestBody = JSON.parse(requestBody);
             }
         } catch (e) {
