@@ -18,7 +18,7 @@ var Session = function (config) {
 
     this.setId(config.id || idGenerator.generate(8));
     this.setData(config.data);
-    this.setCollectApp(config.collectApp || "web");
+    this.setCollectApp(config.collectApp);
     this.setSection(config.section);
     this.setCreatedAt(config.createdAt  || now);
     this.modifiedAt = config.modifiedAt || now;
