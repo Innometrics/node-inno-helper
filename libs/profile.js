@@ -18,7 +18,7 @@ var Profile = function (config) {
 
     this.id = config.id || idGenerator.generate(32);
     this.initAttributes(config.attributes);
-    this.initSession(config.sessions);
+    this.initSessions(config.sessions);
 };
 
 Profile.Attribute = Attribute;
@@ -60,9 +60,11 @@ Profile.prototype = {
      * @returns {Profile}
      */
     initAttributes: function (rawAttributesData) {
-        var attributes = this.attributes = [];
+        var attributes;
+        this.attributes = [];
 
         if (Array.isArray(rawAttributesData)) {
+            attributes = [];
             rawAttributesData.forEach(function (attr) {
                 attributes = attributes.concat(this.createAttributes(
                     attr.collectApp,
@@ -70,6 +72,7 @@ Profile.prototype = {
                     attr.data
                 ));
             }, this);
+            this.attributes = attributes;
         }
 
         return this;
@@ -233,7 +236,7 @@ Profile.prototype = {
      * @param {Object} rawSessionsData
      * @returns {Profile}
      */
-    initSession: function (rawSessionsData) {
+    initSessions: function (rawSessionsData) {
         this.sessions = [];
 
         if (Array.isArray(rawSessionsData)) {
@@ -279,15 +282,33 @@ Profile.prototype = {
 
         var existSession = this.getSession(session.getId());
 
-        // TODO wrong behaviour
-        if (existSession) {
-            existSession = session;
-            return existSession;
-        } else {
-            var sessions = this.getSessions();
-            sessions.push(session);
-            return sessions[sessions.length - 1];
+        if (!existSession) {
+            // add as new session
+            this.getSessions().push(session);
+
+        } else if (existSession !== session) {
+            // replace existing with new one
+            this.replaceSession(existSession, session);
         }
+
+        return session;
+    },
+
+    /**
+     *
+     * @param {Session} oldSession
+     * @param {Session} newSession
+     * @returns {Profile}
+     */
+    replaceSession: function (oldSession, newSession) {
+        var sessions = this.getSessions(),
+            index = sessions.indexOf(oldSession);
+
+        if (index !== -1) {
+            sessions[index] = newSession;
+        }
+
+        return this;
     },
 
     /**
@@ -323,7 +344,7 @@ Profile.prototype = {
             var sorted = sessions.concat().sort(function (a, b) {
                 return b.getModifiedAt() - a.getModifiedAt();
             });
-            lastSession = sorted[0];
+            lastSession = sorted[0] || null;
         }
 
         return lastSession;
@@ -381,7 +402,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * TODO make code review
      * @private
      * @return {Profile}
      */
