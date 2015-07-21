@@ -195,7 +195,7 @@ describe('Session', function () {
 
         it('Should throw error on invalid event', function () {
             var sess = createSession();
-            assert.throws(function () {
+            assert['throws'](function () {
                 sess.addEvent();
             });
         });
@@ -252,6 +252,29 @@ describe('Session', function () {
             event.setDefinitionId('defId');
             assert.equal(events[0].getDefinitionId(), 'defId');
         });
+    });
+
+    it('should serialize data', function () {
+        var rawData = {
+            id: 'qwe',
+            collectApp: 'app',
+            section: 'sec',
+            createdAt: 1,
+            modifiedAt: 2,
+            data: {
+                test: 'cool'
+            },
+            events: [{
+                id: 'ev1',
+                definitionId: 'defId',
+                createdAt: 3,
+                data: {
+                    foo: 'bar'
+                }
+            }]
+        };
+        var session = createSession(rawData);
+        assert.deepEqual(session.serialize(), rawData);
     });
 
 });
