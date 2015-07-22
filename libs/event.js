@@ -99,7 +99,7 @@ Event.prototype = {
      * @returns {String|null}
      */
     getId: function () {
-        return this.id || null;
+        return this.id;
     },
 
     /**
@@ -107,7 +107,7 @@ Event.prototype = {
      * @returns {Number|null}
      */
     getCreatedAt: function () {
-        return this.createdAt || null;
+        return this.createdAt;
     },
 
     /**
@@ -115,7 +115,7 @@ Event.prototype = {
      * @returns {String|null}
      */
     getDefinitionId: function () {
-        return this.definitionId || null;
+        return this.definitionId;
     },
 
     /**
@@ -157,6 +157,11 @@ Event.prototype = {
         };
     },
 
+    /**
+     *
+     * @param {Event} event
+     * @returns {Event}
+     */
     merge: function (event) {
         if (!(event instanceof Event)) {
             throw new Error('Argument "event" should be a Event instance');
