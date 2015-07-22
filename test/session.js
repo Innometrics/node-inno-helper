@@ -176,7 +176,7 @@ describe('Session', function () {
             assert(events[0] instanceof Profile.Event);
         });
 
-        it('should replace existing event', function () {
+        it('should throw error on existing event', function () {
             var sess = createSession({events: [{
                     id: '123',
                     definitionId: 'old-def'
@@ -190,11 +190,9 @@ describe('Session', function () {
             assert.equal(events.length, 1);
             assert.equal(events[0].getDefinitionId(), 'old-def');
 
-            sess.addEvent(event);
-
-            assert.equal(events.length, 1);
-            assert.equal(events[0].getDefinitionId(), 'new-def');
-
+            assert['throws'](function () {
+                sess.addEvent(event);
+            }, /Event with id "123" already exists/);
         });
 
         it('Should throw error on invalid event', function () {
@@ -256,6 +254,28 @@ describe('Session', function () {
             event.setDefinitionId('defId');
             assert.equal(events[0].getDefinitionId(), 'defId');
         });
+
+        it('should sort events', function () {
+            var session = createSession({
+                    events: [{
+                        id: 'ev1',
+                        createdAt: 10
+                    }, {
+                        id: 'ev2',
+                        createdAt: 5
+                    }]
+                }),
+                events;
+
+            events = session.getEvents();
+            assert.equal(events[0].getId(), 'ev1');
+            assert.equal(events[1].getId(), 'ev2');
+
+            events = session.sortEvents().getEvents();
+            assert.equal(events[0].getId(), 'ev2');
+            assert.equal(events[1].getId(), 'ev1');
+        });
+
     });
 
     it('should serialize data', function () {

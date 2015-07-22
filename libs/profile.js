@@ -408,6 +408,17 @@ Profile.prototype = {
     },
 
     /**
+     * @private
+     * @returns {Profile}
+     */
+    sortSessions: function () {
+        this.getSessions().sort(function (session1, session2) {
+            return session1.getModifiedAt() - session2.getModifiedAt();
+        });
+        return this;
+    },
+
+    /**
      * TODO make code review
      * @private
      * @return {Profile}
@@ -420,21 +431,16 @@ Profile.prototype = {
         if (this.getId() !== profile.getId()) {
             throw new Error('Profile IDs should be similar');
         }
-        
-        var localAttrs = deepmerge([], this.getAttributes());
-        var newAttrs = deepmerge([], profile.getAttributes());
-        
+
+        // merge attributes
+        this.setAttributes(profile.getAttributes());
+
+        // merge sessions
+        // TODO how to do it?
+
+
         var localSessions = deepmerge([], this.getSessions());
         var newSessions = deepmerge([], profile.getSessions());
-        
-        // merge full profile
-        // note: "merge" util instead of "deepmerge" - backref should be saved
-        // var data = this.getData();
-        // data = merge(data, profile.getData());
-        
-        // merge attributes
-        this.setAttributes(newAttrs);
-        this.setAttributes(localAttrs);
         
         // merge sessions
         this.sessions = newSessions;

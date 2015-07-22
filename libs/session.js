@@ -196,8 +196,8 @@ Session.prototype = {
 
         if (Array.isArray(rawEventsData)) {
             this.events = rawEventsData.map(function (rawEventData) {
-                return new Event(rawEventData);
-            });
+                return this.createEvent(rawEventData);
+            }, this);
         }
 
         return this;
@@ -210,7 +210,7 @@ Session.prototype = {
      */
     addEvent: function (event) {
         if (!(event instanceof Event)) {
-            event = new Event(event);
+            event = this.createEvent(event);
         }
 
         if (!event.isValid()) {
@@ -220,15 +220,21 @@ Session.prototype = {
         var existEvent = this.getEvent(event.getId());
 
         if (existEvent) {
-            // TODO wrong behaviour
-            existEvent.setData(event.getData());
-            existEvent.setDefinitionId(event.getDefinitionId());
-            return existEvent;
-        } else {
-            var events = this.getEvents();
-            events.push(event);
-            return events[events.length - 1];
+            throw new Error('Event with id "' + event.getId() + '" already exists');
         }
+
+        this.getEvents().push(event);
+
+        return event;
+    },
+
+    /**
+     *
+     * @param {Object} rawEventData
+     * @returns {Event}
+     */
+    createEvent: function (rawEventData) {
+        return new Event(rawEventData);
     },
     
     /**
@@ -247,7 +253,7 @@ Session.prototype = {
 
     /**
      *
-     * @param  {String} eventDefinitionId
+     * @param  {String} [eventDefinitionId]
      * @return {Array}
      */
     getEvents: function (eventDefinitionId) {
@@ -299,6 +305,17 @@ Session.prototype = {
         return this.getEvents().map(function (event) {
             return event.serialize();
         });
+    },
+
+    /**
+     * @private
+     * @returns {Session}
+     */
+    sortEvents: function () {
+        this.getEvents().sort(function (event1, event2) {
+            return event1.getCreatedAt() - event2.getCreatedAt();
+        });
+        return this;
     }
 };
 
