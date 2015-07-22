@@ -553,7 +553,7 @@ describe('Profile', function () {
 
         it('should properly merge data from profile to other one', function () {
             var profile1 = createProfile({
-                    id: 'pid1',
+                    id: 'pid',
                     attributes: [{
                         collectApp: 'app1',
                         section: 'sec1',
