@@ -301,4 +301,64 @@ describe('Session', function () {
         assert.deepEqual(session.serialize(), rawData);
     });
 
+    describe('Merge', function () {
+
+        it('should throw error if session is not instance of Session', function () {
+            var fakeSession = {id: 1},
+                session = createSession();
+
+            assert['throws'](function () {
+                session.merge(fakeSession);
+            }, /Argument "session" should be a Session instance/);
+        });
+
+        it('should throw error if ids are different', function () {
+            var session1 = createSession({id: "1"}),
+                session2 = createSession({id: "2"});
+
+            assert['throws'](function () {
+                session1.merge(session2);
+            }, /Session IDs should be similar/);
+        });
+
+        it('should properly merge session to other one', function () {
+            var session1 =  createSession({
+                    id: "1",
+                    data: {
+                        name: 'value',
+                        a: 1
+                    },
+                    events: [{
+                        id: 'ev1'
+                    }]
+                }),
+                session2 = createSession({
+                    id: "1",
+                    data: {
+                        name: 'new',
+                        b: 2
+                    },
+                    events: [{
+                        id: 'ev1'
+                    }, {
+                        id: 'ev2'
+                    }]
+                });
+
+            session1.merge(session2);
+
+            /*
+            session1.merge(session2);
+            assert.strictEqual(session1.getId(), "1");
+            assert.deepEqual(session1.getData, {
+                name: 'new',
+                a: 1,
+                b: 2
+            });
+            assert.strictEqual(session1.getEvents().length, 2);
+            */
+        });
+
+    });
+
 });

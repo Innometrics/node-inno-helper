@@ -318,6 +318,11 @@ Session.prototype = {
         return this;
     },
 
+    /**
+     *
+     * @param {Session} session
+     * @returns {Session}
+     */
     merge: function (session) {
         var eventsMap;
 
@@ -353,8 +358,8 @@ Session.prototype = {
             }
         });
 
-        this.events = Object.keys(eventsMap).map(function (event) {
-            return event;
+        this.events = Object.keys(eventsMap).map(function (id) {
+            return eventsMap[id];
         });
 
         this.sortEvents();
