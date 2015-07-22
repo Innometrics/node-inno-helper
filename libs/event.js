@@ -17,34 +17,36 @@ var Event = function (config) {
     this.setData(config.data);
     this.setDefinitionId(config.definitionId || null);
     this.setCreatedAt(config.createdAt || +new Date());
-
 };
 
 Event.prototype = {
 
     /**
+     * Event id
      * @type {String}
      */
     id: null,
 
     /**
-     *
+     * Event definition id
      * @type {String}
      */
     definitionId: null,
 
     /**
+     * Event data object
      * @type {Object}
      */
     data: null,
 
     /**
+     * Date when event was created (timestamp in ms)
      * @type {Number}
      */
     createdAt: null,
 
     /**
-     *
+     * Set event id
      * @param {String} id
      * @returns {Event}
      */
@@ -54,17 +56,19 @@ Event.prototype = {
     },
 
     /**
+     * Set date (in ms) when event was created
+     * Number or Date can be used.
      *
      * @param {Number|Date} date
      * @returns {Event}
      */
     setCreatedAt: function (date) {
-        this.createdAt = (new Date(date)).getTime();
+        this.createdAt = +new Date(date);
         return this;
     },
 
     /**
-     *
+     * Set event definition id
      * @param {String} definitionId
      * @returns {Event}
      */
@@ -74,6 +78,8 @@ Event.prototype = {
     },
 
     /**
+     * Set event data values
+     * Data is an object with key=>value pair(s).
      *
      * @param {Object} data
      * @returns {Event}
@@ -84,7 +90,7 @@ Event.prototype = {
     },
 
     /**
-     *
+     * Set single value of event data
      * @param {String} name
      * @param {*} value
      * @returns {Event}
@@ -95,31 +101,31 @@ Event.prototype = {
     },
 
     /**
-     *
-     * @returns {String|null}
+     * get event id
+     * @returns {String}
      */
     getId: function () {
         return this.id;
     },
 
     /**
-     *
-     * @returns {Number|null}
+     * Get date (in ms) when event was created
+     * @returns {Number}
      */
     getCreatedAt: function () {
         return this.createdAt;
     },
 
     /**
-     *
-     * @returns {String|null}
+     * Get event definition id
+     * @returns {String}
      */
     getDefinitionId: function () {
         return this.definitionId;
     },
 
     /**
-     *
+     * Get event data object
      * @returns {Object}
      */
     getData: function () {
@@ -127,7 +133,7 @@ Event.prototype = {
     },
 
     /**
-     *
+     * Get single value of event data object
      * @param {String} name
      * @returns {Object|null}
      */
@@ -136,16 +142,15 @@ Event.prototype = {
     },
 
     /**
-     *
+     * Check if event is valid (all required fields are present)
      * @returns {Boolean}
      */
     isValid: function () {
-        return !!this.getId() && !!this.getDefinitionId() && !!this.getData() && !!this.getCreatedAt();
+        return !!(this.getId() && this.getDefinitionId() && this.getData() && this.getCreatedAt());
     },
 
     /**
-     *
-     * @private
+     * Convert event to JSON
      * @return {Object}
      */
     serialize: function () {
@@ -158,7 +163,7 @@ Event.prototype = {
     },
 
     /**
-     *
+     * Merge event with same id to current
      * @param {Event} event
      * @returns {Event}
      */
