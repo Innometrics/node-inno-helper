@@ -23,70 +23,40 @@ var InnoHelper = function (config) {
 InnoHelper.prototype = {
 
     /**
+     * Bucket name
      * @type {String}
      */
     bucketName: null,
 
     /**
+     * Application name
      * @type {String}
      */
     appName: null,
 
     /**
+     * Company id
      * @type {Number|String}
      */
     groupId: null,
 
     /**
+     * Application key
      * @type {String}
      */
     appKey: null,
 
     /**
-     * @type: {String}
+     * API url
+     * @type {String}
      */
     apiUrl: null,
 
     /**
-     * Checks if config is valid
-     * @param {Object} config
-     */
-    validateConfig: function (config) {
-        if (!config) {
-            throw new Error('Config should be defined');
-        }
-
-        if (typeof config !== 'object') {
-            throw new Error('Config should be an object');
-        }
-
-        ['bucketName', 'appName', 'appKey', 'apiUrl'].forEach(function (field) {
-            if (!(field in config)) {
-                throw new Error('Property "' + field + '" in config should be defined');
-            }
-            if (typeof config[field] !== 'string') {
-                throw new Error('Property "' + field + '" in config should be a string');
-            }
-            if (!config[field].trim()) {
-                throw new Error('Property "' + field + '" in config can not be empty');
-            }
-        });
-
-        if (!('groupId' in config)) {
-            throw new Error('Property "groupId" in config should be defined');
-        }
-        if (['string', 'number'].indexOf(typeof config.groupId) === -1) {
-            throw new Error('Property "groupId" in config should be a string or a number');
-        }
-        if (!String(config.groupId).trim()) {
-            throw new Error('Property "groupId" in config can not be empty');
-        }
-    },
-
-    /**
-     *
+     * Build Url for API request to work with certain Profile
      * @param {String} profileId
      * @returns {String}
+     * @protected
      */
     getProfileUrl: function (profileId) {
         return util.format('%s/v1/companies/%s/buckets/%s/profiles/%s?app_key=%s',
@@ -98,7 +68,9 @@ InnoHelper.prototype = {
     },
 
     /**
+     * Build Url for API request to work with application settings
      * @returns {String}
+     * @protected
      */
     getAppSettingsUrl: function () {
         return util.format('%s/v1/companies/%s/buckets/%s/apps/%s/custom?app_key=%s',
@@ -110,7 +82,9 @@ InnoHelper.prototype = {
     },
 
     /**
+     * Build Url for API request to work with segments
      * @returns {String}
+     * @protected
      */
     getSegmentsUrl: function () {
         return util.format('%s/v1/companies/%s/buckets/%s/segments?app_key=%s',
@@ -121,7 +95,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Build Url for API request to work with segments
      * @param {Object} params
      * @returns {String}
      */
@@ -132,61 +106,6 @@ InnoHelper.prototype = {
             this.getBucket(),
             this.getAppKey(),
             querystring.stringify(params));
-    },
-
-    /**
-     *
-     * @param obj
-     * @param fields
-     * @returns {*}
-     */
-    validateObject: function (obj, fields) {
-        var error = null;
-        if (typeof obj !== 'object') {
-            error = new Error('Object is not defined');
-        } else {
-            try {
-                fields = Array.isArray(fields) ? fields : [fields];
-                fields.forEach(function (key) {
-                    if (!(key in obj)) {
-                        throw new Error(key.toUpperCase() + ' not found');
-                    }
-                });
-            } catch (e) {
-                error = e;
-            }
-        }
-        return error;
-    },
-
-    /**
-     *
-     * @param {Error}error
-     * @param {Object} response
-     * @param {Number} successCode
-     * @returns {Error|null}
-     */
-    checkErrors: function (error, response, successCode) {
-        successCode = successCode || 200;
-        if (!(successCode instanceof Array)) {
-            successCode = [successCode];
-        }
-        
-        if (error) {
-            return error;
-        }
-
-        if (!response || !response.body) {
-            return new Error('Response does not contain data');
-        }
-
-        if (successCode.indexOf(response.statusCode) === -1) {
-            error = new Error(response.body.message);
-            error.name = 'Server failed with status code ' + response.statusCode;
-            return error;
-        }
-
-        return null;
     },
 
     /**
@@ -678,6 +597,100 @@ InnoHelper.prototype = {
             attributes: [],
             mergedProfiles: []
         });
+    },
+
+    /**
+     * Checks if config is valid
+     * @param {Object} config
+     * @private
+     */
+    validateConfig: function (config) {
+        if (!config) {
+            throw new Error('Config should be defined');
+        }
+
+        if (typeof config !== 'object') {
+            throw new Error('Config should be an object');
+        }
+
+        ['bucketName', 'appName', 'appKey', 'apiUrl'].forEach(function (field) {
+            if (!(field in config)) {
+                throw new Error('Property "' + field + '" in config should be defined');
+            }
+            if (typeof config[field] !== 'string') {
+                throw new Error('Property "' + field + '" in config should be a string');
+            }
+            if (!config[field].trim()) {
+                throw new Error('Property "' + field + '" in config can not be empty');
+            }
+        });
+
+        if (!('groupId' in config)) {
+            throw new Error('Property "groupId" in config should be defined');
+        }
+        if (['string', 'number'].indexOf(typeof config.groupId) === -1) {
+            throw new Error('Property "groupId" in config should be a string or a number');
+        }
+        if (!String(config.groupId).trim()) {
+            throw new Error('Property "groupId" in config can not be empty');
+        }
+    },
+
+    /**
+     * Check that certain object has all fields from list
+     * @param {Object} obj
+     * @param {Array} fields
+     * @returns {Error|null}
+     * @private
+     */
+    validateObject: function (obj, fields) {
+        var error = null;
+        if (typeof obj !== 'object') {
+            error = new Error('Object is not defined');
+        } else {
+            try {
+                fields = Array.isArray(fields) ? fields : [fields];
+                fields.forEach(function (key) {
+                    if (!(key in obj)) {
+                        throw new Error(key.toUpperCase() + ' not found');
+                    }
+                });
+            } catch (e) {
+                error = e;
+            }
+        }
+        return error;
+    },
+
+    /**
+     * Check for error and that response has allowed statusCode and required field(s)
+     * @param {Error} error
+     * @param {Object} response
+     * @param {Number|Array<Number>} successCode
+     * @returns {Error|null}
+     * @private
+     */
+    checkErrors: function (error, response, successCode) {
+        successCode = successCode || 200;
+        if (!(successCode instanceof Array)) {
+            successCode = [successCode];
+        }
+
+        if (error) {
+            return error;
+        }
+
+        if (!response || !response.body) {
+            return new Error('Response does not contain data');
+        }
+
+        if (successCode.indexOf(response.statusCode) === -1) {
+            error = new Error(response.body.message);
+            error.name = 'Server failed with status code ' + response.statusCode;
+            return error;
+        }
+
+        return null;
     }
 };
 
