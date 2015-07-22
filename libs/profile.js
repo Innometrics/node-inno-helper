@@ -4,7 +4,6 @@ var Attribute = require('./attribute');
 var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
-var deepmerge = require('deepmerge');
 var idGenerator = require('./id-generator');
 // var merge = require('merge');
 
@@ -408,7 +407,18 @@ Profile.prototype = {
     },
 
     /**
-     * TODO make code review
+     * @private
+     * @returns {Profile}
+     */
+    sortSessions: function () {
+        this.getSessions().sort(function (session1, session2) {
+            return session1.getModifiedAt() - session2.getModifiedAt();
+        });
+        return this;
+    },
+
+    /**
+     *
      * @private
      * @return {Profile}
      */
@@ -420,50 +430,30 @@ Profile.prototype = {
         if (this.getId() !== profile.getId()) {
             throw new Error('Profile IDs should be similar');
         }
-        
-        var localAttrs = deepmerge([], this.getAttributes());
-        var newAttrs = deepmerge([], profile.getAttributes());
-        
-        var localSessions = deepmerge([], this.getSessions());
-        var newSessions = deepmerge([], profile.getSessions());
-        
-        // merge full profile
-        // note: "merge" util instead of "deepmerge" - backref should be saved
-        // var data = this.getData();
-        // data = merge(data, profile.getData());
-        
-        // merge attributes
-        this.setAttributes(newAttrs);
-        this.setAttributes(localAttrs);
-        
-        // merge sessions
-        this.sessions = newSessions;
-        
-        localSessions.forEach(function (localSession) {
-            var newSession = this.getSession(localSession.getId());
-            
-            if (newSession) {
-                // session data
-                newSession.setData(localSession.getData());
-        
-                // events
-                var localEvents = localSession.getEvents();
-                
-                localEvents.forEach(function (localEvent) {
-                    var newEvent = newSession.getEvent(localEvent.getId());
 
-                    if (newEvent) {
-                        // event data
-                        newEvent.setData(localEvent.getData());
-                    } else {
-                        newSession.addEvent(localEvent);
-                    }
-                });
+        // merge attributes
+        this.setAttributes(profile.getAttributes());
+
+        var sessionsMap = {};
+
+        this.getSessions().forEach(function (session) {
+            sessionsMap[session.getId()] = session;
+        });
+
+        profile.getSessions().forEach(function (session) {
+            var id = session.getId();
+            if (!sessionsMap[id]) {
+                sessionsMap[id] = session;
             } else {
-                this.setSession(localSession);
+                sessionsMap[id].merge(session);
             }
-        }, this);
-        
+        });
+
+        this.sessions = Object.keys(sessionsMap).map(function (id) {
+            return sessionsMap[id];
+        });
+
+        this.sortSessions();
         return this;
     }
 };

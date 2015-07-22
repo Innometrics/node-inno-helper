@@ -528,7 +528,115 @@ describe('Profile', function () {
     });
 
     describe('Merge', function () {
-        // TODO
+
+        it('should throw error if non Profile instance passed', function () {
+            var profile = createProfile();
+            assert['throws'](function () {
+                profile.merge(null);
+            }, /Argument "profile" should be a Profile instance/);
+            assert['throws'](function () {
+                profile.merge(true);
+            }, /Argument "profile" should be a Profile instance/);
+            assert['throws'](function () {
+                profile.merge({});
+            }, /Argument "profile" should be a Profile instance/);
+        });
+
+        it('should throw error if ids are different', function () {
+            var profile1 = createProfile('pid1'),
+                profile2 = createProfile('pid2');
+
+            assert['throws'](function () {
+                profile1.merge(profile2);
+            }, /Profile IDs should be similar/);
+        });
+
+        it('should properly merge data from profile to other one', function () {
+            var profile1 = createProfile({
+                    id: 'pid',
+                    attributes: [{
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        data: {
+                            foo: 'bar',
+                            test: 1
+                        }
+                    }],
+                    sessions: [{
+                        id: 'sid1',
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        createdAt: 1,
+                        modifiedAt: 2,
+                        data: {
+                            data1: 'value1'
+                        },
+                        events: []
+                    }, {
+                        id: 'sid2',
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        createdAt: 3,
+                        modifiedAt: 4,
+                        data: {},
+                        events: [{
+                            id: 'ev1',
+                            definitionId: 'def1',
+                            createdAt: 5,
+                            data: {
+                                spider: 'man'
+                            }
+                        }]
+                    }]
+                }),
+                profile2 = createProfile({
+                    id: 'pid',
+                    attributes: [{
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        data: {
+                            foo: 'baz'
+                        }
+                    }, {
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        data: {
+                            cat: 'dog'
+                        }
+                    }],
+                    sessions: [{
+                        id: 'sid0',
+                        collectApp: 'app1',
+                        section: 'sec2',
+                        createdAt: 0,
+                        modifiedAt: 0,
+                        data: {
+                            car: 'moto'
+                        },
+                        events: []
+                    }, {
+                        id: 'sid2',
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        createdAt: 3,
+                        modifiedAt: 10,
+                        data: {},
+                        events: [{
+                            id: 'ev1',
+                            definitionId: 'def1',
+                            createdAt: 5,
+                            data: {
+                                spider: 'fly',
+                                java: 'script'
+                            }
+                        }]
+                    }]
+                });
+
+            profile1.merge(profile2);
+
+        });
+
     });
 
 });
