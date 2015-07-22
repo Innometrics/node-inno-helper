@@ -578,7 +578,10 @@ describe('Profile', function () {
                         section: 'sec2',
                         createdAt: 3,
                         modifiedAt: 4,
-                        data: {},
+                        data: {
+                            test1: 'q',
+                            test2: 'w'
+                        },
                         events: [{
                             id: 'ev1',
                             definitionId: 'def1',
@@ -620,7 +623,9 @@ describe('Profile', function () {
                         section: 'sec2',
                         createdAt: 3,
                         modifiedAt: 10,
-                        data: {},
+                        data: {
+                            test1: 'e'
+                        },
                         events: [{
                             id: 'ev1',
                             definitionId: 'def1',
@@ -634,6 +639,16 @@ describe('Profile', function () {
                 });
 
             profile1.merge(profile2);
+
+
+            assert.strictEqual(profile1.getAttributes().length, 3);
+            assert.strictEqual(profile1.getAttribute('foo', 'app1', 'sec1').getValue(), 'baz');
+
+            assert.strictEqual(profile1.getSessions().length, 3);
+            assert.deepEqual(profile1.getSession('sid2').getData(), {
+                test1: 'e',
+                test2: 'w'
+            });
 
         });
 
