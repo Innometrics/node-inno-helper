@@ -155,6 +155,20 @@ Event.prototype = {
             definitionId:   this.getDefinitionId(),
             createdAt:      this.getCreatedAt()
         };
+    },
+
+    merge: function (event) {
+        if (!(event instanceof Event)) {
+            throw new Error('Argument "event" should be a Event instance');
+        }
+
+        if (this.getId() !== event.getId()) {
+            throw new Error('Event IDs should be similar');
+        }
+
+        this.setData(event.getData());
+
+        return this;
     }
 };
 

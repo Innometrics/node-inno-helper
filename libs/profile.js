@@ -4,7 +4,6 @@ var Attribute = require('./attribute');
 var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
-var deepmerge = require('deepmerge');
 var idGenerator = require('./id-generator');
 // var merge = require('merge');
 
@@ -419,7 +418,7 @@ Profile.prototype = {
     },
 
     /**
-     * TODO make code review
+     *
      * @private
      * @return {Profile}
      */
@@ -435,54 +434,26 @@ Profile.prototype = {
         // merge attributes
         this.setAttributes(profile.getAttributes());
 
-        var freshSessions = {},
-            olderSessions = {};
+        var sessionsMap = {};
 
         this.getSessions().forEach(function (session) {
-            freshSessions[session.getId()] = session;
+            sessionsMap[session.getId()] = session;
         });
 
         profile.getSessions().forEach(function (session) {
             var id = session.getId();
-            if (!freshSessions[id]) {
-                // does not exist in freshSessions map
-                freshSessions[id] = session;
-            } else if (session.getModifiedAt() > freshSessions[id]) {
-                // exists but newer, replace
-                olderSessions[id] = freshSessions[id];
-                freshSessions[id] = session;
+            if (!sessionsMap[id]) {
+                sessionsMap[id] = session;
             } else {
-                // exists but older
-                olderSessions[id] = session;
+                sessionsMap[id].merge(session);
             }
         });
 
-        this.sessions = Object.keys(freshSessions).map(function (id) {
-            return freshSessions[id];
+        this.sessions = Object.keys(sessionsMap).map(function (id) {
+            return sessionsMap[id];
         });
 
-        Object.keys(olderSessions).forEach(function (id) {
-            var baseSession = freshSessions[id],
-                session = olderSessions[id],
-                events = [];
-
-            // merge data
-            baseSession.setData(deepmerge({}, session.getData(), baseSession.getData()));
-
-            // merge events
-            baseSession.getEvents().forEach(function (baseEvent) {
-                var event = session.getEvent(baseEvent.getId());
-                if (!event) {
-                    events.push(event);
-                } else {
-                    baseEvent.setData(deepmerge({}, event.getData(), baseEvent.getData()));
-                    events.push(baseEvent);
-                }
-            });
-
-            baseSession.events = events;
-        });
-
+        this.sortSessions();
         return this;
     }
 };
