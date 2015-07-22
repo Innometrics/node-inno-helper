@@ -551,6 +551,92 @@ describe('Profile', function () {
             }, /Profile IDs should be similar/);
         });
 
+        it('should properly merge data from profile to other one', function () {
+            var profile1 = createProfile({
+                    id: 'pid1',
+                    attributes: [{
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        data: {
+                            foo: 'bar',
+                            test: 1
+                        }
+                    }],
+                    sessions: [{
+                        id: 'sid1',
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        createdAt: 1,
+                        modifiedAt: 2,
+                        data: {
+                            data1: 'value1'
+                        },
+                        events: []
+                    }, {
+                        id: 'sid2',
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        createdAt: 3,
+                        modifiedAt: 4,
+                        data: {},
+                        events: [{
+                            id: 'ev1',
+                            definitionId: 'def1',
+                            createdAt: 5,
+                            data: {
+                                spider: 'man'
+                            }
+                        }]
+                    }]
+                }),
+                profile2 = createProfile({
+                    id: 'pid',
+                    attributes: [{
+                        collectApp: 'app1',
+                        section: 'sec1',
+                        data: {
+                            foo: 'baz'
+                        }
+                    }, {
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        data: {
+                            cat: 'dog'
+                        }
+                    }],
+                    sessions: [{
+                        id: 'sid0',
+                        collectApp: 'app1',
+                        section: 'sec2',
+                        createdAt: 0,
+                        modifiedAt: 0,
+                        data: {
+                            car: 'moto'
+                        },
+                        events: []
+                    }, {
+                        id: 'sid2',
+                        collectApp: 'app2',
+                        section: 'sec2',
+                        createdAt: 3,
+                        modifiedAt: 10,
+                        data: {},
+                        events: [{
+                            id: 'ev1',
+                            definitionId: 'def1',
+                            createdAt: 5,
+                            data: {
+                                spider: 'fly',
+                                java: 'script'
+                            }
+                        }]
+                    }]
+                });
+
+            profile1.merge(profile2);
+
+        });
+
     });
 
 });

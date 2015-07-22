@@ -435,41 +435,54 @@ Profile.prototype = {
         // merge attributes
         this.setAttributes(profile.getAttributes());
 
-        // merge sessions
-        // TODO how to do it?
+        var freshSessions = {},
+            olderSessions = {};
 
+        this.getSessions().forEach(function (session) {
+            freshSessions[session.getId()] = session;
+        });
 
-        var localSessions = deepmerge([], this.getSessions());
-        var newSessions = deepmerge([], profile.getSessions());
-        
-        // merge sessions
-        this.sessions = newSessions;
-        
-        localSessions.forEach(function (localSession) {
-            var newSession = this.getSession(localSession.getId());
-            
-            if (newSession) {
-                // session data
-                newSession.setData(localSession.getData());
-        
-                // events
-                var localEvents = localSession.getEvents();
-                
-                localEvents.forEach(function (localEvent) {
-                    var newEvent = newSession.getEvent(localEvent.getId());
-
-                    if (newEvent) {
-                        // event data
-                        newEvent.setData(localEvent.getData());
-                    } else {
-                        newSession.addEvent(localEvent);
-                    }
-                });
+        profile.getSessions().forEach(function (session) {
+            var id = session.getId();
+            if (!freshSessions[id]) {
+                // does not exist in freshSessions map
+                freshSessions[id] = session;
+            } else if (session.getModifiedAt() > freshSessions[id]) {
+                // exists but newer, replace
+                olderSessions[id] = freshSessions[id];
+                freshSessions[id] = session;
             } else {
-                this.setSession(localSession);
+                // exists but older
+                olderSessions[id] = session;
             }
-        }, this);
-        
+        });
+
+        this.sessions = Object.keys(freshSessions).map(function (id) {
+            return freshSessions[id];
+        });
+
+        Object.keys(olderSessions).forEach(function (id) {
+            var baseSession = freshSessions[id],
+                session = olderSessions[id],
+                events = [];
+
+            // merge data
+            baseSession.setData(deepmerge({}, session.getData(), baseSession.getData()));
+
+            // merge events
+            baseSession.getEvents().forEach(function (baseEvent) {
+                var event = session.getEvent(baseEvent.getId());
+                if (!event) {
+                    events.push(event);
+                } else {
+                    baseEvent.setData(deepmerge({}, event.getData(), baseEvent.getData()));
+                    events.push(baseEvent);
+                }
+            });
+
+            baseSession.events = events;
+        });
+
         return this;
     }
 };
