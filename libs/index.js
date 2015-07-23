@@ -317,7 +317,11 @@ InnoHelper.prototype = {
             if (!error) {
                 data = response.body;
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-                    profile = new Profile(data.profile);
+                    try {
+                        profile = new Profile(data.profile);
+                    } catch (e) {
+                        return callback(e);
+                    }
                 }
             }
 
@@ -378,7 +382,11 @@ InnoHelper.prototype = {
             if (!error) {
                 data = response.body;
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-                    profile = new Profile(data.profile);
+                    try {
+                        profile = new Profile(data.profile);
+                    } catch (e) {
+                        return callback(e);
+                    }
                 }
             }
 
@@ -433,7 +441,11 @@ InnoHelper.prototype = {
             if (!error) {
                 data = response.body;
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
-                    profile = new Profile(data.profile);
+                    try {
+                        profile = new Profile(data.profile);
+                    } catch (e) {
+                        return callback(e);
+                    }
                 }
             }
 
