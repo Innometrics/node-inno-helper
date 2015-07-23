@@ -28,25 +28,25 @@ Profile.Segment = Segment;
 Profile.prototype = {
 
     /**
-     *
+     * Profile id
      * @type {String}
      */
     id: null,
 
     /**
-     *
+     * Profile attributes
      * @type {Array}
      */
     attributes: null,
 
     /**
-     *
+     * Profile sessions
      * @type {Array}
      */
     sessions: null,
 
     /**
-     *
+     * Get profile id
      * @returns {String}
      */
     getId: function () {
@@ -54,31 +54,7 @@ Profile.prototype = {
     },
 
     /**
-     *
-     * @param {Object} rawAttributesData
-     * @returns {Profile}
-     */
-    initAttributes: function (rawAttributesData) {
-        var attributes;
-        this.attributes = [];
-
-        if (Array.isArray(rawAttributesData)) {
-            attributes = [];
-            rawAttributesData.forEach(function (attr) {
-                attributes = attributes.concat(this.createAttributes(
-                    attr.collectApp,
-                    attr.section,
-                    attr.data
-                ));
-            }, this);
-            this.attributes = attributes;
-        }
-
-        return this;
-    },
-
-    /**
-     *
+     * Create attributes by application, section and data object
      * @param {String} collectApp
      * @param {String} section
      * @param {Object} attributesData
@@ -90,7 +66,7 @@ Profile.prototype = {
         if (!collectApp || !section) {
             throw new Error('collectApp and section should be filled to create attribute correctly');
         }
-        
+
         if (!attributesData || typeof attributesData !== 'object') {
             throw new Error('attributes should be an object');
         }
@@ -112,7 +88,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * Create attribute
      * @param {String} collectApp
      * @param {String} section
      * @param {String} name
@@ -129,7 +105,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * Get attributes. Can be filtered by application or section
      * @param {String} [collectApp]
      * @param {String} [section]
      * @returns {Array}
@@ -162,7 +138,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * Get attribute by name, application and section
      * @param {String} name
      * @param {String} collectApp
      * @param {String} section
@@ -182,7 +158,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * Add attribute to profile or update existing
      * @param {Attribute|Object} attribute
      * @returns {Profile}
      */
@@ -192,7 +168,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * Add attributes to profile or update existing
      * @param {Array.<Attribute>} newAttributes
      * @returns {Profile}
      */
@@ -200,7 +176,7 @@ Profile.prototype = {
         var attributes;
 
         if (!Array.isArray(newAttributes)) {
-            throw new Error('attributes should be an array');
+            throw new Error('Argument "attributes" should be an array');
         }
 
         attributes = this.getAttributes();
@@ -235,28 +211,10 @@ Profile.prototype = {
         return this;
     },
 
-
     /**
-     *
-     * @param {Object} rawSessionsData
-     * @returns {Profile}
-     */
-    initSessions: function (rawSessionsData) {
-        this.sessions = [];
-
-        if (Array.isArray(rawSessionsData)) {
-            this.sessions = rawSessionsData.map(function (rawSessionData) {
-                return this.createSession(rawSessionData);
-            }, this);
-        }
-
-        return this;
-    },
-
-    /**
-     *
+     * Get sessions. Can be filtered by passed function
      * @param {Function} [filter]
-     * @returns {*}
+     * @returns {Array}
      */
     getSessions: function (filter) {
         var sessions = this.sessions;
@@ -272,7 +230,7 @@ Profile.prototype = {
     },
 
     /**
-     *
+     * Add session to profile or replace existing
      * @param {Session|Object} session
      * @returns {Session}
      */
@@ -300,24 +258,7 @@ Profile.prototype = {
     },
 
     /**
-     *
-     * @param {Session} oldSession
-     * @param {Session} newSession
-     * @returns {Profile}
-     */
-    replaceSession: function (oldSession, newSession) {
-        var sessions = this.getSessions(),
-            index = sessions.indexOf(oldSession);
-
-        if (index !== -1) {
-            sessions[index] = newSession;
-        }
-
-        return this;
-    },
-
-    /**
-     *
+     * Get session by id
      * @param  {String} sessionId
      * @return {Session}
      */
@@ -329,16 +270,7 @@ Profile.prototype = {
     },
 
     /**
-     *
-     * @param {Object} rawSessionData
-     * @returns {Session}
-     */
-    createSession: function (rawSessionData) {
-        return new Session(rawSessionData);
-    },
-
-    /**
-     *
+     * Get last session
      * @return {Session}
      */
     getLastSession: function () {
@@ -356,8 +288,7 @@ Profile.prototype = {
     },
 
     /**
-     *
-     * @private
+     * Serialize profile to JSON
      * @return {Object}
      */
     serialize: function () {
@@ -369,8 +300,9 @@ Profile.prototype = {
     },
 
     /**
-     * @private
+     * Serialize attributes to JSON
      * @returns {Array}
+     * @private
      */
     serializeAttributes: function () {
         var attributesMap = {},
@@ -397,8 +329,9 @@ Profile.prototype = {
     },
 
     /**
-     * @private
+     * Serialize sessions to JSON
      * @returns {Array}
+     * @private
      */
     serializeSessions: function () {
         return this.getSessions().map(function (session) {
@@ -407,8 +340,9 @@ Profile.prototype = {
     },
 
     /**
-     * @private
+     * Sort sessions by modifiedAt property
      * @returns {Profile}
+     * @protected
      */
     sortSessions: function () {
         this.getSessions().sort(function (session1, session2) {
@@ -418,9 +352,10 @@ Profile.prototype = {
     },
 
     /**
-     *
-     * @private
-     * @return {Profile}
+     * Merge data from passed profile to current
+     * @param profile
+     * @returns {Profile}
+     * @protected
      */
     merge: function (profile) {
         if (!(profile instanceof Profile)) {
@@ -455,6 +390,77 @@ Profile.prototype = {
 
         this.sortSessions();
         return this;
+    },
+
+    /**
+     * Create attributes by initial data
+     * @param {Object} rawAttributesData
+     * @returns {Profile}
+     * @private
+     */
+    initAttributes: function (rawAttributesData) {
+        var attributes;
+        this.attributes = [];
+
+        if (Array.isArray(rawAttributesData)) {
+            attributes = [];
+            rawAttributesData.forEach(function (attr) {
+                attributes = attributes.concat(this.createAttributes(
+                    attr.collectApp,
+                    attr.section,
+                    attr.data
+                ));
+            }, this);
+            this.attributes = attributes;
+        }
+
+        return this;
+    },
+
+    /**
+     * Create session by initial data
+     * @param {Object} rawSessionsData
+     * @returns {Profile}
+     * @private
+     */
+    initSessions: function (rawSessionsData) {
+        this.sessions = [];
+
+        if (Array.isArray(rawSessionsData)) {
+            this.sessions = rawSessionsData.map(function (rawSessionData) {
+                return this.createSession(rawSessionData);
+            }, this);
+        }
+
+        return this;
+    },
+
+    /**
+     * Replace existing session with other one
+     * @param {Session} oldSession
+     * @param {Session} newSession
+     * @returns {Profile}
+     * @private
+     */
+    replaceSession: function (oldSession, newSession) {
+        var sessions = this.getSessions(),
+            index = sessions.indexOf(oldSession);
+
+        if (index !== -1) {
+            sessions[index] = newSession;
+        }
+
+        return this;
+    },
+
+    /**
+     * Create session
+     * @param {Object} rawSessionData
+     * @returns {Session}
+     * @protected
+     */
+    createSession: function (rawSessionData) {
+        return new Session(rawSessionData);
     }
 };
 

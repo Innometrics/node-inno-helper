@@ -10,41 +10,41 @@ var Attribute = function (config) {
     
     config = config || {};
 
-    this.name = config.name || null;
-    this.value = config.value;
-    this.section = config.section || null;
-    this.collectApp = config.collectApp || 'web';
-
+    ['name', 'value', 'section', 'collectApp'].forEach(function (property) {
+        if (property in config) {
+            this[property] = config[property];
+        }
+    }, this);
 };
 
 Attribute.prototype = {
 
     /**
-     *
+     * Attribute name
      * @type {String}
      */
     name: null,
 
     /**
-     *
+     * Attribute application name
      * @type {String}
      */
     collectApp: null,
 
     /**
-     *
+     * Attribute section name
      * @type {String}
      */
     section: null,
 
     /**
-     *
-     * @type {mixed}
+     * Attribute value
+     * @type {*}
      */
     value: null,
     
     /**
-     *
+     * Set attribute name
      * @param {String} name
      * @returns {Attribute}
      */
@@ -54,7 +54,7 @@ Attribute.prototype = {
     },
 
     /**
-     *
+     * Set attribute application name
      * @param {String} collectApp
      * @returns {Attribute}
      */
@@ -65,7 +65,7 @@ Attribute.prototype = {
 
 
     /**
-     *
+     * Set attribute section name
      * @param {String} section
      * @returns {Attribute}
      */
@@ -75,7 +75,7 @@ Attribute.prototype = {
     },
 
     /**
-     *
+     * Set attribute value
      * @param {*} value
      * @returns {Attribute}
      */
@@ -85,44 +85,44 @@ Attribute.prototype = {
     },
 
     /**
-     *
-     * @returns {String|null}
+     * Get attribute name
+     * @returns {String}
      */
     getName: function () {
-        return this.name || null;
+        return this.name;
     },
 
     /**
-     *
-     * @returns {String|null}
+     * Get attribute application name
+     * @returns {String}
      */
     getCollectApp: function () {
-        return this.collectApp || null;
+        return this.collectApp;
     },
 
     /**
-     *
-     * @returns {String|null}
+     * Get attribute section name
+     * @returns {String}
      */
     getSection: function () {
-        return this.section || null;
+        return this.section;
     },
 
     /**
-     *
-     * @returns {mixed|null}
+     * Get attribute value
+     * @returns {*}
      */
     getValue: function () {
         return this.value;
     },
 
     /**
-     *
+     * Check if attribute is valid (all required fields are present)
      * @returns {boolean}
      */
     isValid: function () {
         var value = this.getValue();
-        return !!this.getName() && !!this.getCollectApp() && !!this.getSection() && value !== null && value !== undefined;
+        return !!(this.getName() && this.getCollectApp() && this.getSection() && value !== null && value !== undefined);
     }
 };
 

@@ -139,15 +139,15 @@ describe('Profile', function () {
             it('should throw error if non array passed', function () {
                 assert['throws'](function () {
                     profile.setAttributes();
-                }, /attributes should be an array/);
+                }, /Argument "attributes" should be an array/);
 
                 assert['throws'](function () {
                     profile.setAttributes(true);
-                }, /attributes should be an array/);
+                }, /Argument "attributes" should be an array/);
 
                 assert['throws'](function () {
                     profile.setAttributes({});
-                }, /attributes should be an array/);
+                }, /Argument "attributes" should be an array/);
             });
 
             it('should throw error if try to set invalid attributes', function () {

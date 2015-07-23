@@ -233,13 +233,6 @@ describe('Session', function () {
             events = sess.getEvents('defId-123');
             assert.equal(events.length, 1);
             assert.equal(events[0].getDefinitionId(), 'defId-123');
-
-            // impossible situation, but who knows
-            sess.events = null;
-            assert.doesNotThrow(function () {
-                events = sess.getEvents();
-                assert.equal(events.length, 0);
-            });
         });
 
         it('should test backref of events', function () {
@@ -347,16 +340,13 @@ describe('Session', function () {
 
             session1.merge(session2);
 
-            /*
-            session1.merge(session2);
             assert.strictEqual(session1.getId(), "1");
-            assert.deepEqual(session1.getData, {
+            assert.deepEqual(session1.getData(), {
                 name: 'new',
                 a: 1,
                 b: 2
             });
             assert.strictEqual(session1.getEvents().length, 2);
-            */
         });
 
     });

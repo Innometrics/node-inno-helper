@@ -31,7 +31,8 @@ describe('Attribute', function () {
             var attr = createAttribute({
                 name: 'name1',
                 value: 'value1',
-                section: 'section1'
+                section: 'section1',
+                collectApp: 'app'
             });
             assert(attr.isValid());
 
