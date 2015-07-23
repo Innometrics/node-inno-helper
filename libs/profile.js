@@ -357,7 +357,6 @@ Profile.prototype = {
 
     /**
      *
-     * @private
      * @return {Object}
      */
     serialize: function () {
@@ -419,7 +418,7 @@ Profile.prototype = {
 
     /**
      *
-     * @private
+     * @protected
      * @return {Profile}
      */
     merge: function (profile) {

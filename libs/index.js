@@ -109,7 +109,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get application name
      * @returns {String}
      */
     getCollectApp: function () {
@@ -117,7 +117,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get bucket name
      * @returns {String}
      */
     getBucket: function () {
@@ -125,7 +125,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get company id
      * @returns {Number|String}
      */
     getCompany: function () {
@@ -133,7 +133,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get application key
      * @returns {String}
      */
     getAppKey: function () {
@@ -141,7 +141,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get Api url
      * @returns {String}
      */
     getApiHost: function () {
@@ -149,7 +149,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Update application settings
      * @param {Object} settings
      * @param {Function} callback
      */
@@ -190,7 +190,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get application settings
      * @param {Function} callback
      */
     getAppSettings: function (callback) {
@@ -218,7 +218,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Get segments
      * @param {Function} callback
      */
     getSegments: function (callback) {
@@ -255,7 +255,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Evaluate profile by segment
      * @param {Profile} profile
      * @param {Segment} segment
      * @param {Function} callback
@@ -272,7 +272,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Evaluate profile by segment's id
      * @param {Profile} profile
      * @param {String} segmentId
      * @param {Function} callback
@@ -284,7 +284,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Evaluate profile by IQL expression
      * @param {Profile} profile
      * @param {String} iql
      * @param {Function} callback
@@ -294,53 +294,6 @@ InnoHelper.prototype = {
             iql: iql
         }, callback);
     },
-
-    /**
-     *
-     * @param {Profile} profile
-     * @param {Object} params
-     * @param {Function} callback
-     * @private
-     */
-    _evaluateProfileByParams: function (profile, params, callback) {
-        var self = this;
-        var error = null;
-        var result = null;
-        
-        if (!(profile instanceof Profile)) {
-            error = new Error('Argument "profile" should be a Profile instance');
-            return callback(error, result);
-        }
-        
-        var defParams = {
-            profile_id: profile.getId()
-        };
-        
-        params = util._extend(params, defParams);
-        
-        var opts = {
-            url: this.getSegmentEvaluationUrl(params),
-            json: true
-        };
-
-        request.get(opts, function (error, response) {
-
-            var data;
-            
-            error = self.checkErrors(error, response);
-
-            if (!error) {
-                data = response.body;
-                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('result')) {
-                    result = data.segmentEvaluation.result;
-                }
-            }
-
-            callback(error, result);
-        });
-    },
-
-    // profile Cloud API
 
     /**
      *
@@ -373,7 +326,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Make Api request to delete profile
      * @param {String} profileId
      * @param {Function} callback
      */
@@ -385,27 +338,16 @@ InnoHelper.prototype = {
         };
 
         request.del(opts, function (error, response) {
-
             error = self.checkErrors(error, response, 204);
-
-            /*
-            if (!error) {
-                if (response.statusCode !== 204) {
-                    error = new Error(response.body ? response.body.message : '');
-                    error.name = 'Server failed with status code ' + response.statusCode;
-                }
-            }
-            */
 
             if (typeof callback === 'function') {
                 callback(error);
             }
-
         });
     },
 
     /**
-     *
+     * Make Api request to save profile in DH
      * @param {Profile} profile
      * @param {Function} callback
      */
@@ -443,12 +385,11 @@ InnoHelper.prototype = {
             if (typeof callback === 'function') {
                 callback(error, profile);
             }
-
         });
     },
 
     /**
-     *
+     * Make Api request to merge two profiles
      * @param {Profile} profile1
      * @param {Profile} profile2
      * @param {Function} callback
@@ -489,16 +430,6 @@ InnoHelper.prototype = {
 
             error = self.checkErrors(error, response, [200, 201]);
 
-            /*
-            //var code = response.statusCode;
-            if (!error) {
-                if (!(code === 200 || code === 201)) {
-                    error = new Error(data ? data.message : '');
-                    error.name = 'Server failed with status code ' + response.statusCode;
-                }
-            }
-            */
-
             if (!error) {
                 data = response.body;
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
@@ -513,9 +444,8 @@ InnoHelper.prototype = {
         });
     },
 
-    // <InnoHelper> refreshLocalProfile(<Profile> profile, <function> callback(error, <Profile> profile))
     /**
-     *
+     * Refresh  local profile with data from DH
      * @param {Profile} profile
      * @param {Function} callback
      */
@@ -545,7 +475,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Try to parse profile data from request made by DH
      * @param {String} requestBody
      * @returns {Profile}
      */
@@ -585,7 +515,7 @@ InnoHelper.prototype = {
     },
 
     /**
-     *
+     * Create empty local profile with certain id
      * @param {String} profileId
      * @returns {Profile}
      */
@@ -691,6 +621,51 @@ InnoHelper.prototype = {
         }
 
         return null;
+    },
+
+    /**
+     *
+     * @param {Profile} profile
+     * @param {Object} params
+     * @param {Function} callback
+     * @private
+     */
+    _evaluateProfileByParams: function (profile, params, callback) {
+        var self = this;
+        var error = null;
+        var result = null;
+
+        if (!(profile instanceof Profile)) {
+            error = new Error('Argument "profile" should be a Profile instance');
+            return callback(error, result);
+        }
+
+        var defParams = {
+            profile_id: profile.getId()
+        };
+
+        params = util._extend(params, defParams);
+
+        var opts = {
+            url: this.getSegmentEvaluationUrl(params),
+            json: true
+        };
+
+        request.get(opts, function (error, response) {
+
+            var data;
+
+            error = self.checkErrors(error, response);
+
+            if (!error) {
+                data = response.body;
+                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('result')) {
+                    result = data.segmentEvaluation.result;
+                }
+            }
+
+            callback(error, result);
+        });
     }
 };
 
