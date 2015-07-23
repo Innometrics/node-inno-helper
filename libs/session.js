@@ -28,49 +28,49 @@ var Session = function (config) {
 Session.prototype = {
 
     /**
-     *
+     * Session id
      * @type {String}
      */
     id: null,
 
     /**
-     *
-     * @type {Object}
-     */
-    data: null,
-
-    /**
-     *
-     * @type {Array}
-     */
-    events: null,
-
-    /**
-     *
+     * Session section name
      * @type {String}
      */
     section: null,
 
     /**
-     *
+     * Session application name
      * @type {String}
      */
     collectApp: null,
 
     /**
-     *
+     * Timestamp in ms when session was created
      * @type {Number}
      */
     createdAt: null,
 
     /**
-     *
+     * Timestamp in ms when session was modified
      * @type {Number}
      */
     modifiedAt: null,
 
     /**
-     *
+     * Session data object
+     * @type {Object}
+     */
+    data: null,
+
+    /**
+     * Session events
+     * @type {Array}
+     */
+    events: null,
+
+    /**
+     * Set session id
      * @param {String} id
      * @return {Session}
      */
@@ -80,7 +80,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Set session application name
      * @param {String} collectApp
      * @return {Session}
      */
@@ -90,7 +90,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Set session section name
      * @param {String} section
      * @return {Session}
      */
@@ -100,7 +100,8 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Set timestamp when session was created
+     * Passed argument should be a number or Date instance
      * @param {Date|Number} date
      * @return {Session}
      */
@@ -110,7 +111,8 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Update session data with values
+     * Data is an object with key=>value pair(s).
      * @param {Object} data
      * @return {Session}
      */
@@ -120,9 +122,9 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Set single value of session data
      * @param {String} name
-     * @param {String} value
+     * @param {*} value
      * @return {Session}
      */
     setDataValue: function (name, value) {
@@ -131,7 +133,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get session id
      * @return {String}
      */
     getId: function () {
@@ -139,7 +141,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get session application name
      * @return {String}
      */
     getCollectApp: function () {
@@ -147,7 +149,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get session section name
      * @return {String}
      */
     getSection: function () {
@@ -155,7 +157,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get timestamp in ms when session was created
      * @return {Number}
      */
     getCreatedAt: function () {
@@ -163,7 +165,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get timestamp in ms when session was modified
      * @return {Number}
      */
     getModifiedAt: function () {
@@ -171,7 +173,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get session data object
      * @return {Object}
      */
     getData: function () {
@@ -179,7 +181,7 @@ Session.prototype = {
     },
     
     /**
-     *
+     * Get single value from session data object
      * @return {String}
      */
     getDataValue: function (name) {
@@ -187,24 +189,8 @@ Session.prototype = {
     },
 
     /**
-     *
-     * @param {Array} rawEventsData
-     * @returns {Session}
-     */
-    initEvents: function (rawEventsData) {
-        this.events = [];
-
-        if (Array.isArray(rawEventsData)) {
-            this.events = rawEventsData.map(function (rawEventData) {
-                return this.createEvent(rawEventData);
-            }, this);
-        }
-
-        return this;
-    },
-    
-    /**
-     *
+     * Add event to session
+     * If event with same id already exist in session then Error will be thrown
      * @param {Event|Object} event
      * @return {Event}
      */
@@ -229,16 +215,7 @@ Session.prototype = {
     },
 
     /**
-     *
-     * @param {Object} rawEventData
-     * @returns {Event}
-     */
-    createEvent: function (rawEventData) {
-        return new Event(rawEventData);
-    },
-    
-    /**
-     *
+     * Get event by id
      * @param  {String} eventId
      * @return {Event|null}
      */
@@ -252,24 +229,20 @@ Session.prototype = {
     },
 
     /**
-     *
+     * Get events. Can be filtered by definition id
      * @param  {String} [eventDefinitionId]
      * @return {Array}
      */
     getEvents: function (eventDefinitionId) {
-        if (!this.events) {
-            this.events = [];
-            return this.events;
-        }
+        var events = this.events;
 
         if (eventDefinitionId) {
-            return this.events.filter(function (event) {
+            events = events.filter(function (event) {
                 return event.getDefinitionId() === eventDefinitionId;
             });
-        } else {
-            return this.events;
         }
 
+        return events;
     },
     
     /**
@@ -281,9 +254,9 @@ Session.prototype = {
     },
     
     /**
-     *
-     * @private
+     * Serialize session to JSON
      * @return {Object}
+     * @protected
      */
     serialize: function () {
         return {
@@ -298,17 +271,8 @@ Session.prototype = {
     },
 
     /**
-     * @private
-     * @returns {Array}
-     */
-    serializeEvents: function () {
-        return this.getEvents().map(function (event) {
-            return event.serialize();
-        });
-    },
-
-    /**
-     * @private
+     * Sort events
+     * @protected
      * @returns {Session}
      */
     sortEvents: function () {
@@ -319,9 +283,10 @@ Session.prototype = {
     },
 
     /**
-     *
+     * Merge data from passed session to current
      * @param {Session} session
      * @returns {Session}
+     * @protected
      */
     merge: function (session) {
         var eventsMap;
@@ -364,6 +329,45 @@ Session.prototype = {
 
         this.sortEvents();
         return this;
+    },
+
+    /**
+     * Create session events by initial data
+     * @param {Array} rawEventsData
+     * @returns {Session}
+     * @private
+     */
+    initEvents: function (rawEventsData) {
+        this.events = [];
+
+        if (Array.isArray(rawEventsData)) {
+            this.events = rawEventsData.map(function (rawEventData) {
+                return this.createEvent(rawEventData);
+            }, this);
+        }
+
+        return this;
+    },
+
+    /**
+     * Create event
+     * @param {Object} rawEventData
+     * @returns {Event}
+     * @private
+     */
+    createEvent: function (rawEventData) {
+        return new Event(rawEventData);
+    },
+
+    /**
+     * Serialize events to JSON
+     * @returns {Array}
+     * @private
+     */
+    serializeEvents: function () {
+        return this.getEvents().map(function (event) {
+            return event.serialize();
+        });
     }
 };
 

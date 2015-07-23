@@ -78,7 +78,7 @@ Event.prototype = {
     },
 
     /**
-     * Set event data values
+     * Update event data with values
      * Data is an object with key=>value pair(s).
      *
      * @param {Object} data
