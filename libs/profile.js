@@ -405,11 +405,13 @@ Profile.prototype = {
         if (Array.isArray(rawAttributesData)) {
             attributes = [];
             rawAttributesData.forEach(function (attr) {
-                attributes = attributes.concat(this.createAttributes(
-                    attr.collectApp,
-                    attr.section,
-                    attr.data
-                ));
+                if (Object.keys(attr.data).length){
+                    attributes = attributes.concat(this.createAttributes(
+                        attr.collectApp,
+                        attr.section,
+                        attr.data
+                    ));
+                }
             }, this);
             this.attributes = attributes;
         }
