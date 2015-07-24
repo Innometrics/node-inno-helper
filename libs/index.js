@@ -320,7 +320,7 @@ InnoHelper.prototype = {
                     try {
                         profile = new Profile(data.profile);
                     } catch (e) {
-                        return callback(e);
+                        error = e;
                     }
                 }
             }
@@ -385,7 +385,7 @@ InnoHelper.prototype = {
                     try {
                         profile = new Profile(data.profile);
                     } catch (e) {
-                        return callback(e);
+                        error = e;
                     }
                 }
             }
@@ -444,7 +444,7 @@ InnoHelper.prototype = {
                     try {
                         profile = new Profile(data.profile);
                     } catch (e) {
-                        return callback(e);
+                        error = e;
                     }
                 }
             }
