@@ -229,6 +229,15 @@ Session.prototype = {
     },
 
     /**
+     * Get last event in session
+     * @returns {Event|null}
+     */
+    getLastEvent: function () {
+        var events = this.getEvents();
+        return events[events.length - 1] || null;
+    },
+
+    /**
      * Get events. Can be filtered by definition id
      * @param  {String} [eventDefinitionId]
      * @return {Array}
