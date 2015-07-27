@@ -111,7 +111,7 @@ Profile.prototype = {
      * @returns {Array}
      */
     getAttributes: function (collectApp, section) {
-        var attributes = this.attributes,
+        var attributes = this.attributes.slice(0),
             filters = [];
 
         if (collectApp) {
@@ -179,7 +179,7 @@ Profile.prototype = {
             throw new Error('Argument "attributes" should be an array');
         }
 
-        attributes = this.getAttributes();
+        attributes = this.attributes;
 
         newAttributes.forEach(function (attr) {
             if (!(attr instanceof Attribute)) {
@@ -217,7 +217,7 @@ Profile.prototype = {
      * @returns {Array}
      */
     getSessions: function (filter) {
-        var sessions = this.sessions;
+        var sessions = this.sessions.slice(0);
 
         if (arguments.length) {
             if (typeof filter !== 'function') {
@@ -247,7 +247,7 @@ Profile.prototype = {
 
         if (!existSession) {
             // add as new session
-            this.getSessions().push(session);
+            this.sessions.push(session);
 
         } else if (existSession !== session) {
             // replace existing with new one
@@ -278,7 +278,7 @@ Profile.prototype = {
             lastSession = null;
 
         if (sessions.length) {
-            var sorted = sessions.concat().sort(function (a, b) {
+            var sorted = sessions.sort(function (a, b) {
                 return b.getModifiedAt() - a.getModifiedAt();
             });
             lastSession = sorted[0];
@@ -308,7 +308,7 @@ Profile.prototype = {
         var attributesMap = {},
             attributes = [];
 
-        this.getAttributes().forEach(function (attribute) {
+        this.attributes.forEach(function (attribute) {
             var collectApp = attribute.getCollectApp(),
                 section = attribute.getSection(),
                 key = collectApp + '/' + section;
@@ -334,7 +334,7 @@ Profile.prototype = {
      * @private
      */
     serializeSessions: function () {
-        return this.getSessions().map(function (session) {
+        return this.sessions.map(function (session) {
             return session.serialize();
         });
     },
@@ -345,7 +345,7 @@ Profile.prototype = {
      * @protected
      */
     sortSessions: function () {
-        this.getSessions().sort(function (session1, session2) {
+        this.sessions.sort(function (session1, session2) {
             return session1.getModifiedAt() - session2.getModifiedAt();
         });
         return this;
@@ -371,7 +371,7 @@ Profile.prototype = {
 
         var sessionsMap = {};
 
-        this.getSessions().forEach(function (session) {
+        this.sessions.forEach(function (session) {
             sessionsMap[session.getId()] = session;
         });
 
@@ -445,7 +445,7 @@ Profile.prototype = {
      * @private
      */
     replaceSession: function (oldSession, newSession) {
-        var sessions = this.getSessions(),
+        var sessions = this.sessions,
             index = sessions.indexOf(oldSession);
 
         if (index !== -1) {

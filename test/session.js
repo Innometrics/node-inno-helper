@@ -269,6 +269,25 @@ describe('Session', function () {
             assert.equal(events[1].getId(), 'ev1');
         });
 
+        it('should return null if there os no last event', function () {
+            var sess  = createSession();
+            assert.strictEqual(sess.getLastEvent(), null);
+        });
+
+        it('should return last event from sesson', function () {
+            var session = createSession({
+                    events: [{
+                        id: 'ev1',
+                        createdAt: 10
+                    }, {
+                        id: 'ev2',
+                        createdAt: 5
+                    }]
+                });
+
+            assert.strictEqual(session.getLastEvent().getId(), 'ev2');
+        });
+
     });
 
     it('should serialize data', function () {
