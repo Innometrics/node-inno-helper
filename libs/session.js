@@ -209,7 +209,7 @@ Session.prototype = {
             throw new Error('Event with id "' + event.getId() + '" already exists');
         }
 
-        this.getEvents().push(event);
+        this.events.push(event);
 
         return event;
     },
@@ -220,7 +220,7 @@ Session.prototype = {
      * @return {Event|null}
      */
     getEvent: function (eventId) {
-        var events = this.getEvents();
+        var events = this.events;
         var result = events.filter(function (event) {
             return event.getId() === eventId;
         });
@@ -233,7 +233,7 @@ Session.prototype = {
      * @returns {Event|null}
      */
     getLastEvent: function () {
-        var events = this.getEvents();
+        var events = this.events;
         return events[events.length - 1] || null;
     },
 
@@ -243,7 +243,7 @@ Session.prototype = {
      * @return {Array}
      */
     getEvents: function (eventDefinitionId) {
-        var events = this.events;
+        var events = this.events.slice(0);
 
         if (eventDefinitionId) {
             events = events.filter(function (event) {
@@ -285,7 +285,7 @@ Session.prototype = {
      * @returns {Session}
      */
     sortEvents: function () {
-        this.getEvents().sort(function (event1, event2) {
+        this.events.sort(function (event1, event2) {
             return event1.getCreatedAt() - event2.getCreatedAt();
         });
         return this;
@@ -319,7 +319,7 @@ Session.prototype = {
         // merge events
         eventsMap = {};
 
-        this.getEvents().forEach(function (event) {
+        this.events.forEach(function (event) {
             eventsMap[event.getId()] = event;
         });
 
@@ -374,7 +374,7 @@ Session.prototype = {
      * @private
      */
     serializeEvents: function () {
-        return this.getEvents().map(function (event) {
+        return this.events.map(function (event) {
             return event.serialize();
         });
     }
