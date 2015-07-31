@@ -1,5 +1,5 @@
-var InnoHelper = require('..').InnoHelper,
-    Profile = require('..').Profile,
+var InnoHelper = require('../..').InnoHelper,
+    Profile = require('../..').Profile,
     assert = require('assert'),
     sinon = require('sinon'),
     request = require('request');
