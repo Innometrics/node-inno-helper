@@ -8,62 +8,17 @@ describe('Session', function () {
         return new Profile.Session(conf);
     }
 
-    it('should not throw error when create with empty data', function () {
-        assert.doesNotThrow(function () {
-            createSession();
-        });
-    });
+    describe('Creation', function () {
 
-    it('should serialize session', function () {
-        var sess = createSession({
-            id: '123456',
-            section: 'foo',
-            collectApp: 'rest',
-            createdAt: 123,
-            modifiedAt: 456,
-            data: {key: 'value'}
-        });
-
-        assert.deepEqual(sess.serialize(), {
-            id: '123456',
-            section: 'foo',
-            collectApp: 'rest',
-            createdAt: 123,
-            modifiedAt: 456,
-            events: [],
-            data: {key: 'value'}
-        });
-    });
-
-    describe('Validation', function () {
-
-        it('should be valid if all required fields exist', function () {
-            var sess = createSession({
-                id: 'sid',
-                collectApp: 'app',
-                section: 'section'
-            });
-            assert(sess.isValid());
-        });
-
-        [
-            "Id", "Section", "CollectApp", "CreatedAt"
-        ].forEach(function (field) {
-            it('should be invalid if required field "' + field + '" not defined', function () {
-                var event = createSession({
-                    id: 'sid',
-                    collectApp: 'app',
-                    section: 'section'
-                });
-                assert(event.isValid());
-
-                event['set' + field](null);
-                assert.equal(event.isValid(), false);
+        it('should not throw error when create with empty data', function () {
+            assert.doesNotThrow(function () {
+                createSession();
             });
         });
+
     });
 
-    describe('Setters/Getters', function () {
+    describe('Get/Set methods', function () {
         
         [
             {
@@ -290,30 +245,83 @@ describe('Session', function () {
 
     });
 
-    it('should serialize data', function () {
-        var rawData = {
-            id: 'qwe',
-            collectApp: 'app',
-            section: 'sec',
-            createdAt: 1,
-            modifiedAt: 2,
-            data: {
-                test: 'cool'
-            },
-            events: [{
-                id: 'ev1',
-                definitionId: 'defId',
-                createdAt: 3,
+    describe('Serialization', function () {
+
+        it('should serialize session', function () {
+            var sess = createSession({
+                id: '123456',
+                section: 'foo',
+                collectApp: 'rest',
+                createdAt: 123,
+                modifiedAt: 456,
+                data: {key: 'value'}
+            });
+
+            assert.deepEqual(sess.serialize(), {
+                id: '123456',
+                section: 'foo',
+                collectApp: 'rest',
+                createdAt: 123,
+                modifiedAt: 456,
+                events: [],
+                data: {key: 'value'}
+            });
+        });
+
+        it('should serialize data', function () {
+            var rawData = {
+                id: 'qwe',
+                collectApp: 'app',
+                section: 'sec',
+                createdAt: 1,
+                modifiedAt: 2,
                 data: {
-                    foo: 'bar'
-                }
-            }]
-        };
-        var session = createSession(rawData);
-        assert.deepEqual(session.serialize(), rawData);
+                    test: 'cool'
+                },
+                events: [{
+                    id: 'ev1',
+                    definitionId: 'defId',
+                    createdAt: 3,
+                    data: {
+                        foo: 'bar'
+                    }
+                }]
+            };
+            var session = createSession(rawData);
+            assert.deepEqual(session.serialize(), rawData);
+        });
+
     });
 
-    describe('Merge', function () {
+    describe('Validation', function () {
+
+        it('should be valid if all required fields exist', function () {
+            var sess = createSession({
+                id: 'sid',
+                collectApp: 'app',
+                section: 'section'
+            });
+            assert(sess.isValid());
+        });
+
+        [
+            "Id", "Section", "CollectApp", "CreatedAt"
+        ].forEach(function (field) {
+                it('should be invalid if required field "' + field + '" not defined', function () {
+                    var event = createSession({
+                        id: 'sid',
+                        collectApp: 'app',
+                        section: 'section'
+                    });
+                    assert(event.isValid());
+
+                    event['set' + field](null);
+                    assert.equal(event.isValid(), false);
+                });
+            });
+    });
+
+    describe('Merging', function () {
 
         it('should throw error if session is not instance of Session', function () {
             var fakeSession = {id: 1},
