@@ -11,7 +11,7 @@ function createHelper (conf) {
     return new InnoHelper(conf);
 }
 
-describe('Helper/Segments', function () {
+describe('Inno Helper/Segments', function () {
 
     beforeEach(function () {
         helper = createHelper(config);
@@ -91,7 +91,7 @@ describe('Helper/Segments', function () {
 
 });
 
-describe('Helper/Segment evaluation', function () {
+describe('Inno Helper/Segment evaluation', function () {
 
     beforeEach(function () {
         helper = createHelper(config);

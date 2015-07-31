@@ -1,7 +1,7 @@
 var InnoHelper = require('../..').InnoHelper,
     assert = require('assert');
 
-describe('Inno Helper', function () {
+describe('Inno Helper/Common', function () {
     var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4};
 
     function createHelper (conf) {

@@ -3,7 +3,7 @@ var InnoHelper = require('../..').InnoHelper,
     sinon = require('sinon'),
     request = require('request');
 
-describe('Helper/AppSettings', function () {
+describe('Inno Helper/AppSettings', function () {
 
     var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4},
         helper;

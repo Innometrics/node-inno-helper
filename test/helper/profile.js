@@ -4,7 +4,7 @@ var InnoHelper = require('../..').InnoHelper,
     request = require('request');
 
 
-describe('Helper/Profile', function () {
+describe('Inno Helper/Profile', function () {
 
     var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4},
         helper;
