@@ -1,8 +1,5 @@
 var InnoHelper = require('../..').InnoHelper,
-    Profile = require('../..').Profile,
-    assert = require('assert'),
-    sinon = require('sinon'),
-    request = require('request');
+    assert = require('assert');
 
 describe('Inno Helper', function () {
     var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4};
@@ -11,7 +8,7 @@ describe('Inno Helper', function () {
         return new InnoHelper(conf);
     }
 
-    describe('initialization', function () {
+    describe('Creation', function () {
 
         it('should throw error on empty config', function () {
             assert['throws'](function () {
@@ -74,7 +71,7 @@ describe('Inno Helper', function () {
 
     });
 
-    describe('interface', function () {
+    describe('Get methods', function () {
         var helper;
 
         beforeEach(function () {
@@ -84,6 +81,7 @@ describe('Inno Helper', function () {
         describe('settings', function () {
 
             it('should properly get settings', function () {
+                var helper = createHelper(config);
                 assert.strictEqual(helper.getBucket(), config.bucketName);
                 assert.strictEqual(helper.getCollectApp(), config.appName);
                 assert.strictEqual(helper.getAppKey(), config.appKey);
@@ -113,868 +111,92 @@ describe('Inno Helper', function () {
 
         });
 
-        describe('Profile', function () {
+    });
 
-            it('should properly create new profile', function () {
-                var id = 'profile-id',
-                    profile = helper.createProfile('profile-id');
+    describe('Internal methods', function () {
 
-                assert.equal(profile.getId(), id);
-                assert.deepEqual(profile.getSessions(), []);
-                assert.deepEqual(profile.getAttributes(), []);
+        describe('Object validation', function () {
+            var helper;
+
+            beforeEach(function () {
+                helper = createHelper(config);
             });
 
-            describe('Load', function () {
+            it('should return error on non-object', function () {
+                var err;
 
-                it('should make properly request to load profile', function (done) {
-                    var pid = 'pid';
-
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        callback();
-                    });
-
-                    helper.loadProfile(pid, function () {
-
-                        assert(request.get.calledWith({
-                            url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
-                            json: true
-                        }));
-
-                        request.get.restore();
-                        done();
-                    });
-                });
-
-                it('should return error if occurred while request', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        callback(new Error('request error'));
-                    });
-                    helper.loadProfile('pid', function (error) {
-                        assert(error);
-                        assert(error.message, 'request error');
-                        request.get.restore();
-                        done();
-                    });
-                });
-
-                [{
-                    body: {}
-                }, {
-                    body: {profile: true}
-                }].forEach(function (test) {
-                        it('should return null if profile data corrupted', function (done) {
-                            sinon.stub(request, 'get', function (opts, callback) {
-                                var response = {
-                                    statusCode: 200,
-                                    body: test.body
-                                };
-                                callback(null, response);
-                            });
-                            helper.loadProfile('pid', function (error, profile) {
-                                assert.ifError(error);
-                                assert.strictEqual(profile, null);
-                                request.get.restore();
-                                done();
-                            });
-                        });
-                    });
-
-                it('should return profile', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: {
-                                profile: {id: 'pid'}
-                            }
-                        };
-                        callback(null, response);
-                    });
-                    helper.loadProfile('pid', function (error, profile) {
-                        assert.ifError(error);
-                        assert(profile);
-                        assert.equal(profile.getId(), 'pid');
-                        request.get.restore();
-                        done();
-                    });
-                });
-
+                err = helper.validateObject('non obj');
+                assert(err);
+                assert.equal(err.message, 'Object is not defined');
             });
 
-            describe('Delete', function () {
+            it('should return error if required field does not exist', function () {
+                var err;
 
-                it('should make properly request to delete profile', function (done) {
-                    var pid = 'pid';
+                err = helper.validateObject({foo: 'bar'}, 'baz');
+                assert(err);
+                assert.equal(err.message, 'BAZ not found');
 
-                    sinon.stub(request, 'del', function (opts, callback) {
-                        callback();
-                    });
-
-                    helper.deleteProfile(pid, function () {
-                        assert(request.del.calledWith({
-                            url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
-                            json: true
-                        }));
-                        request.del.restore();
-                        done();
-                    });
-                });
-
-                it('should return error if occurred while request', function (done) {
-                    sinon.stub(request, 'del', function (opts, callback) {
-                        callback(new Error('request error'));
-                    });
-                    helper.deleteProfile('pid', function (error) {
-                        assert(error);
-                        assert(error.message, 'request error');
-                        request.del.restore();
-                        done();
-                    });
-                });
-
-                it('should not return error if success', function (done) {
-                    sinon.stub(request, 'del', function (opts, callback) {
-                        var response = {
-                            statusCode: 204,
-                            body: {}
-                        };
-                        callback(null, response);
-                    });
-                    helper.deleteProfile('pid', function (error) {
-                        assert.ifError(error);
-                        request.del.restore();
-                        done();
-                    });
-                });
-
+                err = helper.validateObject({foo: 'bar'}, ['cat']);
+                assert(err);
+                assert.equal(err.message, 'CAT not found');
             });
 
-            describe('Save', function () {
-
-                it('should return error if profile is not instance of Profile', function (done) {
-                    var fakeProfile = {id: 1};
-                    helper.saveProfile(fakeProfile, function (error) {
-                        assert(error);
-                        assert.equal(error.message, 'Argument "profile" should be a Profile instance');
-                        done();
-                    });
-                });
-
-                it('should make properly request to save profile', function () {
-                    var profile = helper.createProfile('pid');
-
-                    sinon.stub(request, 'post');
-                    sinon.spy(profile, 'serialize');
-
-                    helper.saveProfile(profile, function () {});
-                    assert(request.post.calledWith({
-                        url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
-                        body: {id: 'pid', attributes: [], sessions: []},
-                        json: true
-                    }));
-                    request.post.restore();
-                    assert(profile.serialize.called);
-                    profile.serialize.restore();
-                });
-
-                it('should return error if occurred while request', function (done) {
-                    var profile = helper.createProfile('pid');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        callback(new Error('request error'));
-                    });
-                    sinon.spy(profile, 'serialize');
-
-                    helper.saveProfile(profile, function (error) {
-                        assert(error);
-                        assert(error.message, 'request error');
-                        request.post.restore();
-                        assert(profile.serialize.called);
-                        profile.serialize.restore();
-                        done();
-                    });
-                });
-
-                it('should return same profile if in received response no profile data', function (done) {
-                    var profile = helper.createProfile('pid');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: {}
-                        };
-                        callback(null, response);
-                    });
-                    sinon.spy(profile, 'serialize');
-
-                    helper.saveProfile(profile, function (error, returnedProfile) {
-                        assert.ifError(error);
-                        assert.strictEqual(returnedProfile, profile);
-                        request.post.restore();
-                        assert(profile.serialize.called);
-                        profile.serialize.restore();
-                        done();
-                    });
-                });
-
-                it('should return profile received after merge request', function (done) {
-                    var profile = helper.createProfile('pid');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: {
-                                profile: {
-                                    id: 'pidSaved'
-                                }
-                            }
-                        };
-                        callback(null, response);
-                    });
-                    sinon.spy(profile, 'serialize');
-
-                    helper.saveProfile(profile, function (error, returnedProfile) {
-                        assert.ifError(error);
-                        assert(returnedProfile);
-                        assert.equal(returnedProfile.getId(), 'pidSaved');
-                        request.post.restore();
-                        assert(profile.serialize.called);
-                        profile.serialize.restore();
-                        done();
-                    });
-                });
-
-            });
-
-            describe('Merge', function () {
-
-                it('should return error if profile1 is not instance of Profile', function (done) {
-                    var fakeProfile1 = {id: 1},
-                        fakeProfile2 = {id: 2};
-
-                    helper.mergeProfiles(fakeProfile1, fakeProfile2, function (error) {
-                        assert(error);
-                        assert('Argument "profile1" should be a Profile instance');
-                        done();
-                    });
-                });
-
-                it('should return error if profile2 is not instance of Profile', function (done) {
-                    var profile1 = helper.createProfile('pid1'),
-                        fakeProfile2 = {id: 2};
-
-                    helper.mergeProfiles(profile1, fakeProfile2, function (error) {
-                        assert(error);
-                        assert('Argument "profile2" should be a Profile instance');
-                        done();
-                    });
-                });
-
-                it('should make properly request to merge profiles', function (done) {
-                    var profile1 = helper.createProfile('pid1'),
-                        profile2 = helper.createProfile('pid2');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        callback();
-                    });
-
-                    helper.mergeProfiles(profile1, profile2, function () {});
-
-                    assert(request.post.calledWith({
-                        url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid1?app_key=appKey',
-                        body: {
-                            id: 'pid1',
-                            mergedProfiles: ['pid2']
-                        },
-                        json: true
-                    }));
-
-                    request.post.restore();
-                    done();
-                });
-
-                it('should return error if occurred while request', function (done) {
-                    var profile1 = helper.createProfile('pid1'),
-                        profile2 = helper.createProfile('pid2');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        callback(new Error('request error'));
-                    });
-
-                    helper.mergeProfiles(profile1, profile2, function (error) {
-                        assert(error);
-                        assert(error.message, 'request error');
-                        request.post.restore();
-                        done();
-                    });
-                });
-
-                it('should return null if in received response no profile data', function (done) {
-                    var profile1 = helper.createProfile('pid1'),
-                        profile2 = helper.createProfile('pid2');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: {}
-                        };
-                        callback(null, response);
-                    });
-
-                    helper.mergeProfiles(profile1, profile2, function (error, profile) {
-                        assert.ifError(error);
-                        assert.strictEqual(profile, null);
-                        request.post.restore();
-                        done();
-                    });
-                });
-
-                it('should return profile received after merge request', function (done) {
-                    var profile1 = helper.createProfile('pid1'),
-                        profile2 = helper.createProfile('pid2');
-
-                    sinon.stub(request, 'post', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: {
-                                profile: {
-                                    id: 'pid12'
-                                }
-                            }
-                        };
-                        callback(null, response);
-                    });
-
-                    helper.mergeProfiles(profile1, profile2, function (error, profile) {
-                        assert.ifError(error);
-                        assert(profile);
-                        assert.equal(profile.getId(), 'pid12');
-                        request.post.restore();
-                        done();
-                    });
-                });
-
-            });
-
-            describe('Refresh', function () {
-
-                it('should return error if profile is not instance of Profile', function () {
-                    var fakeProfile = {id: 1};
-                    helper.refreshLocalProfile(fakeProfile, function (error) {
-                        assert(error);
-                        assert.equal(error.message, 'Argument "profile" should be a Profile instance');
-                    });
-                });
-
-                it('should call loadProfile properly', function () {
-                    var profile = helper.createProfile('pid');
-                    sinon.stub(helper, 'loadProfile');
-                    helper.refreshLocalProfile(profile, function () {});
-                    assert(helper.loadProfile.calledWith('pid'));
-                    helper.loadProfile.restore();
-                });
-
-                it('should return error from loadProfile if occurred', function (done) {
-                    var profile = helper.createProfile('pid');
-                    sinon.stub(helper, 'loadProfile', function (profileId, callback) {
-                        callback(new Error('load-error'));
-                    });
-                    helper.refreshLocalProfile(profile, function (error) {
-                        assert(error);
-                        assert.equal(error.message, 'load-error');
-                        helper.loadProfile.restore();
-                        done();
-                    });
-                });
-
-                it('should call profile.merge', function (done) {
-                    var profile = helper.createProfile('pid'),
-                        loadedProfile = helper.createProfile('pid');
-
-                    sinon.spy(profile, 'merge');
-
-                    sinon.stub(helper, 'loadProfile', function (profileId, callback) {
-                        callback(null, loadedProfile);
-                    });
-                    helper.refreshLocalProfile(profile, function (error, profile) {
-                        assert.ifError(error);
-                        assert(profile);
-                        profile.merge.calledWith(loadedProfile);
-                        profile.merge.restore();
-                        done();
-                    });
-                });
-
-            });
-
-            describe('Profile Stream', function () {
-
-                it('should throw error on wrong data', function () {
-                    var rawBody = 'some non json data';
-                    assert['throws'](function () {
-                        helper.getProfileFromRequest(rawBody);
-                    }, /Wrong stream data/);
-                });
-
-                it('should throw error if data has not "profile" property', function () {
-                    var jsonBody = {noprofile: 'hahaha'};
-                    assert['throws'](function () {
-                        helper.getProfileFromRequest(jsonBody);
-                    }, /Profile not found/);
-                });
-
-                it('should properly create profile from Profile Stream', function () {
-                    var id = 'profile-id',
-                        jsonBody = {profile: {id: id}},
-                        profile;
-
-                    profile = helper.getProfileFromRequest(jsonBody);
-                    assert(profile);
-                    assert.equal(profile.getId(), id);
-
-                    profile = helper.getProfileFromRequest(JSON.stringify(jsonBody));
-                    assert(profile);
-                    assert.equal(profile.getId(), id);
-                });
-
-                describe('meta', function () {
-
-                    it('should throw error on wrong meta data', function () {
-                        var rawBody = 'some non json data';
-                        assert['throws'](function () {
-                            helper.getMetaFromRequest(rawBody);
-                        }, /Wrong stream data/);
-                    });
-
-                    it('should throw error if data has not "meta" property', function () {
-                        var jsonBody = {nometa: 'hahaha'};
-                        assert['throws'](function () {
-                            helper.getMetaFromRequest(jsonBody);
-                        }, /Meta not found/);
-                    });
-
-                    it('should properly create profile from Profile Stream', function () {
-                        var meta = {some: 'data', or: 'ip', and: 42},
-                            jsonBody = {meta: meta};
-
-                        assert.deepEqual(helper.getMetaFromRequest(jsonBody), meta);
-                        assert.deepEqual(helper.getMetaFromRequest(JSON.stringify(jsonBody)), meta);
-                    });
-
-                });
-
-            });
-        });
-
-        describe('AppSettings', function () {
-
-            describe('GET', function () {
-
-                it('should make properly request to get application settings', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        callback();
-                    });
-                    helper.getAppSettings(function () {
-                        assert(request.get.calledWith({
-                            url: 'apiUrl/v1/companies/4/buckets/bucketName/apps/appName/custom?app_key=appKey',
-                            json: true
-                        }));
-                        request.get.restore();
-                        done();
-                    });
-                });
-
-                it('should return error if occurred while request', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        callback(new Error('request error'));
-                    });
-                    helper.getAppSettings(function (error) {
-                        assert(error);
-                        assert(error.message, 'request error');
-                        request.get.restore();
-                        done();
-                    });
-                });
-
-                it('should return error if "custom" field not found', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        callback(null, {statusCode: 200, body: {no: 'custom'}});
-                    });
-                    helper.getAppSettings(function (error) {
-                        assert(error);
-                        assert(error.message, 'CUSTOM not found');
-                        request.get.restore();
-                        done();
-                    });
-                });
-
-                it('should return settings', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        callback(null, {statusCode: 200, body: {custom: ['settings', 'here']}});
-                    });
-                    helper.getAppSettings(function (error, settings) {
-                        assert.ifError(error);
-                        assert.deepEqual(settings, ['settings', 'here']);
-                        request.get.restore();
-                        done();
-                    });
-                });
-
-            });
-
-
-            describe('SET', function () {
-
-                it('should throw error if no settings passed', function (done) {
-
-                    helper.setAppSettings(null, function (error) {
-                        assert(error);
-                        assert.equal(error.message, 'Settings not found');
-                        done();
-                    });
-                });
-
-                it('should make properly request to set application settings', function (done) {
-                    var settings = {test: 'qwe'};
-
-                    sinon.stub(request, 'put', function (opts, callback) {
-                        callback();
-                    });
-
-                    helper.setAppSettings(settings, function () {
-                        assert(request.put.calledWith({
-                            url: 'apiUrl/v1/companies/4/buckets/bucketName/apps/appName/custom?app_key=appKey',
-                            body: settings,
-                            json: true
-                        }));
-                        request.put.restore();
-                        done();
-                    });
-                });
-
-                it('should return error if occurred while request', function (done) {
-                    sinon.stub(request, 'put', function (opts, callback) {
-                        callback(new Error('request error'));
-                    });
-                    helper.setAppSettings({}, function (error) {
-                        assert(error);
-                        assert(error.message, 'request error');
-                        request.put.restore();
-                        done();
-                    });
-                });
-
-                it('should return error if "custom" field not found', function (done) {
-                    sinon.stub(request, 'put', function (opts, callback) {
-                        callback(null, {statusCode: 200, body: {no: 'custom'}});
-                    });
-                    helper.setAppSettings({}, function (error) {
-                        assert(error);
-                        assert(error.message, 'CUSTOM not found');
-                        request.put.restore();
-                        done();
-                    });
-                });
-
-                it('should return settings', function (done) {
-                    sinon.stub(request, 'put', function (opts, callback) {
-                        callback(null, {statusCode: 200, body: {custom: ['settings', 'here']}});
-                    });
-                    helper.setAppSettings({}, function (error, settings) {
-                        assert.ifError(error);
-                        assert.deepEqual(settings, ['settings', 'here']);
-                        request.put.restore();
-                        done();
-                    });
-                });
-
+            it('should return null all required field present', function () {
+                var err;
+
+                err = helper.validateObject({foo: 'bar', test: false}, 'test');
+                assert.strictEqual(err, null);
+                err = helper.validateObject({foo: 'bar', test: false}, ['test', 'foo']);
+                assert.strictEqual(err, null);
             });
 
         });
 
-        describe('Segments', function () {
+        describe('Error checker', function () {
+            var helper;
 
-            it('should make properly request to get segmensts', function (done) {
-                sinon.stub(request, 'get', function (opts, callback) {
-                    callback();
-                });
-                helper.getSegments(function () {
-                    assert(request.get.calledWith({
-                        url: 'apiUrl/v1/companies/4/buckets/bucketName/segments?app_key=appKey',
-                        json: true
-                    }));
-                    request.get.restore();
-                    done();
-                });
+            beforeEach(function () {
+                helper = createHelper(config);
             });
 
-            it('should return error if occurred while request', function (done) {
-                sinon.stub(request, 'get', function (opts, callback) {
-                    callback(new Error('request error'));
-                });
-                helper.getSegments(function (error) {
-                    assert(error);
-                    assert(error.message, 'request error');
-                    request.get.restore();
-                    done();
-                });
+            it('should return error if it presents', function () {
+                var error = new Error('crash');
+                assert.strictEqual(helper.checkErrors(error, 'some response', 200), error);
+            });
+
+            it('should return error if response is empty or has not body', function () {
+                var error;
+                error = helper.checkErrors(null, false);
+                assert.equal(error.message, 'Response does not contain data');
+
+                error = helper.checkErrors(null, {no: 'body'});
+                assert.equal(error.message, 'Response does not contain data');
             });
 
             [
-                {
-                    body: [{
-                        segment: {
-                            id: '1',
-                            iql: 'test1'
-                        }
-                    }, {
-                        segment: {
-                            id: '1',
-                            noiql: 'HAHA'
-                        }
-                    }, {
-                        no: 'segment'
-                    },
-                        'non object!!'
-                    ],
-                    count: 1
-                }, {
-                    body: {
-                        non: {
-                            array: 'data'
-                        }
-                    },
-                    count: 0
-                }
-            ].forEach(function (test) {
-                it('should return array of segments', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: test.body
-                        };
-                        callback(null, response);
-                    });
-                    helper.getSegments(function (error, segments) {
-                        assert.ifError(error);
-                        assert(segments);
-                        assert(segments instanceof Array);
-                        assert.equal(segments.length, test.count);
-                        request.get.restore();
-                        done();
+                null,
+                201
+            ].forEach(function (code) {
+                    var msg = code || 'default 200';
+                    it('should return error it current status code does not equal to ' + msg, function () {
+                        var error;
+                        error = helper.checkErrors(null, {body: {message: 'error message'}, statusCode: 418}, code);
+                        assert.equal(error.message, 'error message');
+                        assert.equal(error.name, 'Server failed with status code 418');
                     });
                 });
-            });
 
-        });
-
-        describe('Segment evaluation', function () {
-
-            it('should return error if segment is not an instance of Segment', function () {
-                var fakeSegment = {id: 1},
-                    fakeProfile = {id: 2};
-                helper.evaluateProfileBySegment(fakeProfile, fakeSegment, function (error) {
-                    assert(error);
-                    assert.equal(error.message, 'Argument "segment" should be a Segment instance');
-                });
-            });
-
-            it('should delegate evaluation ProfileBySegment', function () {
-                var profile = helper.createProfile('pid'),
-                    segment = new Profile.Segment({
-                        id: "1",
-                        iql: 'my-iql'
-                    }),
-                    callback = function () {};
-
-                sinon.stub(helper, 'evaluateProfileBySegmentId');
-
-                helper.evaluateProfileBySegment(profile, segment, callback);
-                assert(helper.evaluateProfileBySegmentId.calledWith(profile, "1", callback));
-                helper.evaluateProfileBySegmentId.restore();
-            });
-
-            it('should delegate evaluation ProfileBySegmentId', function () {
-                var profile = helper.createProfile('pid'),
-                    segmentId = "1",
-                    callback = function () {};
-
-                sinon.stub(helper, '_evaluateProfileByParams');
-                helper.evaluateProfileBySegmentId(profile, segmentId, callback);
-                assert(helper._evaluateProfileByParams.calledWith(profile, {
-                    segment_id: segmentId
-                }, callback));
-                helper._evaluateProfileByParams.restore();
-            });
-
-            it('should delegate evaluation ProfileByIql', function () {
-                var profile = helper.createProfile('pid'),
-                    segmentIql = "my-iql",
-                    callback = function () {};
-
-                sinon.stub(helper, '_evaluateProfileByParams');
-                helper.evaluateProfileByIql(profile, segmentIql, callback);
-                assert(helper._evaluateProfileByParams.calledWith(profile, {
-                    iql: segmentIql
-                }, callback));
-                helper._evaluateProfileByParams.restore();
-            });
-
-            it('should return error from Profile evaluation if profile is not instance of Profile', function (done) {
-                var fakeProfile = {id: 1};
-
-                helper._evaluateProfileByParams(fakeProfile, {}, function (error) {
-                    assert(error);
-                    assert.equal(error.message, 'Argument "profile" should be a Profile instance');
-                    done();
-                });
-            });
-
-            it('should make properly request while evaluate Profile', function (done) {
-                var profile = helper.createProfile('pid');
-
-                sinon.stub(request, 'get', function (params, callback) {
-                    callback();
-                });
-
-                helper._evaluateProfileByParams(profile, {some: 'params', are: 'here'}, function () {
-                    assert(request.get.calledWith({
-                        url: 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
-                        json: true
-                    }));
-                    request.get.restore();
-                    done();
-                });
-            });
-
-            it('should return error if occurred while request', function (done) {
-                var profile = helper.createProfile('pid');
-                sinon.stub(request, 'get', function (opts, callback) {
-                    callback(new Error('request error'));
-                });
-                helper._evaluateProfileByParams(profile, {}, function (error) {
-                    assert(error);
-                    assert(error.message, 'request error');
-                    request.get.restore();
-                    done();
-                });
-            });
-
-            [{
-                body: {
-                    segmentEvaluation: {
-                        noresult: 'here'
-                    }
-                },
-                result: null
-            }, {
-                body: {
-                    segmentEvaluation: {
-                        result: 'some result'
-                    }
-                },
-                result: 'some result'
-            }].forEach(function (test) {
-                it('should return Profile evaluation result', function (done) {
-                    var profile = helper.createProfile('pid');
-
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        var responce = {
-                            statusCode: 200,
-                            body: test.body
-                        };
-                        callback(null, responce);
-                    });
-
-                    helper._evaluateProfileByParams(profile, {}, function (error, result) {
-                        assert.ifError(error);
-                        assert.equal(result, test.result);
-                        request.get.restore();
-                        done();
-                    });
-                });
-            });
-
-        });
-    });
-
-    describe('object validation', function () {
-        var helper;
-
-        beforeEach(function () {
-            helper = createHelper(config);
-        });
-
-        it('should return error on non-object', function () {
-            var err;
-
-            err = helper.validateObject('non obj');
-            assert(err);
-            assert.equal(err.message, 'Object is not defined');
-        });
-
-        it('should return error if required field does not exist', function () {
-            var err;
-
-            err = helper.validateObject({foo: 'bar'}, 'baz');
-            assert(err);
-            assert.equal(err.message, 'BAZ not found');
-
-            err = helper.validateObject({foo: 'bar'}, ['cat']);
-            assert(err);
-            assert.equal(err.message, 'CAT not found');
-        });
-
-        it('should return null all required field present', function () {
-            var err;
-
-            err = helper.validateObject({foo: 'bar', test: false}, 'test');
-            assert.strictEqual(err, null);
-            err = helper.validateObject({foo: 'bar', test: false}, ['test', 'foo']);
-            assert.strictEqual(err, null);
-        });
-
-    });
-
-    describe('error checker', function () {
-        var helper;
-
-        beforeEach(function () {
-            helper = createHelper(config);
-        });
-
-        it('should return error if it presents', function () {
-            var error = new Error('crash');
-            assert.strictEqual(helper.checkErrors(error, 'some response', 200), error);
-        });
-
-        it('should return error if response is empty or has not body', function () {
-            var error;
-            error = helper.checkErrors(null, false);
-            assert.equal(error.message, 'Response does not contain data');
-
-            error = helper.checkErrors(null, {no: 'body'});
-            assert.equal(error.message, 'Response does not contain data');
-        });
-
-        [
-            null,
-            201
-        ].forEach(function (code) {
-            var msg = code || 'default 200';
-            it('should return error it current status code does not equal to ' + msg, function () {
+            it('should return null if no error found', function () {
                 var error;
-                error = helper.checkErrors(null, {body: {message: 'error message'}, statusCode: 418}, code);
-                assert.equal(error.message, 'error message');
-                assert.equal(error.name, 'Server failed with status code 418');
+                error = helper.checkErrors(null, {body: {some: 'data'}, statusCode: 418}, 418);
+                assert.strictEqual(error, null);
             });
-        });
 
-        it('should return null if no error found', function () {
-            var error;
-            error = helper.checkErrors(null, {body: {some: 'data'}, statusCode: 418}, 418);
-            assert.strictEqual(error, null);
         });
 
     });
+
+
 
 });
