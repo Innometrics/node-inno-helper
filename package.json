@@ -1,10 +1,23 @@
 {
   "name": "innometrics-helper",
-  "version": "0.0.2",
+  "version": "0.0.6",
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "merge": "^1.2.0",
     "request": "^2.45.0"
+  },
+  "devDependencies": {
+    "istanbul": "^0.3.17",
+    "jscs": "^1.13.1",
+    "jshint": "^2.8.0",
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4"
+  },
+  "scripts": {
+    "test": "npm run test-node",
+    "test-node": "mocha -R spec --recursive",
+    "test-cov": "istanbul cover _mocha -- -R spec --recursive"
   },
   "engines": {
     "node": "0.10.x"
