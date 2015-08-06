@@ -14,10 +14,14 @@ var idGenerator = require('./id-generator');
  */
 var Profile = function (config) {
     config = config || {};
-
-    this.id = config.id || idGenerator.generate(32);
-    this.initAttributes(config.attributes);
-    this.initSessions(config.sessions);
+    
+    if (this instanceof Profile) {
+        this.id = config.id || idGenerator.generate(32);
+        this.initAttributes(config.attributes);
+        this.initSessions(config.sessions);
+    } else {
+        return new Profile(config);
+    }
 };
 
 Profile.Attribute = Attribute;
