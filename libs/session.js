@@ -2,7 +2,7 @@
 
 var merge = require('merge');
 var Event = require('./event');
-var idGenerator = require('./id-generator');
+var IdGenerator = require('./id-generator');
 
 /**
  *
@@ -16,7 +16,7 @@ var Session = function (config) {
 
     var now = +new Date();
 
-    this.setId(config.id || idGenerator.generate(8));
+    this.setId(config.id || (new IdGenerator(8)).getId());
     this.setData(config.data);
     this.setCollectApp(config.collectApp);
     this.setSection(config.section);

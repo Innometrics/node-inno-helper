@@ -1,7 +1,7 @@
 'use strict';
 
 var merge = require('merge');
-var idGenerator = require('./id-generator');
+var IdGenerator = require('./id-generator');
 
 /**
  *
@@ -13,7 +13,7 @@ var Event = function (config) {
 
     config = config || {};
 
-    this.setId(config.id || idGenerator.generate(8));
+    this.setId(config.id || (new IdGenerator(8)).getId());
     this.setData(config.data);
     this.setDefinitionId(config.definitionId || null);
     this.setCreatedAt(config.createdAt || +new Date());

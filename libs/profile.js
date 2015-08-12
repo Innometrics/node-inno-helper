@@ -4,7 +4,7 @@ var Attribute = require('./attribute');
 var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
-var idGenerator = require('./id-generator');
+var IdGenerator = require('./id-generator');
 // var merge = require('merge');
 
 /**
@@ -16,7 +16,7 @@ var Profile = function (config) {
     config = config || {};
     
     if (this instanceof Profile) {
-        this.id = config.id || idGenerator.generate(32);
+        this.id = config.id || (new IdGenerator(32)).getId();
         this.initAttributes(config.attributes);
         this.initSessions(config.sessions);
     } else {

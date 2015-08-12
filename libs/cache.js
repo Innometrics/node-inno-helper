@@ -1,22 +1,25 @@
-var cache = {
-
+/**
+ * @constructor
+ */
+var Cache =  function () {
     /**
      * Cache storage
      * @private
      * @type {Object}
      */
-    cache: {},
+    var cache = {};
 
     /**
      * Cache TTL
      * @private
      * @type {Number}
      */
-    cachedTime: 60,
+    var cachedTime = 60;
+};
 
+Cache.prototype = {
     /**
      * Get data from cache by name if it's not expired
-     * @private
      * @param {String} name
      * @returns {Mixed|undefined}
      */
@@ -36,7 +39,6 @@ var cache = {
 
     /**
      * Set data to cache
-     * @private
      * @param {String} name
      * @param {Mixed} value
      * @returns {undefined}
@@ -52,7 +54,6 @@ var cache = {
 
     /**
      * Expire record in cache by name
-     * @private
      * @param {String} name
      * @returns {undefined}
      */
@@ -64,7 +65,6 @@ var cache = {
 
     /**
      * Clear all cache records
-     * @private
      * @returns {undefined}
      */
     clearCache: function () {
@@ -73,15 +73,12 @@ var cache = {
 
     /**
      * Change cache TTL
-     * @private
      * @param {Number} time
      * @returns {undefined}
      */
     setCachedTime: function (time) {
         this.cachedTime = time;
     }
-
 };
 
-
-module.exports = cache;
+module.exports = Cache;

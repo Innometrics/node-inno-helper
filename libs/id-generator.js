@@ -1,10 +1,14 @@
+/**
+ *
+ * @param {number} length
+ * @constructor
+ */
+var IdGenerator = function (length) {
+    var DEFAULT_ID_LENGTH = 32;
 
-var DEFAULT_ID_LENGTH = 32;
-
-function generate (length) {
-    var randPart,
-        hashPart,
-        id;
+    var randPart;
+    var hashPart;
+    var id;
 
     if (arguments.length > 0) {
         if (typeof length !== 'number') {
@@ -21,8 +25,8 @@ function generate (length) {
     }
 
     id = '';
-    hashPart = getHashPart(getEnvStr(getEnvObj()));
-    randPart = getRandPart(length - hashPart.length);
+    hashPart = this.getHashPart(this.getEnvStr(this.getEnvObj()));
+    randPart = this.getRandPart(length - hashPart.length);
 
     // depending on the length of the hash, which is variable, we place it at the beginning or the end of the ID
     if (hashPart.length % 2) {
@@ -31,86 +35,97 @@ function generate (length) {
         id = randPart + hashPart;
     }
 
-    return id;
+    this.id = id;
 }
 
+IdGenerator.prototype = {
+    /**
+     * Id
+     * @private
+     * @type {String}
+     */
+    id: null,
 
-exports.generate = generate;
+    /**
+     * Get generated id
+     * @returns {String}
+     */
+    getId: function () {
+        return this.id;
+    },
 
+    /**
+     * Generate the random number between 0-9
+     * @private
+     * @returns {number}
+     */
+    rnd: function () {
+        return Math.floor(Math.random() * 10);
+    },
 
-//
-// Some helpers
-//
+    /**
+     * Create an object from environment values
+     * @private
+     * @return {Object} Contains values as string from environment values or random number if absent
+     */
+    getEnvObj: function () {
+        return {
+            vr: process.version + this.rnd(),
+            ah: process.arch + this.rnd(),
+            pl: process.platform + this.rnd()
+        };
+    },
 
-/**
- *
- * @returns {number}
- */
-function rnd () {
-    return Math.floor(Math.random() * 10);
-}
+    /**
+     * Get an object containing only values and return a String
+     * @private
+     * @param  {Object} envObj Object containing string representing browser environment values
+     * @return {String}        String to be hashed
+     */
+    getEnvStr: function (envObj) {
+        var envStr = '';
 
-/**
- * Create an object from environment values
- * @return {Object} Contains values as string from environment values or random number if absent
- */
-function getEnvObj () {
-    return {
-        vr: process.version + rnd(),
-        ah: process.arch + rnd(),
-        pl: process.platform + rnd()
-    };
-}
+        Object.keys(envObj).forEach(function (key) {
+            envStr += envObj[key];
+        });
 
-/**
- * Get an object containing only values and return a String
- * @param  {Object} envObj Object containing string representing browser environment values
- * @return {String}        String to be hashed
- */
-function getEnvStr (envObj) {
-    var envStr = "";
+        return envStr;
+    },
 
-    Object.keys(envObj).forEach(function (key) {
-        envStr += envObj[key];
-    });
+    /**
+     * Create a 32 bit hash from a String
+     * @private
+     * @param  {String} envStr String composed from environment variables
+     * @return {String}        String composed of [0-9a-z]
+     */
+    getHashPart: function (envStr) {
+        var hash = 0,
+            envLgt = envStr.length,
+            i;
 
-    return envStr;
-}
+        for (i = 0; i < envLgt; i += 1) {
+            hash = hash * 31 + envStr.charCodeAt(i);
+            hash = hash & hash; // Convert to 32 bit integer
+        }
+        return ('' + Math.abs(hash).toString(36));
+    },
 
-/**
- * create a 32 bit hash from a String
- * @param  {String} envStr String composed from environment variables
- * @return {String}        String composed of [0-9a-z]
- */
-function getHashPart (envStr) {
-    var hash = 0,
-        envLgt = envStr.length,
-        i;
+    /**
+     * Generate the random part of the hash thanks to hash already created and idLgt
+     * @private
+     * @param  {String} hashPart hash of environment variables
+     * @return {String}          Random string composed of [0-9a-z]
+     */
+    getRandPart: function (length) {
+        var randPart = '',
+            i;
 
-    for (i = 0; i < envLgt; i += 1) {
-        hash = hash * 31 + envStr.charCodeAt(i);
-        hash = hash & hash; // Convert to 32 bit integer
+        for (i = 0; i < length; i++) {
+            randPart += Math.floor(Math.random() * 36).toString(36);
+        }
+
+        return randPart;
     }
-    return ("" + Math.abs(hash).toString(36));
-}
+};
 
-/**
- * generate the random part of the hash thanks to hash already created and idLgt
- * @param  {String} hashPart hash of environment variables
- * @return {String}          Random string composed of [0-9a-z]
- */
-/**
- *
- * @param {Number} length
- * @returns {string}
- */
-function getRandPart (length) {
-    var randPart = "",
-        i;
-
-    for (i = 0; i < length; i++) {
-        randPart += Math.floor(Math.random() * 36).toString(36);
-    }
-
-    return randPart;
-}
+module.exports = IdGenerator;

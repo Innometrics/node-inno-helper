@@ -608,7 +608,7 @@ InnoHelper.prototype = {
      * Check for error and that response has allowed statusCode and required field(s)
      * @param {Error} error
      * @param {Object} response
-     * @param {Number|Array<Number>} successCode
+     * @param {Number|Array} successCode
      * @returns {Error|null}
      * @private
      */
