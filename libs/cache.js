@@ -2,22 +2,24 @@
  * @constructor
  */
 var Cache =  function () {
+
+};
+
+Cache.prototype = {
     /**
      * Cache storage
      * @private
      * @type {Object}
      */
-    var cache = {};
+    cache: {},
 
     /**
      * Cache TTL
      * @private
      * @type {Number}
      */
-    var cachedTime = 60;
-};
-
-Cache.prototype = {
+    cachedTime: 60,
+    
     /**
      * Get data from cache by name if it's not expired
      * @param {String} name
