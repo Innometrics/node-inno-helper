@@ -1,6 +1,6 @@
 {
   "name": "innometrics-helper",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "",
   "main": "index.js",
   "dependencies": {
@@ -20,6 +20,6 @@
     "test-cov": "istanbul cover _mocha -- -R spec --recursive"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": ">= 0.10"
   }
 }
