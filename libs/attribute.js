@@ -7,7 +7,7 @@
  * @constructor
  */
 var Attribute = function (config) {
-    
+
     config = config || {};
 
     ['name', 'value', 'section', 'collectApp'].forEach(function (property) {
@@ -42,7 +42,7 @@ Attribute.prototype = {
      * @type {*}
      */
     value: null,
-    
+
     /**
      * Set attribute name
      * @param {String} name
@@ -121,9 +121,61 @@ Attribute.prototype = {
      * @returns {boolean}
      */
     isValid: function () {
+        var valid = true;
+
+        try {
+            this.validateName();
+            this.validateValue();
+            this.validateCollectApp();
+            this.validateSection();
+        } catch (e) {
+            valid = false;
+        }
+
+        return valid;
+    },
+
+    /**
+     * Checks name, throws exception if invalid
+     * @protected
+     */
+    validateName: function () {
+        if (!this.getName()) {
+            throw new Error('Name can not be empty');
+        }
+    },
+
+    /**
+     * Checks name, throws exception if invalid
+     * @protected
+     */
+    validateValue: function () {
         var value = this.getValue();
-        return !!(this.getName() && this.getCollectApp() && this.getSection() && value !== null && value !== undefined);
+        if (value === null || value === undefined) {
+            throw new Error('Value can not be null or undefined');
+        }
+    },
+
+    /**
+     * Checks collectApp, throws exception if invalid
+     * @protected
+     */
+    validateCollectApp: function () {
+        if (!this.getCollectApp()) {
+            throw new Error('CollectApp can not be empty');
+        }
+    },
+
+    /**
+     * Checks section, throws exception if invalid
+     * @protected
+     */
+    validateSection: function () {
+        if (!this.getSection()) {
+            throw new Error('Section can not be empty');
+        }
     }
+
 };
 
 module.exports = Attribute;

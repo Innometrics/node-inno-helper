@@ -36,7 +36,7 @@ var IdGenerator = function (length) {
     }
 
     this.id = id;
-}
+};
 
 IdGenerator.prototype = {
     /**
@@ -105,7 +105,8 @@ IdGenerator.prototype = {
 
         for (i = 0; i < envLgt; i += 1) {
             hash = hash * 31 + envStr.charCodeAt(i);
-            hash = hash & hash; // Convert to 32 bit integer
+            // Convert to 32 bit integer
+            hash = hash & hash;
         }
         return ('' + Math.abs(hash).toString(36));
     },

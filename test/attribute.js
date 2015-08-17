@@ -1,7 +1,7 @@
 var inno = require('../'),
     Profile = inno.Profile,
     assert = require('assert');
-    
+
 describe('Attribute', function () {
 
     function createAttribute (conf) {

@@ -5,7 +5,6 @@ var Event = require('./event');
 var Session = require('./session');
 var Segment = require('./segment');
 var IdGenerator = require('./id-generator');
-// var merge = require('merge');
 
 /**
  *
@@ -152,12 +151,12 @@ Profile.prototype = {
         if (!name || !collectApp || !section) {
             throw new Error('Name, collectApp and section should be filled to get attribute');
         }
-        
+
         var attributes = this.getAttributes(collectApp, section);
         attributes = attributes.filter(function (attr) {
             return attr.getName() === name;
         });
-        
+
         return attributes[0] || null;
     },
 
@@ -198,20 +197,20 @@ Profile.prototype = {
             if (!attr.isValid()) {
                 throw new Error('Attribute is not valid');
             }
-            
+
             var foundAttr = this.getAttribute(
                 attr.getName(),
                 attr.getCollectApp(),
                 attr.getSection()
             );
-            
+
             if (foundAttr) {
                 foundAttr.setValue(attr.getValue());
             } else {
                 attributes.push(attr);
             }
         }, this);
-        
+
         return this;
     },
 

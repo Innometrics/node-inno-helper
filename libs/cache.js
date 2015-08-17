@@ -27,13 +27,11 @@ Cache.prototype = {
      */
     get: function (name) {
         var value;
-        if (this.cachedTime) {
-            if (this.cache.hasOwnProperty(name)) {
-                if (this.cache[name].expired <= Date.now()) {
-                    delete this.cache[name];
-                } else {
-                    value = this.cache[name].value;
-                }
+        if (this.cachedTime && this.cache.hasOwnProperty(name)) {
+            if (this.cache[name].expired <= Date.now()) {
+                delete this.cache[name];
+            } else {
+                value = this.cache[name].value;
             }
         }
         return value;
@@ -49,7 +47,7 @@ Cache.prototype = {
         if (this.cachedTime) {
             this.cache[name] = {
                 expired: Date.now() + (this.cachedTime * 1000),
-                value: value || true
+                value: value
             };
         }
     },

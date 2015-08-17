@@ -231,7 +231,7 @@ InnoHelper.prototype = {
         request.get(opts, function (error, response) {
             var data = null;
             var segments = [];
-            
+
             error = self.checkErrors(error, response);
 
             if (!error) {
@@ -267,7 +267,7 @@ InnoHelper.prototype = {
             error = new Error('Argument "segment" should be a Segment instance');
             return callback(error, result);
         }
-        
+
         this.evaluateProfileBySegmentId(profile, segment.getId(), callback);
     },
 
@@ -311,7 +311,7 @@ InnoHelper.prototype = {
 
             var data = null;
             var profile = null;
-            
+
             error = self.checkErrors(error, response);
 
             if (!error) {
@@ -359,7 +359,7 @@ InnoHelper.prototype = {
         var self = this;
         var error = null;
         var result = null;
-        
+
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
             if (typeof callback === 'function') {
@@ -367,7 +367,7 @@ InnoHelper.prototype = {
             }
             return;
         }
-        
+
         var profileId = profile.getId();
         var opts = {
             url: this.getProfileUrl(profileId),
@@ -406,20 +406,20 @@ InnoHelper.prototype = {
         var self = this;
         var error = null;
         var result = null;
-        
+
         if (!(profile1 instanceof Profile)) {
             error = new Error('Argument "profile1" should be a Profile instance');
         } else if (!(profile2 instanceof Profile)) {
             error = new Error('Argument "profile2" should be a Profile instance');
         }
-        
+
         if (error) {
             if (typeof callback === 'function') {
                 callback(error, result);
             }
             return;
         }
-        
+
         var profileId = profile1.getId();
         var opts = {
             url: this.getProfileUrl(profileId),
@@ -431,7 +431,7 @@ InnoHelper.prototype = {
             },
             json: true
         };
-        
+
         request.post(opts, function (error, response) {
             var data;
             var profile = null;
@@ -464,7 +464,7 @@ InnoHelper.prototype = {
     refreshLocalProfile: function (profile, callback) {
         var error = null;
         var result = null;
-        
+
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
             if (typeof callback === 'function') {
@@ -472,14 +472,14 @@ InnoHelper.prototype = {
             }
             return;
         }
-        
+
         var profileId = profile.getId();
 
         this.loadProfile(profileId, function (error, loadedProfile) {
             if (!error) {
                 profile.merge(loadedProfile);
             }
-            
+
             if (typeof callback === 'function') {
                 callback(error, profile);
             }
