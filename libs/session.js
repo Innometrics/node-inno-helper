@@ -78,7 +78,7 @@ Session.prototype = {
         this.id = id;
         return this;
     },
-    
+
     /**
      * Set session application name
      * @param {String} collectApp
@@ -88,7 +88,7 @@ Session.prototype = {
         this.collectApp = collectApp;
         return this;
     },
-    
+
     /**
      * Set session section name
      * @param {String} section
@@ -98,7 +98,7 @@ Session.prototype = {
         this.section = section;
         return this;
     },
-    
+
     /**
      * Set timestamp when session was created
      * Passed argument should be a number or Date instance
@@ -109,7 +109,7 @@ Session.prototype = {
         this.createdAt = +new Date(date);
         return this;
     },
-    
+
     /**
      * Update session data with values
      * Data is an object with key=>value pair(s).
@@ -120,7 +120,7 @@ Session.prototype = {
         this.data = merge(this.data, data || {});
         return this;
     },
-    
+
     /**
      * Set single value of session data
      * @param {String} name
@@ -131,7 +131,7 @@ Session.prototype = {
         this.data[name] = value;
         return this;
     },
-    
+
     /**
      * Get session id
      * @return {String}
@@ -139,7 +139,7 @@ Session.prototype = {
     getId: function () {
         return this.id;
     },
-    
+
     /**
      * Get session application name
      * @return {String}
@@ -147,7 +147,7 @@ Session.prototype = {
     getCollectApp: function () {
         return this.collectApp;
     },
-    
+
     /**
      * Get session section name
      * @return {String}
@@ -155,7 +155,7 @@ Session.prototype = {
     getSection: function () {
         return this.section;
     },
-    
+
     /**
      * Get timestamp in ms when session was created
      * @return {Number}
@@ -163,7 +163,7 @@ Session.prototype = {
     getCreatedAt: function () {
         return this.createdAt;
     },
-    
+
     /**
      * Get timestamp in ms when session was modified
      * @return {Number}
@@ -171,7 +171,7 @@ Session.prototype = {
     getModifiedAt: function () {
         return this.modifiedAt;
     },
-    
+
     /**
      * Get session data object
      * @return {Object}
@@ -179,7 +179,7 @@ Session.prototype = {
     getData: function () {
         return this.data;
     },
-    
+
     /**
      * Get single value from session data object
      * @return {String}
@@ -253,7 +253,7 @@ Session.prototype = {
 
         return events;
     },
-    
+
     /**
      *
      * @return {Boolean}
@@ -261,7 +261,7 @@ Session.prototype = {
     isValid: function () {
         return !!this.getId() && !!this.getSection() && !!this.getCollectApp() && !!this.getCreatedAt();
     },
-    
+
     /**
      * Serialize session to JSON
      * @return {Object}

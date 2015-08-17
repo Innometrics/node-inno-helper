@@ -7,7 +7,7 @@
  * @constructor
  */
 var Attribute = function (config) {
-    
+
     config = config || {};
 
     ['name', 'value', 'section', 'collectApp'].forEach(function (property) {
@@ -42,7 +42,7 @@ Attribute.prototype = {
      * @type {*}
      */
     value: null,
-    
+
     /**
      * Set attribute name
      * @param {String} name
