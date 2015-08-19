@@ -13,7 +13,7 @@ var IdGenerator = require('./id-generator');
  */
 var Profile = function (config) {
     config = config || {};
-    
+
     if (this instanceof Profile) {
         this.id = config.id || (new IdGenerator(32)).getId();
         this.initAttributes(config.attributes);

@@ -19,11 +19,11 @@ Cache.prototype = {
      * @type {Number}
      */
     cachedTime: 60,
-    
+
     /**
      * Get data from cache by name if it's not expired
      * @param {String} name
-     * @returns {Mixed|undefined}
+     * @returns {*|undefined}
      */
     get: function (name) {
         var value;
@@ -40,7 +40,7 @@ Cache.prototype = {
     /**
      * Set data to cache
      * @param {String} name
-     * @param {Mixed} value
+     * @param {*} value
      * @returns {undefined}
      */
     set: function (name, value) {

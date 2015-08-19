@@ -19,7 +19,7 @@ describe('Session', function () {
     });
 
     describe('Get/Set methods', function () {
-        
+
         [
             {
                 field: 'Id',
@@ -105,7 +105,7 @@ describe('Session', function () {
     });
 
     describe('Events', function () {
-        
+
         it('should create session with Events', function () {
 
             var sess = createSession({
@@ -179,7 +179,7 @@ describe('Session', function () {
 
             sess.addEvent({definitionId: 'defId-123'});
             sess.addEvent({definitionId: 'defId-234'});
-            
+
             events = sess.getEvents();
             assert.equal(events.length, 2);
             assert.equal(events[0].getDefinitionId(), 'defId-123');

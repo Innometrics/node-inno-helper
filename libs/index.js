@@ -542,6 +542,7 @@ InnoHelper.prototype = {
     },
 
     /**
+     * TODO decrease method complexity
      * Checks if config is valid
      * @param {Object} config
      * @private
