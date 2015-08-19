@@ -542,7 +542,6 @@ InnoHelper.prototype = {
     },
 
     /**
-     * TODO decrease method complexity
      * Checks if config is valid
      * @param {Object} config
      * @private
@@ -556,6 +555,16 @@ InnoHelper.prototype = {
             throw new Error('Config should be an object');
         }
 
+        this.validateConfigRequiredProps(config);
+        this.validateConfigGroupId(config);
+    },
+
+    /**
+     *
+     * @param {Object} config
+     * @private
+     */
+    validateConfigRequiredProps: function (config) {
         ['bucketName', 'appName', 'appKey', 'apiUrl'].forEach(function (field) {
             if (!(field in config)) {
                 throw new Error('Property "' + field + '" in config should be defined');
@@ -567,7 +576,14 @@ InnoHelper.prototype = {
                 throw new Error('Property "' + field + '" in config can not be empty');
             }
         });
+    },
 
+    /**
+     *
+     * @param {Object} config
+     * @private
+     */
+    validateConfigGroupId: function (config) {
         if (!('groupId' in config)) {
             throw new Error('Property "groupId" in config should be defined');
         }
