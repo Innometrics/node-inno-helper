@@ -70,12 +70,19 @@ Session.prototype = {
     events: null,
 
     /**
+     * @type {Boolean}
+     * @private
+     */
+    modified: false,
+
+    /**
      * Set session id
      * @param {String} id
      * @return {Session}
      */
     setId: function (id) {
         this.id = id;
+        this.setModified(true);
         return this;
     },
 
@@ -86,6 +93,7 @@ Session.prototype = {
      */
     setCollectApp: function (collectApp) {
         this.collectApp = collectApp;
+        this.setModified(true);
         return this;
     },
 
@@ -96,6 +104,7 @@ Session.prototype = {
      */
     setSection: function (section) {
         this.section = section;
+        this.setModified(true);
         return this;
     },
 
@@ -107,6 +116,7 @@ Session.prototype = {
      */
     setCreatedAt: function (date) {
         this.createdAt = +new Date(date);
+        this.setModified(true);
         return this;
     },
 
@@ -118,6 +128,7 @@ Session.prototype = {
      */
     setData: function (data) {
         this.data = merge(this.data, data || {});
+        this.setModified(true);
         return this;
     },
 
@@ -129,6 +140,7 @@ Session.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
+        this.setModified(true);
         return this;
     },
 
@@ -211,6 +223,8 @@ Session.prototype = {
 
         this.events.push(event);
 
+        this.setModified(true);
+
         return event;
     },
 
@@ -264,16 +278,17 @@ Session.prototype = {
 
     /**
      * Serialize session to JSON
+     * @param {Boolean} [onlyChanges]
      * @return {Object}
      * @protected
      */
-    serialize: function () {
+    serialize: function (onlyChanges) {
         return {
             id:         this.getId(),
             section:    this.getSection(),
             collectApp: this.getCollectApp(),
             data:       this.getData(),
-            events:     this.serializeEvents(),
+            events:     this.serializeEvents(onlyChanges),
             createdAt:  this.getCreatedAt(),
             modifiedAt: this.getModifiedAt()
         };
@@ -337,6 +352,7 @@ Session.prototype = {
         });
 
         this.sortEvents();
+        this.setModified(true);
         return this;
     },
 
@@ -370,13 +386,47 @@ Session.prototype = {
 
     /**
      * Serialize events to JSON
+     * @param {Boolean} onlyChanges
      * @returns {Array}
      * @private
      */
-    serializeEvents: function () {
-        return this.events.map(function (event) {
-            return event.serialize();
+    serializeEvents: function (onlyChanges) {
+        var events = [];
+        this.events.forEach(function (event) {
+            if (onlyChanges && !event.hasChanges()) {
+                return;
+            }
+            events.push(event.serialize());
         });
+
+        return events;
+    },
+
+    /**
+     * Set "modified" status
+     * @param {Boolean} modified
+     * @returns {Attribute}
+     * @protected
+     */
+    setModified: function (modified) {
+        this.modified = modified;
+        return this;
+    },
+
+    /**
+     * Check if session has any changes
+     * @returns {Boolean}
+     */
+    hasChanges: function () {
+        var hasChanges = this.modified;
+
+        if (!hasChanges) {
+            hasChanges = this.events.some(function (event) {
+                return event.hasChanges();
+            });
+        }
+
+        return hasChanges;
     }
 };
 

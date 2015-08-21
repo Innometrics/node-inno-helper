@@ -371,7 +371,7 @@ InnoHelper.prototype = {
         var profileId = profile.getId();
         var opts = {
             url: this.getProfileUrl(profileId),
-            body: profile.serialize(),
+            body: profile.serialize(true),
             json: true
         };
 
@@ -384,6 +384,7 @@ InnoHelper.prototype = {
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     try {
                         profile = new Profile(data.profile);
+                        profile.resetModified();
                     } catch (e) {
                         error = e;
                     }
@@ -443,6 +444,7 @@ InnoHelper.prototype = {
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     try {
                         profile = new Profile(data.profile);
+                        profile.resetModified();
                     } catch (e) {
                         error = e;
                     }

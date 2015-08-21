@@ -17,6 +17,8 @@ var Event = function (config) {
     this.setData(config.data);
     this.setDefinitionId(config.definitionId || null);
     this.setCreatedAt(config.createdAt || +new Date());
+
+    this.setModified(false);
 };
 
 Event.prototype = {
@@ -46,12 +48,19 @@ Event.prototype = {
     createdAt: null,
 
     /**
+     * @type {Boolean}
+     * @private
+     */
+    modified: false,
+
+    /**
      * Set event id
      * @param {String} id
      * @returns {Event}
      */
     setId: function (id) {
         this.id = id;
+        this.setModified(true);
         return this;
     },
 
@@ -64,6 +73,7 @@ Event.prototype = {
      */
     setCreatedAt: function (date) {
         this.createdAt = +new Date(date);
+        this.setModified(true);
         return this;
     },
 
@@ -74,6 +84,7 @@ Event.prototype = {
      */
     setDefinitionId: function (definitionId) {
         this.definitionId = definitionId;
+        this.setModified(true);
         return this;
     },
 
@@ -86,6 +97,7 @@ Event.prototype = {
      */
     setData: function (data) {
         this.data = merge(this.data, data || {});
+        this.setModified(true);
         return this;
     },
 
@@ -97,6 +109,7 @@ Event.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
+        this.setModified(true);
         return this;
     },
 
@@ -178,7 +191,28 @@ Event.prototype = {
 
         this.setData(event.getData());
 
+        this.setModified(true);
+
         return this;
+    },
+
+    /**
+     * Set "modified" status
+     * @param {Boolean} modified
+     * @returns {Attribute}
+     * @protected
+     */
+    setModified: function (modified) {
+        this.modified = modified;
+        return this;
+    },
+
+    /**
+     * Check if event has any changes
+     * @returns {Boolean}
+     */
+    hasChanges: function () {
+        return !!this.modified;
     }
 };
 

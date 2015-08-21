@@ -15,6 +15,8 @@ var Attribute = function (config) {
             this[property] = config[property];
         }
     }, this);
+
+
 };
 
 Attribute.prototype = {
@@ -44,12 +46,19 @@ Attribute.prototype = {
     value: null,
 
     /**
+     * @type {Boolean}
+     * @private
+     */
+    modified: false,
+
+    /**
      * Set attribute name
      * @param {String} name
      * @returns {Attribute}
      */
     setName: function (name) {
         this.name = name;
+        this.setModified(true);
         return this;
     },
 
@@ -60,6 +69,7 @@ Attribute.prototype = {
      */
     setCollectApp: function (collectApp) {
         this.collectApp = collectApp;
+        this.setModified(true);
         return this;
     },
 
@@ -71,6 +81,7 @@ Attribute.prototype = {
      */
     setSection: function (section) {
         this.section = section;
+        this.setModified(true);
         return this;
     },
 
@@ -81,6 +92,7 @@ Attribute.prototype = {
      */
     setValue: function (value) {
         this.value = value;
+        this.setModified(true);
         return this;
     },
 
@@ -174,6 +186,25 @@ Attribute.prototype = {
         if (!this.getSection()) {
             throw new Error('Section can not be empty');
         }
+    },
+
+    /**
+     * Set "modified" status
+     * @param {Boolean} modified
+     * @returns {Attribute}
+     * @protected
+     */
+    setModified: function (modified) {
+        this.modified = modified;
+        return this;
+    },
+
+    /**
+     * Check if attribute has any changes
+     * @returns {Boolean}
+     */
+    hasChanges: function () {
+        return !!this.modified;
     }
 
 };
