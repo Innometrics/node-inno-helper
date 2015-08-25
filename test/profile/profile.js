@@ -39,6 +39,13 @@ describe('Profile/Common', function () {
             assert.strictEqual(profile.getId(), id);
         });
 
+        it('should support creation like factory (not as constructor)', function () {
+            assert.doesNotThrow(function () {
+                var constructor = Profile;
+                constructor({});
+            });
+        });
+
     });
 
     describe('Serialization', function () {
