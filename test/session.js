@@ -291,6 +291,84 @@ describe('Session', function () {
             assert.deepEqual(session.serialize(), rawData);
         });
 
+        describe('Partially serialization', function () {
+
+            var rawData = {
+                id: 'qwe',
+                collectApp: 'app',
+                section: 'sec',
+                createdAt: 1,
+                modifiedAt: 2,
+                data: {
+                    test: 'cool'
+                },
+                events: [{
+                    id: 'ev1',
+                    definitionId: 'defId',
+                    createdAt: 3,
+                    data: {
+                        foo: 'bar'
+                    }
+                }]
+            };
+
+            it('should collect only common props if no data or event(s) changed', function () {
+                var session = createSession(rawData);
+                session.resetChanged();
+                assert.deepEqual(session.serialize(true), {
+                    id: 'qwe',
+                    collectApp: 'app',
+                    section: 'sec',
+                    createdAt: 1,
+                    modifiedAt: 2,
+                    data: {},
+                    events: []
+                });
+            });
+
+            it('should collect common props and changed data', function () {
+                var session = createSession(rawData);
+                session.resetChanged();
+                session.setDataValue('a', 1);
+                assert.deepEqual(session.serialize(true), {
+                    id: 'qwe',
+                    collectApp: 'app',
+                    section: 'sec',
+                    createdAt: 1,
+                    modifiedAt: 2,
+                    data: {
+                        a:1,
+                        test: 'cool'
+                    },
+                    events: []
+                });
+            });
+
+            it('should collect common props and changed event', function () {
+                var session = createSession(rawData);
+                session.resetChanged();
+                session.getLastEvent().setData({b:0});
+                assert.deepEqual(session.serialize(true), {
+                    id: 'qwe',
+                    collectApp: 'app',
+                    section: 'sec',
+                    createdAt: 1,
+                    modifiedAt: 2,
+                    data: {},
+                    events: [{
+                        id: 'ev1',
+                        definitionId: 'defId',
+                        createdAt: 3,
+                        data: {
+                            b:0,
+                            foo: 'bar'
+                        }
+                    }]
+                });
+            });
+
+        });
+
     });
 
     describe('Validation', function () {
@@ -374,6 +452,80 @@ describe('Session', function () {
                 b: 2
             });
             assert.strictEqual(session1.getEvents().length, 2);
+        });
+
+    });
+
+    describe('Changed flag', function () {
+
+        it('should be marked as changed after creation', function () {
+            var session = createSession();
+            assert(session.hasChanges());
+        });
+
+        it('should be marked as not changed', function () {
+            var session = createSession();
+            session.resetChanged();
+            assert.equal(session.hasChanges(), false);
+        });
+
+        [
+            {
+                field: 'Id',
+                value: 'id1'
+            },
+            {
+                field: 'Section',
+                value: 's1'
+            },
+            {
+                field: 'CollectApp',
+                value: 'rest'
+            },
+            {
+                field: 'CreatedAt',
+                value: new Date()
+            },
+            {
+                field: 'Data',
+                value: {a:1}
+            }
+        ].forEach(function (test) {
+            it('should be marked as changed after set "' + test.field + '"', function () {
+                var session = createSession(),
+                    setter = 'set' + test.field;
+
+                session.resetChanged();
+                session[setter](test.value);
+                assert(session.hasChanges());
+            });
+        });
+
+        it('should be marked as changed after set DataValue', function () {
+            var session = createSession();
+
+            session.resetChanged();
+            session.setDataValue('a', {b:321});
+            assert(session.hasChanges());
+        });
+
+        it('should be marked as changed if some of events has changed flag', function () {
+            var session = createSession(),
+                event = session.createEvent({
+                    id: 1,
+                    definitionId: 2
+                });
+
+            session.resetChanged();
+
+            session.addEvent(event);
+            assert(session.hasChanges());
+
+            session.resetChanged();
+            assert.equal(session.hasChanges(), false);
+
+            event.setData({q:0});
+            assert(session.hasChanges());
         });
 
     });
