@@ -319,6 +319,7 @@ InnoHelper.prototype = {
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     try {
                         profile = new Profile(data.profile);
+                        profile.resetChanged();
                     } catch (e) {
                         error = e;
                     }
