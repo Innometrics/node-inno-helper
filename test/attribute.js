@@ -83,4 +83,50 @@ describe('Attribute', function () {
 
     });
 
+    describe('Changed flag', function () {
+
+        it('should be marked as changed after creation', function () {
+            var attribute = createAttribute();
+            assert(attribute.hasChanges());
+        });
+
+        it('should be marked as not changed', function () {
+            var attribute = createAttribute();
+            attribute.resetChanged();
+            assert.equal(attribute.hasChanges(), false);
+        });
+
+        [
+            {
+                field: 'Name',
+                value: 'n1'
+            },
+            {
+                field: 'Value',
+                value: 'v1'
+            },
+            {
+                field: 'CollectApp',
+                value: 'rest'
+            },
+            {
+                field: 'Section',
+                value: 's1'
+            }
+        ].forEach(function (test) {
+                it('should be marked as changed after set "' + test.field + '"', function () {
+                    var attribute = createAttribute(),
+                        setter = 'set' + test.field;
+
+                    attribute.resetChanged();
+                    attribute[setter](test.value);
+
+                    assert(attribute.hasChanges());
+                });
+            });
+
+
+
+    });
+
 });

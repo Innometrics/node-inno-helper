@@ -206,6 +206,15 @@ Event.prototype = {
     },
 
     /**
+     *
+     * @returns {Event}
+     */
+    resetChanged: function () {
+        this.changed = false;
+        return this;
+    },
+
+    /**
      * Check if event has any changes
      * @returns {Boolean}
      */

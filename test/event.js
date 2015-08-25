@@ -173,5 +173,57 @@ describe('Event', function () {
 
     });
 
+    describe('Changed flag', function () {
+
+        it('should be marked as changed after creation', function () {
+            var event = createEvent();
+            assert(event.hasChanges());
+        });
+
+        it('should be marked as not changed', function () {
+            var event = createEvent();
+            event.resetChanged();
+            assert.equal(event.hasChanges(), false);
+        });
+
+        [
+            {
+                field: 'Id',
+                value: 'asd'
+            },
+            {
+                field: 'CreatedAt',
+                value: +new Date()
+            },
+            {
+                field: 'DefinitionId',
+                value: 'my-event'
+            }
+        ].forEach(function (test) {
+            it('should be marked as changed after set ' + test.field, function () {
+                var event = createEvent(),
+                    field = test.field,
+                    value = test.value,
+                    setter = 'set' + field;
+
+                event.resetChanged();
+                event[setter](value);
+                assert(event.hasChanges());
+            });
+        });
+
+        it('should be marked as changed after change data', function () {
+            var event = createEvent();
+            event.resetChanged();
+            event.setData({a:1});
+            assert(event.hasChanges());
+
+            event.resetChanged();
+            event.setDataValue('b', 321);
+            assert(event.hasChanges());
+        });
+
+    });
+
 
 });

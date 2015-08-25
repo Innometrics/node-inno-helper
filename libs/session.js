@@ -436,7 +436,7 @@ Session.prototype = {
         this.changed = false;
         this.dataChanged = false;
         this.getEvents().forEach(function (event) {
-            event.setChanged(false);
+            event.resetChanged();
         });
         return this;
     },
