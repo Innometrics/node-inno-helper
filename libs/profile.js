@@ -482,20 +482,13 @@ Profile.prototype = {
     },
 
     /**
-     * Mark all part of Profile as not modified
+     * Mark all part of Profile as not changed
      * (only for internal usage)
      * @protected
      */
-    resetModified: function () {
-        this.attributes.forEach(function (attribute) {
-            attribute.setModified(false);
-        });
-        this.sessions.forEach(function (session) {
-            session.setModified(false);
-
-            session.getEvents().forEach(function (event) {
-                event.setModified(false);
-            });
+    resetChanged: function () {
+        return [].concat(this.attributes, this.sessions).some(function (item) {
+            return item.resetChanged();
         });
     },
 

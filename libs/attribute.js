@@ -7,16 +7,12 @@
  * @constructor
  */
 var Attribute = function (config) {
-
     config = config || {};
 
-    ['name', 'value', 'section', 'collectApp'].forEach(function (property) {
-        if (property in config) {
-            this[property] = config[property];
-        }
-    }, this);
-
-
+    this.setName(config.name);
+    this.setValue(config.value);
+    this.setCollectApp(config.collectApp);
+    this.setSection(config.section);
 };
 
 Attribute.prototype = {
@@ -46,10 +42,11 @@ Attribute.prototype = {
     value: null,
 
     /**
+     * Flag that something was changed in attribute
      * @type {Boolean}
      * @private
      */
-    modified: false,
+    changed: false,
 
     /**
      * Set attribute name
@@ -58,7 +55,7 @@ Attribute.prototype = {
      */
     setName: function (name) {
         this.name = name;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -69,7 +66,7 @@ Attribute.prototype = {
      */
     setCollectApp: function (collectApp) {
         this.collectApp = collectApp;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -81,7 +78,7 @@ Attribute.prototype = {
      */
     setSection: function (section) {
         this.section = section;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -92,7 +89,7 @@ Attribute.prototype = {
      */
     setValue: function (value) {
         this.value = value;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -189,13 +186,22 @@ Attribute.prototype = {
     },
 
     /**
-     * Set "modified" status
-     * @param {Boolean} modified
+     * Set "changed" status
+     * @param {Boolean} changed
      * @returns {Attribute}
      * @protected
      */
-    setModified: function (modified) {
-        this.modified = modified;
+    setChanged: function (changed) {
+        this.changed = changed;
+        return this;
+    },
+
+    /**
+     *
+     * @returns {Attribute}
+     */
+    resetChanged: function () {
+        this.changed = false;
         return this;
     },
 
@@ -204,7 +210,7 @@ Attribute.prototype = {
      * @returns {Boolean}
      */
     hasChanges: function () {
-        return !!this.modified;
+        return !!this.changed;
     }
 
 };

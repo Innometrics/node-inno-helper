@@ -52,7 +52,7 @@ Session.prototype = {
     createdAt: null,
 
     /**
-     * Timestamp in ms when session was modified
+     * Timestamp in ms when session was changed
      * @type {Number}
      */
     modifiedAt: null,
@@ -70,10 +70,18 @@ Session.prototype = {
     events: null,
 
     /**
+     * Flag that some property was changed in session (not related to events)
      * @type {Boolean}
      * @private
      */
-    modified: false,
+    changed: false,
+
+    /**
+     * Flag that data property was changed in session
+     * @type {Boolean}
+     * @private
+     */
+    dataChanged: false,
 
     /**
      * Set session id
@@ -82,7 +90,7 @@ Session.prototype = {
      */
     setId: function (id) {
         this.id = id;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -93,7 +101,7 @@ Session.prototype = {
      */
     setCollectApp: function (collectApp) {
         this.collectApp = collectApp;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -104,7 +112,7 @@ Session.prototype = {
      */
     setSection: function (section) {
         this.section = section;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -116,7 +124,7 @@ Session.prototype = {
      */
     setCreatedAt: function (date) {
         this.createdAt = +new Date(date);
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -128,7 +136,7 @@ Session.prototype = {
      */
     setData: function (data) {
         this.data = merge(this.data, data || {});
-        this.setModified(true);
+        this.setDataChanged(true);
         return this;
     },
 
@@ -140,7 +148,7 @@ Session.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
-        this.setModified(true);
+        this.setDataChanged(true);
         return this;
     },
 
@@ -177,7 +185,7 @@ Session.prototype = {
     },
 
     /**
-     * Get timestamp in ms when session was modified
+     * Get timestamp in ms when session was changed
      * @return {Number}
      */
     getModifiedAt: function () {
@@ -223,7 +231,7 @@ Session.prototype = {
 
         this.events.push(event);
 
-        this.setModified(true);
+        this.setChanged(true);
 
         return event;
     },
@@ -283,14 +291,21 @@ Session.prototype = {
      * @protected
      */
     serialize: function (onlyChanges) {
+        var data = [],
+            events = this.serializeEvents(onlyChanges);
+
+        if (!onlyChanges || this.hasDataChanges()) {
+            data = this.getData();
+        }
+
         return {
             id:         this.getId(),
             section:    this.getSection(),
             collectApp: this.getCollectApp(),
-            data:       this.getData(),
-            events:     this.serializeEvents(onlyChanges),
             createdAt:  this.getCreatedAt(),
-            modifiedAt: this.getModifiedAt()
+            modifiedAt: this.getModifiedAt(),
+            data:       data,
+            events:     events
         };
     },
 
@@ -323,7 +338,7 @@ Session.prototype = {
             throw new Error('Session IDs should be similar');
         }
 
-        // update last modified date
+        // update last changed date
         if (session.modifiedAt > this.modifiedAt) {
             this.modifiedAt = session.modifiedAt;
         }
@@ -352,7 +367,7 @@ Session.prototype = {
         });
 
         this.sortEvents();
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -403,13 +418,37 @@ Session.prototype = {
     },
 
     /**
-     * Set "modified" status
-     * @param {Boolean} modified
-     * @returns {Attribute}
+     * Set "changed" status
+     * @param {Boolean} changed
+     * @returns {Session}
      * @protected
      */
-    setModified: function (modified) {
-        this.modified = modified;
+    setChanged: function (changed) {
+        this.changed = changed;
+        return this;
+    },
+
+    /**
+     *
+     * @returns {Session}
+     */
+    resetChanged: function () {
+        this.changed = false;
+        this.dataChanged = false;
+        this.getEvents().forEach(function (event) {
+            event.setChanged(false);
+        });
+        return this;
+    },
+
+    /**
+     * Set "data changed" status
+     * @param {Boolean} changed
+     * @returns {Session}
+     * @protected
+     */
+    setDataChanged: function (changed) {
+        this.dataChanged = changed;
         return this;
     },
 
@@ -418,16 +457,28 @@ Session.prototype = {
      * @returns {Boolean}
      */
     hasChanges: function () {
-        var hasChanges = this.modified;
+        return this.changed || this.hasDataChanges() || this.hasEventsChanges();
+    },
 
-        if (!hasChanges) {
-            hasChanges = this.events.some(function (event) {
-                return event.hasChanges();
-            });
-        }
+    /**
+     * Check if session has changes in data property
+     * @returns {Boolean}
+     */
+    hasDataChanges: function () {
+        return this.dataChanged;
+    },
 
-        return hasChanges;
+    /**
+     * Check if some of events has changes
+     * @returns {Boolean}
+     * @private
+     */
+    hasEventsChanges: function () {
+        return this.events.some(function (event) {
+            return event.hasChanges();
+        });
     }
+
 };
 
 module.exports = Session;

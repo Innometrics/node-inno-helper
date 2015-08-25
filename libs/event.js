@@ -17,8 +17,6 @@ var Event = function (config) {
     this.setData(config.data);
     this.setDefinitionId(config.definitionId || null);
     this.setCreatedAt(config.createdAt || +new Date());
-
-    this.setModified(false);
 };
 
 Event.prototype = {
@@ -51,7 +49,7 @@ Event.prototype = {
      * @type {Boolean}
      * @private
      */
-    modified: false,
+    changed: false,
 
     /**
      * Set event id
@@ -60,7 +58,7 @@ Event.prototype = {
      */
     setId: function (id) {
         this.id = id;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -73,7 +71,7 @@ Event.prototype = {
      */
     setCreatedAt: function (date) {
         this.createdAt = +new Date(date);
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -84,7 +82,7 @@ Event.prototype = {
      */
     setDefinitionId: function (definitionId) {
         this.definitionId = definitionId;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -97,7 +95,7 @@ Event.prototype = {
      */
     setData: function (data) {
         this.data = merge(this.data, data || {});
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -109,7 +107,7 @@ Event.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
-        this.setModified(true);
+        this.setChanged(true);
         return this;
     },
 
@@ -191,19 +189,19 @@ Event.prototype = {
 
         this.setData(event.getData());
 
-        this.setModified(true);
+        this.setChanged(true);
 
         return this;
     },
 
     /**
-     * Set "modified" status
-     * @param {Boolean} modified
-     * @returns {Attribute}
+     * Set "changed" status
+     * @param {Boolean} changed
+     * @returns {Event}
      * @protected
      */
-    setModified: function (modified) {
-        this.modified = modified;
+    setChanged: function (changed) {
+        this.changed = changed;
         return this;
     },
 
@@ -212,7 +210,7 @@ Event.prototype = {
      * @returns {Boolean}
      */
     hasChanges: function () {
-        return !!this.modified;
+        return !!this.changed;
     }
 };
 
