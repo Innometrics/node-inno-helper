@@ -102,6 +102,27 @@ describe('Profile/Sessions', function () {
             assert.equal(session.getSection(), 'sec2');
         });
 
+        it('should do nothing if session for replace does not exist', function () {
+            var session1 = {
+                    id: 'qwe',
+                    collectApp: 'app',
+                    section: 'sec'
+                },
+                session2 = new Profile.Session({
+                    id: 'asd',
+                    collectApp: 'app2',
+                    section: 'sec2'
+                }),
+                session;
+
+            assert.equal(profile.getSessions().length, 0);
+            profile.setSession(session1);
+            profile.replaceSession(session1, session2);
+
+            session = profile.getSessions()[0];
+            assert.equal(session.getId(), 'qwe');
+        });
+
         it('should ignore session if this one already in profile', function () {
             var session1 = new Profile.Session({
                     id: 'qwe',

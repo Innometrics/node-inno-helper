@@ -487,7 +487,7 @@ Profile.prototype = {
      * @protected
      */
     resetChanged: function () {
-        return [].concat(this.attributes, this.sessions).some(function (item) {
+        return [].concat(this.attributes, this.sessions).forEach(function (item) {
             return item.resetChanged();
         });
     },

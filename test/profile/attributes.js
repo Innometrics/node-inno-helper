@@ -45,6 +45,20 @@ describe('Profile/Attributes', function () {
             assert.equal(attribute.getValue(), 'bar');
         });
 
+        it('should not create attribute from config if its data is empty object', function () {
+            var profile = createProfile({
+                    id: 'pid',
+                    attributes: [{
+                        collectApp: 'app',
+                        section: 'sec',
+                        data: {}
+                    }]
+                }),
+                attributes = profile.getAttributes();
+
+            assert.strictEqual(attributes.length, 0);
+        });
+
     });
 
     describe('Creation',  function () {

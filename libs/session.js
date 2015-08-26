@@ -291,7 +291,7 @@ Session.prototype = {
      * @protected
      */
     serialize: function (onlyChanges) {
-        var data = [],
+        var data = {},
             events = this.serializeEvents(onlyChanges);
 
         if (!onlyChanges || this.hasDataChanges()) {
