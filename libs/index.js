@@ -3,6 +3,7 @@
 var request = require('request');
 var Profile = require('./profile');
 var Segment = require('./segment');
+var Cache = require('./cache');
 var util = require('util');
 var querystring = require('querystring');
 
@@ -18,6 +19,16 @@ var InnoHelper = function (config) {
     this.bucketName = config.bucketName;
     this.appName = config.appName;
     this.appKey = config.appKey;
+
+    if (config.noCache !== undefined) {
+        this.noCache = !!config.noCache;
+    }
+
+    if (this.isCacheAllowed()) {
+        this.cache = new Cache({
+            cachedTime: 600 // 10 min
+        });
+    }
 };
 
 InnoHelper.prototype = {
@@ -51,6 +62,18 @@ InnoHelper.prototype = {
      * @type {String}
      */
     apiUrl: null,
+
+    /**
+     * No cache flag
+     * @type {boolean}
+     */
+    noCache: false,
+
+    /**
+     * Cache object
+     * @type {Object}
+     */
+    cache: null,
 
     /**
      * Build Url for API request to work with certain Profile
@@ -149,6 +172,22 @@ InnoHelper.prototype = {
     },
 
     /**
+     * Is cache allowed?
+     * @returns {boolean}
+     */
+    isCacheAllowed: function () {
+        return !this.noCache;
+    },
+
+    /**
+     * Set cache admission
+     * @returns {boolean}
+     */
+    setCacheAllowed: function (value) {
+        this.noCache = !value;
+    },
+
+    /**
      * Update application settings
      * @param {Object} settings
      * @param {Function} callback
@@ -163,6 +202,7 @@ InnoHelper.prototype = {
             return;
         }
 
+        var cacheAllowed = this.isCacheAllowed();
         var opts = {
             url: this.getAppSettingsUrl(),
             body: settings,
@@ -180,6 +220,10 @@ InnoHelper.prototype = {
 
             if (!error) {
                 settings = response.body.custom;
+
+                if (cacheAllowed) {
+                    self.cache.set(self.getCacheKey('settings'), settings);
+                }
             }
 
             if (typeof callback === 'function') {
@@ -199,6 +243,17 @@ InnoHelper.prototype = {
             url: this.getAppSettingsUrl(),
             json: true
         };
+        var cache = this.cache;
+        var cacheAllowed = this.isCacheAllowed();
+        var cachedValue;
+
+        if (cacheAllowed) {
+            cachedValue = cache.get(this.getCacheKey('settings'));
+            if (typeof cachedValue !== 'undefined') {
+                callback(null, cachedValue);
+                return;
+            }
+        }
 
         request.get(opts, function (error, response) {
 
@@ -211,6 +266,9 @@ InnoHelper.prototype = {
 
             if (!error) {
                 settings = response.body.custom;
+                if (cacheAllowed) {
+                    cache.set(self.getCacheKey('settings'), settings);
+                }
             }
 
             callback(error, settings);
@@ -698,6 +756,10 @@ InnoHelper.prototype = {
 
             callback(error, result);
         });
+    },
+
+    getCacheKey: function (name) {
+        return (name || 'default') + '-' + this.getCollectApp();
     }
 };
 

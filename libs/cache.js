@@ -1,8 +1,15 @@
 /**
  * @constructor
  */
-var Cache =  function () {
+var Cache = function (config) {
+    config = config || {};
+    if (typeof config !== 'object') {
+        throw new Error('Config should be an object');
+    }
 
+    if (config.cachedTime !== undefined) {
+        this.cachedTime = +config.cachedTime > 0 ? +config.cachedTime : 60;
+    }
 };
 
 Cache.prototype = {
