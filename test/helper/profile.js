@@ -24,6 +24,7 @@ describe('Inno Helper/Profile', function () {
         assert.equal(profile.getId(), id);
         assert.deepEqual(profile.getSessions(), []);
         assert.deepEqual(profile.getAttributes(), []);
+        assert.equal(profile.hasChanges(), false);
     });
 
     describe('Load', function () {
@@ -95,6 +96,7 @@ describe('Inno Helper/Profile', function () {
                 assert.ifError(error);
                 assert(profile);
                 assert.equal(profile.getId(), 'pid');
+                assert.equal(profile.hasChanges(), false);
                 request.get.restore();
                 done();
             });
@@ -218,7 +220,7 @@ describe('Inno Helper/Profile', function () {
             });
         });
 
-        it('should return profile received after merge request', function (done) {
+        it('should return profile received after save request', function (done) {
             var profile = helper.createProfile('pid');
 
             sinon.stub(request, 'post', function (opts, callback) {
@@ -238,8 +240,10 @@ describe('Inno Helper/Profile', function () {
                 assert.ifError(error);
                 assert(returnedProfile);
                 assert.equal(returnedProfile.getId(), 'pidSaved');
+                assert.equal(returnedProfile.hasChanges(), false);
                 request.post.restore();
                 assert(profile.serialize.called);
+                assert(profile.serialize.calledWith(true));
                 profile.serialize.restore();
                 done();
             });
@@ -350,6 +354,7 @@ describe('Inno Helper/Profile', function () {
                 assert.ifError(error);
                 assert(profile);
                 assert.equal(profile.getId(), 'pid12');
+                assert.equal(profile.hasChanges(), false);
                 request.post.restore();
                 done();
             });
