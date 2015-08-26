@@ -46,12 +46,19 @@ Event.prototype = {
     createdAt: null,
 
     /**
+     * @type {Boolean}
+     * @private
+     */
+    changed: false,
+
+    /**
      * Set event id
      * @param {String} id
      * @returns {Event}
      */
     setId: function (id) {
         this.id = id;
+        this.setChanged(true);
         return this;
     },
 
@@ -64,6 +71,7 @@ Event.prototype = {
      */
     setCreatedAt: function (date) {
         this.createdAt = +new Date(date);
+        this.setChanged(true);
         return this;
     },
 
@@ -74,6 +82,7 @@ Event.prototype = {
      */
     setDefinitionId: function (definitionId) {
         this.definitionId = definitionId;
+        this.setChanged(true);
         return this;
     },
 
@@ -86,6 +95,7 @@ Event.prototype = {
      */
     setData: function (data) {
         this.data = merge(this.data, data || {});
+        this.setChanged(true);
         return this;
     },
 
@@ -97,6 +107,7 @@ Event.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
+        this.setChanged(true);
         return this;
     },
 
@@ -178,7 +189,37 @@ Event.prototype = {
 
         this.setData(event.getData());
 
+        this.setChanged(true);
+
         return this;
+    },
+
+    /**
+     * Set "changed" status
+     * @param {Boolean} changed
+     * @returns {Event}
+     * @protected
+     */
+    setChanged: function (changed) {
+        this.changed = changed;
+        return this;
+    },
+
+    /**
+     *
+     * @returns {Event}
+     */
+    resetChanged: function () {
+        this.changed = false;
+        return this;
+    },
+
+    /**
+     * Check if event has any changes
+     * @returns {Boolean}
+     */
+    hasChanges: function () {
+        return !!this.changed;
     }
 };
 

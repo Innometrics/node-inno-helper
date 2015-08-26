@@ -39,26 +39,99 @@ describe('Profile/Common', function () {
             assert.strictEqual(profile.getId(), id);
         });
 
+        it('should support creation like factory (not as constructor)', function () {
+            assert.doesNotThrow(function () {
+                var constructor = Profile;
+                constructor({});
+            });
+        });
+
     });
 
     describe('Serialization', function () {
 
+        var profileData = {
+            id: 'pid',
+            attributes: [{
+                collectApp: 'app1',
+                section: 'sec1',
+                data: {
+                    foo: 'bar',
+                    test: 1
+                }
+            }, {
+                collectApp: 'app2',
+                section: 'sec2',
+                data: {
+                    cat: 'dog',
+                    hi: 'bye'
+                }
+            }],
+            sessions: [{
+                id: 'sid1',
+                collectApp: 'app1',
+                section: 'sec1',
+                createdAt: 1,
+                modifiedAt: 2,
+                data: {
+                    data1: 'value1'
+                },
+                events: []
+            }, {
+                id: 'sid2',
+                collectApp: 'app2',
+                section: 'sec2',
+                createdAt: 3,
+                modifiedAt: 4,
+                data: {},
+                events: [{
+                    id: 'ev1',
+                    definitionId: 'def1',
+                    createdAt: 5,
+                    data: {
+                        spider: 'man'
+                    }
+                }]
+            }, {
+                id: 'sid3',
+                collectApp: 'app3',
+                section: 'sec3',
+                createdAt: 5,
+                modifiedAt: 6,
+                data: {},
+                events: []
+            }]
+        };
+
         it('should properly serialize profile', function () {
-            var profileData = {
+            var profile = createProfile(profileData);
+
+            assert.deepEqual(profile.serialize(), profileData);
+        });
+
+        describe('Partially serialization', function () {
+
+            it('should serialize only changed parts', function () {
+                var profile = createProfile(profileData);
+                profile.resetChanged();
+                assert.equal(profile.hasChanges(), false);
+
+                profile.getAttribute('test', 'app1', 'sec1').setValue('babar');
+                profile.getSession('sid1').addEvent({
+                    id: 'a',
+                    definitionId: 'b',
+                    createdAt: 10
+                });
+                profile.getSession('sid2').setDataValue('dd', 'bb');
+
+                assert(profile.hasChanges());
+                assert.deepEqual(profile.serialize(true), {
                     id: 'pid',
                     attributes: [{
                         collectApp: 'app1',
                         section: 'sec1',
                         data: {
-                            foo: 'bar',
-                            test: 1
-                        }
-                    }, {
-                        collectApp: 'app2',
-                        section: 'sec2',
-                        data: {
-                            cat: 'dog',
-                            hi: 'bye'
+                            test: 'babar'
                         }
                     }],
                     sessions: [{
@@ -67,30 +140,28 @@ describe('Profile/Common', function () {
                         section: 'sec1',
                         createdAt: 1,
                         modifiedAt: 2,
-                        data: {
-                            data1: 'value1'
-                        },
-                        events: []
+                        data: {},
+                        events: [{
+                            id: 'a',
+                            definitionId: 'b',
+                            data: {},
+                            createdAt: 10
+                        }]
                     }, {
                         id: 'sid2',
                         collectApp: 'app2',
                         section: 'sec2',
                         createdAt: 3,
                         modifiedAt: 4,
-                        data: {},
-                        events: [{
-                            id: 'ev1',
-                            definitionId: 'def1',
-                            createdAt: 5,
-                            data: {
-                                spider: 'man'
-                            }
-                        }]
+                        data: {
+                            dd: 'bb'
+                        },
+                        events: []
                     }]
-                },
-                profile = new Profile(profileData);
+                });
 
-            assert.deepEqual(profile.serialize(), profileData);
+            });
+
         });
 
     });
@@ -218,6 +289,51 @@ describe('Profile/Common', function () {
                 test2: 'w'
             });
 
+        });
+
+    });
+
+    describe('Changed flag', function () {
+
+        it('should be changed if has changed attribute', function () {
+            var profile = createProfile();
+            assert.equal(profile.hasChanges(), false);
+
+            profile.setAttribute({
+                collectApp: 'web',
+                section: 'sec',
+                name: 'a',
+                value: 1
+            });
+            assert(profile.hasChanges());
+        });
+
+        it('should be changed if has changed session', function () {
+            var profile = createProfile();
+            assert.equal(profile.hasChanges(), false);
+
+            profile.setSession({
+                collectApp: 'web',
+                section: 'sec',
+                id: '1'
+            });
+            assert(profile.hasChanges());
+        });
+
+        it('should be no changed after call resetChanged', function () {
+            var profile = createProfile({
+                attributes: [{
+                    collectApp: 'web',
+                    section: 'sec',
+                    data: {
+                        a: 1
+                    }
+                }]
+            });
+            assert(profile.hasChanges());
+
+            profile.resetChanged();
+            assert.equal(profile.hasChanges(), false);
         });
 
     });

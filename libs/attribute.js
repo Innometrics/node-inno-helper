@@ -7,14 +7,12 @@
  * @constructor
  */
 var Attribute = function (config) {
-
     config = config || {};
 
-    ['name', 'value', 'section', 'collectApp'].forEach(function (property) {
-        if (property in config) {
-            this[property] = config[property];
-        }
-    }, this);
+    this.setName(config.name);
+    this.setValue(config.value);
+    this.setCollectApp(config.collectApp);
+    this.setSection(config.section);
 };
 
 Attribute.prototype = {
@@ -44,12 +42,20 @@ Attribute.prototype = {
     value: null,
 
     /**
+     * Flag that something was changed in attribute
+     * @type {Boolean}
+     * @private
+     */
+    changed: false,
+
+    /**
      * Set attribute name
      * @param {String} name
      * @returns {Attribute}
      */
     setName: function (name) {
         this.name = name;
+        this.setChanged(true);
         return this;
     },
 
@@ -60,6 +66,7 @@ Attribute.prototype = {
      */
     setCollectApp: function (collectApp) {
         this.collectApp = collectApp;
+        this.setChanged(true);
         return this;
     },
 
@@ -71,6 +78,7 @@ Attribute.prototype = {
      */
     setSection: function (section) {
         this.section = section;
+        this.setChanged(true);
         return this;
     },
 
@@ -81,6 +89,7 @@ Attribute.prototype = {
      */
     setValue: function (value) {
         this.value = value;
+        this.setChanged(true);
         return this;
     },
 
@@ -174,6 +183,34 @@ Attribute.prototype = {
         if (!this.getSection()) {
             throw new Error('Section can not be empty');
         }
+    },
+
+    /**
+     * Set "changed" status
+     * @param {Boolean} changed
+     * @returns {Attribute}
+     * @protected
+     */
+    setChanged: function (changed) {
+        this.changed = changed;
+        return this;
+    },
+
+    /**
+     *
+     * @returns {Attribute}
+     */
+    resetChanged: function () {
+        this.changed = false;
+        return this;
+    },
+
+    /**
+     * Check if attribute has any changes
+     * @returns {Boolean}
+     */
+    hasChanges: function () {
+        return !!this.changed;
     }
 
 };

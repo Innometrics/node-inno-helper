@@ -14,13 +14,13 @@ var IdGenerator = require('./id-generator');
 var Profile = function (config) {
     config = config || {};
 
-    if (this instanceof Profile) {
-        this.id = config.id || (new IdGenerator(32)).getId();
-        this.initAttributes(config.attributes);
-        this.initSessions(config.sessions);
-    } else {
+    if (!(this instanceof Profile)) {
         return new Profile(config);
     }
+
+    this.id = config.id || (new IdGenerator(32)).getId();
+    this.initAttributes(config.attributes);
+    this.initSessions(config.sessions);
 };
 
 Profile.Attribute = Attribute;
@@ -292,26 +292,32 @@ Profile.prototype = {
 
     /**
      * Serialize profile to JSON
-     * @return {Object}
+     * @param {Boolean} [onlyChanges]
+     * @returns {Object}
      */
-    serialize: function () {
+    serialize: function (onlyChanges) {
         return {
             id:         this.getId(),
-            attributes: this.serializeAttributes(),
-            sessions:   this.serializeSessions()
+            attributes: this.serializeAttributes(onlyChanges),
+            sessions:   this.serializeSessions(onlyChanges)
         };
     },
 
     /**
      * Serialize attributes to JSON
+     * @param {Boolean} [onlyChanges]
      * @returns {Array}
      * @private
      */
-    serializeAttributes: function () {
+    serializeAttributes: function (onlyChanges) {
         var attributesMap = {},
             attributes = [];
 
         this.attributes.forEach(function (attribute) {
+            if (onlyChanges && !attribute.hasChanges()) {
+                return;
+            }
+
             var collectApp = attribute.getCollectApp(),
                 section = attribute.getSection(),
                 key = collectApp + '/' + section;
@@ -333,13 +339,20 @@ Profile.prototype = {
 
     /**
      * Serialize sessions to JSON
+     * @param {Boolean} [onlyChanges]
      * @returns {Array}
-     * @private
      */
-    serializeSessions: function () {
-        return this.sessions.map(function (session) {
-            return session.serialize();
+    serializeSessions: function (onlyChanges) {
+        var sessions = [];
+
+        this.sessions.forEach(function (session) {
+            if (onlyChanges && !session.hasChanges()) {
+                return;
+            }
+            sessions.push(session.serialize(onlyChanges));
         });
+
+        return sessions;
     },
 
     /**
@@ -466,7 +479,29 @@ Profile.prototype = {
      */
     createSession: function (rawSessionData) {
         return new Session(rawSessionData);
+    },
+
+    /**
+     * Mark all part of Profile as not changed
+     * (only for internal usage)
+     * @protected
+     */
+    resetChanged: function () {
+        return [].concat(this.attributes, this.sessions).forEach(function (item) {
+            return item.resetChanged();
+        });
+    },
+
+    /**
+     * Check if some of attribute or session has changes
+     * @returns {boolean}
+     */
+    hasChanges: function () {
+        return [].concat(this.attributes, this.sessions).some(function (item) {
+            return item.hasChanges();
+        });
     }
+
 };
 
 module.exports = Profile;
