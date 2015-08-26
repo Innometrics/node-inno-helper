@@ -6,6 +6,7 @@ var Segment = require('./segment');
 var Cache = require('./cache');
 var util = require('util');
 var querystring = require('querystring');
+var validator = require('./validator/index');
 
 /**
  *
@@ -428,9 +429,19 @@ InnoHelper.prototype = {
         }
 
         var profileId = profile.getId();
+        var bodyProfile = profile.serialize(true);
+
+        if (!validator.profileIsValid(bodyProfile)) {
+            error = new Error('Profile is not valid');
+            if (typeof callback === 'function') {
+                callback(error, result);
+            }
+            return;
+        }
+
         var opts = {
             url: this.getProfileUrl(profileId),
-            body: profile.serialize(true),
+            body: bodyProfile,
             json: true
         };
 

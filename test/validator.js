@@ -1,7 +1,7 @@
 var validator = require('../libs/validator/index'),
     assert = require('assert');
 
-describe.only('Schema validator', function () {
+describe('Schema validator', function () {
     var event = {
         id: 'eid',
         createdAt: 1234567890,

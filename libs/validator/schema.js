@@ -117,7 +117,7 @@ var profile = {
             }
         }
     },
-    required: ['id', 'version', 'createdAt', 'sessions', 'attributes', 'mergedProfiles']
+    required: ['id', 'sessions', 'attributes']
 };
 
 module.exports = {
