@@ -56,15 +56,45 @@ describe('Inno Helper/AppSettings', function () {
             });
         });
 
-        it('should return settings', function (done) {
+        it('should return settings: 1st time from server, 2nd time from cache', function (done) {
+            var values = ['settings', 'here'];
             sinon.stub(request, 'get', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {custom: ['settings', 'here']}});
+                callback(null, {statusCode: 200, body: {custom: values}});
             });
             helper.getAppSettings(function (error, settings) {
                 assert.ifError(error);
-                assert.deepEqual(settings, ['settings', 'here']);
+                assert.deepEqual(settings, values);
                 request.get.restore();
-                done();
+
+                helper.getAppSettings(function (error, settings) {
+                    assert.ifError(error);
+                    assert.deepEqual(settings, values);
+
+                    done();
+                });
+            });
+        });
+
+        it('should return settings from server if nocache=true', function (done) {
+            var values = ['settings', 'here'];
+            sinon.stub(request, 'get', function (opts, callback) {
+                callback(null, {statusCode: 200, body: {custom: values}});
+            });
+
+            helper.setCacheAllowed(false);
+            helper.getAppSettings(function (error, settings) {
+                assert.ifError(error);
+                assert.deepEqual(settings, values);
+                assert(request.get.called);
+
+                helper.getAppSettings(function (error, settings) {
+                    assert.ifError(error);
+                    assert.deepEqual(settings, values);
+                    assert(request.get.called);
+
+                    request.get.restore();
+                    done();
+                });
             });
         });
 
@@ -124,15 +154,26 @@ describe('Inno Helper/AppSettings', function () {
             });
         });
 
-        it('should return settings', function (done) {
+        it('should return settings and set cache if allowed', function (done) {
+            var values = ['settings', 'here'];
             sinon.stub(request, 'put', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {custom: ['settings', 'here']}});
+                callback(null, {statusCode: 200, body: {custom: values}});
             });
             helper.setAppSettings({}, function (error, settings) {
                 assert.ifError(error);
-                assert.deepEqual(settings, ['settings', 'here']);
-                request.put.restore();
-                done();
+                assert.deepEqual(settings, values);
+                assert.deepEqual(helper.cache.get(helper.getCacheKey('settings')), values);
+
+                helper.cache.clearCache();
+                helper.setCacheAllowed(false);
+                helper.setAppSettings({}, function (error, settings) {
+                    assert.ifError(error);
+                    assert.deepEqual(settings, values);
+                    assert.strictEqual(helper.cache.get(helper.getCacheKey('settings')), undefined);
+
+                    request.put.restore();
+                    done();
+                });
             });
         });
 

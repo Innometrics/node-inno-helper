@@ -1,4 +1,5 @@
 var InnoHelper = require('../..').InnoHelper,
+    util = require('util'),
     assert = require('assert');
 
 describe('Inno Helper/Common', function () {
@@ -87,6 +88,15 @@ describe('Inno Helper/Common', function () {
                 assert.strictEqual(helper.getAppKey(), config.appKey);
                 assert.strictEqual(helper.getApiHost(), config.apiUrl);
                 assert.strictEqual(helper.getCompany(), config.groupId);
+                assert.equal(helper.isCacheAllowed(), true);
+            });
+
+            it('should properly set that cache is allowed', function () {
+                var helper = createHelper(util._extend(config, {
+                    noCache: true
+                }));
+
+                assert.equal(helper.isCacheAllowed(), false);
             });
 
         });
