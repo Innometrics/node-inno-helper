@@ -1,4 +1,5 @@
 'use strict';
+var validator = require('./validator/index');
 
 /**
  *
@@ -130,18 +131,23 @@ Attribute.prototype = {
      * @returns {boolean}
      */
     isValid: function () {
-        var valid = true;
+        return this.validateName() &&
+            this.validateValue() &&
+            validator.attributeIsValid(this.serialize());
+    },
 
-        try {
-            this.validateName();
-            this.validateValue();
-            this.validateCollectApp();
-            this.validateSection();
-        } catch (e) {
-            valid = false;
-        }
-
-        return valid;
+    /**
+     * Convert attribute to JSON
+     * @return {Object}
+     */
+    serialize: function () {
+        var attribute = {
+            collectApp: this.getCollectApp(),
+            section:    this.getSection(),
+            data:       {}
+        };
+        attribute.data[this.getName()] = this.getValue();
+        return attribute;
     },
 
     /**
@@ -149,9 +155,7 @@ Attribute.prototype = {
      * @protected
      */
     validateName: function () {
-        if (!this.getName()) {
-            throw new Error('Name can not be empty');
-        }
+        return !!this.getName();
     },
 
     /**
@@ -160,29 +164,7 @@ Attribute.prototype = {
      */
     validateValue: function () {
         var value = this.getValue();
-        if (value === null || value === undefined) {
-            throw new Error('Value can not be null or undefined');
-        }
-    },
-
-    /**
-     * Checks collectApp, throws exception if invalid
-     * @protected
-     */
-    validateCollectApp: function () {
-        if (!this.getCollectApp()) {
-            throw new Error('CollectApp can not be empty');
-        }
-    },
-
-    /**
-     * Checks section, throws exception if invalid
-     * @protected
-     */
-    validateSection: function () {
-        if (!this.getSection()) {
-            throw new Error('Section can not be empty');
-        }
+        return !(value === null || value === undefined);
     },
 
     /**

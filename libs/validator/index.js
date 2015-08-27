@@ -26,7 +26,7 @@ function eventIsValid (event) {
 }
 
 function attributeIsValid (attribute) {
-    var schemasValid = validator.validateSchema([schema.attributes]);
+    var schemasValid = validator.validateSchema([schema.attribute]);
     return schemasValid && validator.validate(attribute, schema.attribute);
 }
 

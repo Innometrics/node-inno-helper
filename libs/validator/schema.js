@@ -15,7 +15,7 @@ var attribute = {
             type: 'number'
         }
     },
-    required: ['collectApp', 'section', 'data', 'modifiedAt']
+    required: ['collectApp', 'section', 'data']
 };
 
 var attributes = {
@@ -43,7 +43,45 @@ var session = {
             type: 'string'
         },
         data: {
-            type: 'object'
+            type: 'object',
+            properties: {
+                countryCode: {
+                    type: "number"
+                },
+                countryName: {
+                    type: "string"
+                },
+                region: {
+                    type: "string"
+                },
+                city: {
+                    type: "string"
+                },
+                postalCode: {
+                    type: "string"
+                },
+                latitude: {
+                    type: "number"
+                },
+                longitude: {
+                    type: "number"
+                },
+                dmaCode: {
+                    type: "number"
+                },
+                areaCode: {
+                    type: "number"
+                },
+                metroCode: {
+                    type: "number"
+                },
+                organization: {
+                    type: "string"
+                },
+                isp: {
+                    type: "string"
+                }
+            }
         },
         events: {
             $ref: 'events'
