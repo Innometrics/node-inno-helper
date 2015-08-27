@@ -46,7 +46,21 @@ Attribute.prototype = {
      * @type {Boolean}
      * @private
      */
-    changed: false,
+    dirty: false,
+
+    /**
+     * Set attribute property and mark it as dirty
+     * @param {String} field Property to be set
+     * @param {mixed} value Property value
+     * @private
+     */
+    setField: function (field, value) {
+        if (this[field] !== value) {
+            this[field] = value;
+            this.setDirty();
+        }
+        return this;
+    },
 
     /**
      * Set attribute name
@@ -54,9 +68,7 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setName: function (name) {
-        this.name = name;
-        this.setChanged(true);
-        return this;
+        return this.setField('name', name);
     },
 
     /**
@@ -65,11 +77,8 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setCollectApp: function (collectApp) {
-        this.collectApp = collectApp;
-        this.setChanged(true);
-        return this;
+        return this.setField('collectApp', collectApp);
     },
-
 
     /**
      * Set attribute section name
@@ -77,9 +86,7 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setSection: function (section) {
-        this.section = section;
-        this.setChanged(true);
-        return this;
+        return this.setField('section', section);
     },
 
     /**
@@ -88,9 +95,7 @@ Attribute.prototype = {
      * @returns {Attribute}
      */
     setValue: function (value) {
-        this.value = value;
-        this.setChanged(true);
-        return this;
+        return this.setField('value', value);
     },
 
     /**
@@ -186,22 +191,21 @@ Attribute.prototype = {
     },
 
     /**
-     * Set "changed" status
-     * @param {Boolean} changed
+     * Mark attribute as "dirty"
      * @returns {Attribute}
      * @protected
      */
-    setChanged: function (changed) {
-        this.changed = changed;
+    setDirty: function () {
+        this.dirty = true;
         return this;
     },
 
     /**
-     *
+     * Resets "dirty" status
      * @returns {Attribute}
      */
-    resetChanged: function () {
-        this.changed = false;
+    resetDirty: function () {
+        this.dirty = false;
         return this;
     },
 
@@ -210,7 +214,7 @@ Attribute.prototype = {
      * @returns {Boolean}
      */
     hasChanges: function () {
-        return !!this.changed;
+        return !!this.dirty;
     }
 
 };
