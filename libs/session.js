@@ -284,7 +284,6 @@ Session.prototype = {
     },
 
     /**
-     *
      * @return {Boolean}
      */
     isValid: function () {
