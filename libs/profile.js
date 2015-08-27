@@ -421,7 +421,7 @@ Profile.prototype = {
         if (Array.isArray(rawAttributesData)) {
             attributes = [];
             rawAttributesData.forEach(function (attr) {
-                if (Object.keys(attr.data).length){
+                if (Object.keys(attr.data).length) {
                     attributes = attributes.concat(this.createAttributes(
                         attr.collectApp,
                         attr.section,
@@ -486,9 +486,9 @@ Profile.prototype = {
      * (only for internal usage)
      * @protected
      */
-    resetChanged: function () {
+    resetDirty: function () {
         return [].concat(this.attributes, this.sessions).forEach(function (item) {
-            return item.resetChanged();
+            return item.resetDirty();
         });
     },
 

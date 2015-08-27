@@ -103,7 +103,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setData: function (data) {
-        return this.setField('data', merge(this.data, data || {}));
+        return this.setField('data', merge({}, this.data, data || {}));
     },
 
     /**

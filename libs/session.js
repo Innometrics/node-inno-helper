@@ -131,7 +131,7 @@ Session.prototype = {
      * @return {Session}
      */
     setCreatedAt: function (date) {
-        return this.setField('createdAt', date);
+        return this.setField('createdAt', +new Date(date));
     },
 
     /**
@@ -141,7 +141,7 @@ Session.prototype = {
      * @return {Session}
      */
     setData: function (data) {
-        this.data = merge(this.data, data || {});
+        this.data = merge({}, this.data, data || {});
         this.setDataDirty();
         return this;
     },

@@ -314,7 +314,7 @@ describe('Session', function () {
 
             it('should collect only common props if no data or event(s) changed', function () {
                 var session = createSession(rawData);
-                session.resetChanged();
+                session.resetDirty();
                 assert.deepEqual(session.serialize(true), {
                     id: 'qwe',
                     collectApp: 'app',
@@ -328,7 +328,7 @@ describe('Session', function () {
 
             it('should collect common props and changed data', function () {
                 var session = createSession(rawData);
-                session.resetChanged();
+                session.resetDirty();
                 session.setDataValue('a', 1);
                 assert.deepEqual(session.serialize(true), {
                     id: 'qwe',
@@ -346,7 +346,7 @@ describe('Session', function () {
 
             it('should collect common props and changed event', function () {
                 var session = createSession(rawData);
-                session.resetChanged();
+                session.resetDirty();
                 session.getLastEvent().setData({b:0});
                 assert.deepEqual(session.serialize(true), {
                     id: 'qwe',
@@ -456,16 +456,16 @@ describe('Session', function () {
 
     });
 
-    describe('Changed flag', function () {
+    describe('Dirty flag', function () {
 
-        it('should be marked as changed after creation', function () {
+        it('should be marked as dirty after creation', function () {
             var session = createSession();
             assert(session.hasChanges());
         });
 
-        it('should be marked as not changed', function () {
+        it('should be marked as not dirty', function () {
             var session = createSession();
-            session.resetChanged();
+            session.resetDirty();
             assert.equal(session.hasChanges(), false);
         });
 
@@ -491,37 +491,37 @@ describe('Session', function () {
                 value: {a:1}
             }
         ].forEach(function (test) {
-            it('should be marked as changed after set "' + test.field + '"', function () {
+            it('should be marked as dirty after set "' + test.field + '"', function () {
                 var session = createSession(),
                     setter = 'set' + test.field;
 
-                session.resetChanged();
+                session.resetDirty();
                 session[setter](test.value);
                 assert(session.hasChanges());
             });
         });
 
-        it('should be marked as changed after set DataValue', function () {
+        it('should be marked as dirty after set DataValue', function () {
             var session = createSession();
 
-            session.resetChanged();
+            session.resetDirty();
             session.setDataValue('a', {b:321});
             assert(session.hasChanges());
         });
 
-        it('should be marked as changed if some of events has changed flag', function () {
+        it('should be marked as dirty if some of events has changed flag', function () {
             var session = createSession(),
                 event = session.createEvent({
                     id: 1,
                     definitionId: 2
                 });
 
-            session.resetChanged();
+            session.resetDirty();
 
             session.addEvent(event);
             assert(session.hasChanges());
 
-            session.resetChanged();
+            session.resetDirty();
             assert.equal(session.hasChanges(), false);
 
             event.setData({q:0});

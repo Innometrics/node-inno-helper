@@ -173,16 +173,16 @@ describe('Event', function () {
 
     });
 
-    describe('Changed flag', function () {
+    describe('Dirty flag', function () {
 
-        it('should be marked as changed after creation', function () {
+        it('should be marked as dirty after creation', function () {
             var event = createEvent();
             assert(event.hasChanges());
         });
 
-        it('should be marked as not changed', function () {
+        it('should be marked as not dirty', function () {
             var event = createEvent();
-            event.resetChanged();
+            event.resetDirty();
             assert.equal(event.hasChanges(), false);
         });
 
@@ -200,27 +200,28 @@ describe('Event', function () {
                 value: 'my-event'
             }
         ].forEach(function (test) {
-            it('should be marked as changed after set ' + test.field, function () {
+            it('should be marked as dirty after set ' + test.field, function () {
                 var event = createEvent(),
                     field = test.field,
                     value = test.value,
                     setter = 'set' + field;
 
-                event.resetChanged();
+                event.resetDirty();
                 event[setter](value);
                 assert(event.hasChanges());
             });
         });
 
-        it('should be marked as changed after change data', function () {
+        it('should be marked as dirty after change data', function () {
             var event = createEvent();
-            event.resetChanged();
-            event.setData({a:1});
-            assert(event.hasChanges());
 
-            event.resetChanged();
+            event.resetDirty();
+            event.setData({a:1});
+            assert(event.hasChanges(), 'setData');
+
+            event.resetDirty();
             event.setDataValue('b', 321);
-            assert(event.hasChanges());
+            assert(event.hasChanges(), 'setDataValue');
         });
 
     });

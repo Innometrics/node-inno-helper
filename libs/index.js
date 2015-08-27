@@ -377,7 +377,7 @@ InnoHelper.prototype = {
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     try {
                         profile = new Profile(data.profile);
-                        profile.resetChanged();
+                        profile.resetDirty();
                     } catch (e) {
                         error = e;
                     }
@@ -443,7 +443,7 @@ InnoHelper.prototype = {
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     try {
                         profile = new Profile(data.profile);
-                        profile.resetChanged();
+                        profile.resetDirty();
                     } catch (e) {
                         error = e;
                     }
@@ -503,7 +503,7 @@ InnoHelper.prototype = {
                 if (data.hasOwnProperty('profile') && typeof data.profile === 'object') {
                     try {
                         profile = new Profile(data.profile);
-                        profile.resetChanged();
+                        profile.resetDirty();
                     } catch (e) {
                         error = e;
                     }
