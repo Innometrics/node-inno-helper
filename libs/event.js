@@ -2,6 +2,7 @@
 
 var merge = require('merge');
 var IdGenerator = require('./id-generator');
+var validator = require('./validator/index');
 
 /**
  *
@@ -70,7 +71,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setCreatedAt: function (date) {
-        this.createdAt = +new Date(date);
+        this.createdAt = date ? +new Date(date) : null;
         this.setChanged(true);
         return this;
     },
@@ -157,7 +158,7 @@ Event.prototype = {
      * @returns {Boolean}
      */
     isValid: function () {
-        return !!(this.getId() && this.getDefinitionId() && this.getData() && this.getCreatedAt());
+        return validator.eventIsValid(this.serialize());
     },
 
     /**

@@ -3,6 +3,7 @@
 var merge = require('merge');
 var Event = require('./event');
 var IdGenerator = require('./id-generator');
+var validator = require('./validator/index');
 
 /**
  *
@@ -123,7 +124,7 @@ Session.prototype = {
      * @return {Session}
      */
     setCreatedAt: function (date) {
-        this.createdAt = +new Date(date);
+        this.createdAt = date ? +new Date(date) : null;
         this.setChanged(true);
         return this;
     },
@@ -281,7 +282,7 @@ Session.prototype = {
      * @return {Boolean}
      */
     isValid: function () {
-        return !!this.getId() && !!this.getSection() && !!this.getCollectApp() && !!this.getCreatedAt();
+        return validator.sessionIsValid(this.serialize());
     },
 
     /**

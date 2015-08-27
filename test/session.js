@@ -512,8 +512,8 @@ describe('Session', function () {
         it('should be marked as changed if some of events has changed flag', function () {
             var session = createSession(),
                 event = session.createEvent({
-                    id: 1,
-                    definitionId: 2
+                    id: '1',
+                    definitionId: '2'
                 });
 
             session.resetChanged();
