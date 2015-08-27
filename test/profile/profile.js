@@ -113,7 +113,7 @@ describe('Profile/Common', function () {
 
             it('should serialize only changed parts', function () {
                 var profile = createProfile(profileData);
-                profile.resetChanged();
+                profile.resetDirty();
                 assert.equal(profile.hasChanges(), false);
 
                 profile.getAttribute('test', 'app1', 'sec1').setValue('babar');
@@ -293,7 +293,7 @@ describe('Profile/Common', function () {
 
     });
 
-    describe('Changed flag', function () {
+    describe('Dirty flag', function () {
 
         it('should be changed if has changed attribute', function () {
             var profile = createProfile();
@@ -320,7 +320,7 @@ describe('Profile/Common', function () {
             assert(profile.hasChanges());
         });
 
-        it('should be no changed after call resetChanged', function () {
+        it('should be no changed after call resetDirty', function () {
             var profile = createProfile({
                 attributes: [{
                     collectApp: 'web',
@@ -332,7 +332,7 @@ describe('Profile/Common', function () {
             });
             assert(profile.hasChanges());
 
-            profile.resetChanged();
+            profile.resetDirty();
             assert.equal(profile.hasChanges(), false);
         });
 

@@ -83,16 +83,16 @@ describe('Attribute', function () {
 
     });
 
-    describe('Changed flag', function () {
+    describe('Dirty flag', function () {
 
-        it('should be marked as changed after creation', function () {
+        it('should be marked as dirty after creation', function () {
             var attribute = createAttribute();
             assert(attribute.hasChanges());
         });
 
-        it('should be marked as not changed', function () {
+        it('should be marked as not dirty', function () {
             var attribute = createAttribute();
-            attribute.resetChanged();
+            attribute.resetDirty();
             assert.equal(attribute.hasChanges(), false);
         });
 
@@ -114,11 +114,11 @@ describe('Attribute', function () {
                 value: 's1'
             }
         ].forEach(function (test) {
-                it('should be marked as changed after set "' + test.field + '"', function () {
+                it('should be marked as dirty after set "' + test.field + '"', function () {
                     var attribute = createAttribute(),
                         setter = 'set' + test.field;
 
-                    attribute.resetChanged();
+                    attribute.resetDirty();
                     attribute[setter](test.value);
 
                     assert(attribute.hasChanges());

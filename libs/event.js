@@ -47,10 +47,25 @@ Event.prototype = {
     createdAt: null,
 
     /**
+     * Flag that something was changed in event
      * @type {Boolean}
      * @private
      */
-    changed: false,
+    dirty: false,
+
+    /**
+     * Set event property and mark it as dirty
+     * @param {String} field Property to be set
+     * @param {mixed} value Property value
+     * @private
+     */
+    setField: function (field, value) {
+        if (this[field] !== value) {
+            this[field] = value;
+            this.setDirty();
+        }
+        return this;
+    },
 
     /**
      * Set event id
@@ -58,9 +73,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setId: function (id) {
-        this.id = id;
-        this.setChanged(true);
-        return this;
+        return this.setField('id', id);
     },
 
     /**
@@ -71,9 +84,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setCreatedAt: function (date) {
-        this.createdAt = date ? +new Date(date) : null;
-        this.setChanged(true);
-        return this;
+        return this.setField('createdAt', date ? +new Date(date) : null);
     },
 
     /**
@@ -82,9 +93,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setDefinitionId: function (definitionId) {
-        this.definitionId = definitionId;
-        this.setChanged(true);
-        return this;
+        return this.setField('definitionId', definitionId);
     },
 
     /**
@@ -95,9 +104,7 @@ Event.prototype = {
      * @returns {Event}
      */
     setData: function (data) {
-        this.data = merge(this.data, data || {});
-        this.setChanged(true);
-        return this;
+        return this.setField('data', merge({}, this.data, data || {}));
     },
 
     /**
@@ -108,7 +115,7 @@ Event.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
-        this.setChanged(true);
+        this.setDirty();
         return this;
     },
 
@@ -190,28 +197,25 @@ Event.prototype = {
 
         this.setData(event.getData());
 
-        this.setChanged(true);
-
         return this;
     },
 
     /**
-     * Set "changed" status
-     * @param {Boolean} changed
+     * Mark event as "dirty"
      * @returns {Event}
      * @protected
      */
-    setChanged: function (changed) {
-        this.changed = changed;
+    setDirty: function () {
+        this.dirty = true;
         return this;
     },
 
     /**
-     *
+     * reset "dirty" flag
      * @returns {Event}
      */
-    resetChanged: function () {
-        this.changed = false;
+    resetDirty: function () {
+        this.dirty = false;
         return this;
     },
 
@@ -220,7 +224,7 @@ Event.prototype = {
      * @returns {Boolean}
      */
     hasChanges: function () {
-        return !!this.changed;
+        return !!this.dirty;
     }
 };
 

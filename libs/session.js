@@ -75,14 +75,28 @@ Session.prototype = {
      * @type {Boolean}
      * @private
      */
-    changed: false,
+    dirty: false,
 
     /**
      * Flag that data property was changed in session
      * @type {Boolean}
      * @private
      */
-    dataChanged: false,
+    dataDirty: false,
+
+    /**
+     * Set session property and mark it as dirty
+     * @param {String} field Property to be set
+     * @param {mixed} value Property value
+     * @private
+     */
+    setField: function (field, value) {
+        if (this[field] !== value) {
+            this[field] = value;
+            this.setDirty();
+        }
+        return this;
+    },
 
     /**
      * Set session id
@@ -90,9 +104,7 @@ Session.prototype = {
      * @return {Session}
      */
     setId: function (id) {
-        this.id = id;
-        this.setChanged(true);
-        return this;
+        return this.setField('id', id);
     },
 
     /**
@@ -101,9 +113,7 @@ Session.prototype = {
      * @return {Session}
      */
     setCollectApp: function (collectApp) {
-        this.collectApp = collectApp;
-        this.setChanged(true);
-        return this;
+        return this.setField('collectApp', collectApp);
     },
 
     /**
@@ -112,9 +122,7 @@ Session.prototype = {
      * @return {Session}
      */
     setSection: function (section) {
-        this.section = section;
-        this.setChanged(true);
-        return this;
+        return this.setField('section', section);
     },
 
     /**
@@ -124,9 +132,7 @@ Session.prototype = {
      * @return {Session}
      */
     setCreatedAt: function (date) {
-        this.createdAt = date ? +new Date(date) : null;
-        this.setChanged(true);
-        return this;
+        return this.setField('createdAt', date ? +new Date(date) : null);
     },
 
     /**
@@ -136,8 +142,8 @@ Session.prototype = {
      * @return {Session}
      */
     setData: function (data) {
-        this.data = merge(this.data, data || {});
-        this.setDataChanged(true);
+        this.data = merge({}, this.data, data || {});
+        this.setDataDirty();
         return this;
     },
 
@@ -149,7 +155,7 @@ Session.prototype = {
      */
     setDataValue: function (name, value) {
         this.data[name] = value;
-        this.setDataChanged(true);
+        this.setDataDirty();
         return this;
     },
 
@@ -232,7 +238,7 @@ Session.prototype = {
 
         this.events.push(event);
 
-        this.setChanged(true);
+        this.setDirty();
 
         return event;
     },
@@ -368,7 +374,7 @@ Session.prototype = {
         });
 
         this.sortEvents();
-        this.setChanged(true);
+        this.setDirty();
         return this;
     },
 
@@ -419,37 +425,35 @@ Session.prototype = {
     },
 
     /**
-     * Set "changed" status
-     * @param {Boolean} changed
+     * Mark session as "dirty"
      * @returns {Session}
      * @protected
      */
-    setChanged: function (changed) {
-        this.changed = changed;
+    setDirty: function () {
+        this.dirty = true;
         return this;
     },
 
     /**
-     *
+     * reset "dirty" flag
      * @returns {Session}
      */
-    resetChanged: function () {
-        this.changed = false;
-        this.dataChanged = false;
+    resetDirty: function () {
+        this.dirty = false;
+        this.dataDirty = false;
         this.getEvents().forEach(function (event) {
-            event.resetChanged();
+            event.resetDirty();
         });
         return this;
     },
 
     /**
-     * Set "data changed" status
-     * @param {Boolean} changed
+     * Mark session data as "dirty"
      * @returns {Session}
      * @protected
      */
-    setDataChanged: function (changed) {
-        this.dataChanged = changed;
+    setDataDirty: function () {
+        this.dataDirty = true;
         return this;
     },
 
@@ -458,7 +462,7 @@ Session.prototype = {
      * @returns {Boolean}
      */
     hasChanges: function () {
-        return this.changed || this.hasDataChanges() || this.hasEventsChanges();
+        return this.dirty || this.hasDataChanges() || this.hasEventsChanges();
     },
 
     /**
@@ -466,7 +470,7 @@ Session.prototype = {
      * @returns {Boolean}
      */
     hasDataChanges: function () {
-        return this.dataChanged;
+        return !!this.dataDirty;
     },
 
     /**
