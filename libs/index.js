@@ -8,7 +8,7 @@ var util = require('util');
 var querystring = require('querystring');
 var validator = require('./validator/index');
 
-var unused;
+var unuseß;
 
 /**
  * @param {Object} config
