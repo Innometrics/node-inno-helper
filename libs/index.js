@@ -8,10 +8,12 @@ var util = require('util');
 var querystring = require('querystring');
 var validator = require('./validator/index');
 
+var unuseß;
+
 /**
- *
  * @param {Object} config
  * @constructor
+ * Test comment to see if docs are generated
  */
 var InnoHelper = function (config) {
     this.validateConfig(config);
@@ -774,4 +776,4 @@ InnoHelper.prototype = {
     }
 };
 
-module.exports = InnoHelper;
+module['exports'] = InnoHelper;

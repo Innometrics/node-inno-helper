@@ -36,7 +36,7 @@ describe('Schema validator', function () {
     };
 
     it('should be valid profile', function () {
-        assert.ok(validator.profileIsValid(profile));
+        assert.fail(validator.profileIsValid(profile));
     });
 
     it('should be valid attribute', function () {
