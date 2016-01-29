@@ -13,7 +13,7 @@ describe('Cache', function () {
 
         it('should throw error on incorrect config', function () {
             assert['throws'](function () {
-                new Cache(true);
+                return new Cache(true);
             }, /Config should be an object/);
         });
 
@@ -48,7 +48,7 @@ describe('Cache', function () {
             cache.expire('a');
             assert.strictEqual(cache.get('a'), undefined);
 
-            cache.cache['b'].expired = +new Date() - 1;
+            cache.cache.b.expired = +new Date() - 1;
             assert.strictEqual(cache.get('b'), undefined);
 
             cache.clearCache();
