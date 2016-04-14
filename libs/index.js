@@ -469,8 +469,8 @@ InnoHelper.prototype = {
 
     /**
      * Make Api request to merge two profiles
-     * @param {Profile} profile1
-     * @param {Profile} profile2
+     * @param {Profile} profile1 Profile-recipient which will receive data from the profile-donor.
+     * @param {Profile} profile2 Profile-donor which will be merged in profile-recipient. ID of this profile will appear in mergedProfiles list
      * @param {Function} callback
      */
     mergeProfiles: function (profile1, profile2, callback) {
