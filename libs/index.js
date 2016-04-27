@@ -575,7 +575,9 @@ InnoHelper.prototype = {
         if (!profile) {
             throw new Error('Profile not found');
         }
-        return new Profile(profile);
+        var profileInstance = new Profile(profile);
+        profileInstance.resetDirty();
+        return profileInstance;
     },
 
     /**
