@@ -17,12 +17,15 @@
     "jscs": "^1.13.1",
     "jshint": "^2.8.0",
     "mocha": "^2.2.5",
-    "sinon": "^1.15.4"
+    "sinon": "^1.15.4",
+    "gulp": "^3.9.0",
+    "jsduck": "*"
   },
   "scripts": {
     "test": "npm run test-node",
     "test-node": "mocha -R spec --recursive",
-    "test-cov": "istanbul cover _mocha -- -R spec --recursive"
+    "test-cov": "istanbul cover _mocha -- -R spec --recursive",
+    "generate-docs": "gulp generate-docs"
   },
   "engines": {
     "node": ">= 0.10"
