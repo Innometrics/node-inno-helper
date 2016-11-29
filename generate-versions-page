@@ -1,0 +1,23 @@
+#!/bin/bash
+
+VERS=`git tag`
+LINKS=""
+for one in $VERS; do
+    LINKS="$LINKS<a href=\"./$one\">$one</a>"
+done
+
+TEST=`cat << _EOF_ 
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>index</title>
+    </head>
+    <body>
+        $LINKS
+    </body>
+</html>
+_EOF_`
+
+echo $TEST
