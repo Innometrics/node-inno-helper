@@ -3,7 +3,7 @@
 VERS=`git tag`
 LINKS=""
 for one in $VERS; do
-    LINKS="$LINKS<a href=\"./$one\">$one</a>"
+    LINKS="$LINKS<p><a href=\"./$one\">$one</a></p>"
 done
 
 TEST=`cat << _EOF_ 
@@ -15,6 +15,7 @@ TEST=`cat << _EOF_
         <title>index</title>
     </head>
     <body>
+        <style>* { margin: 0; padding: 0}</style>
         $LINKS
     </body>
 </html>
