@@ -1,8 +1,12 @@
-var schema = require('./schema');
+var schema = Object.assign({}, require('./schema'));
 var ZSchema = require('z-schema');
 var validator = new ZSchema();
 
-function profileIsValid (profile) {
+function Validator () {
+    this.preloadSchema(schema);
+}
+
+function preloadSchema () {
     var allSchemasValid = validator.validateSchema([
         schema.event,
         schema.events,
@@ -12,21 +16,30 @@ function profileIsValid (profile) {
         schema.attributes,
         schema.profile
     ]);
-    return allSchemasValid && validator.validate(profile, schema.profile);
+
+    this.schemaIsValid = allSchemasValid;
+}
+
+function isValid () {
+    return this.schemaIsValid;
+}
+
+function profileIsValid (profile) {
+    return this.isValid() && validator.validate(profile, schema.profile);
 }
 
 function sessionIsValid (session) {
-    var schemasValid = validator.validateSchema([schema.session]);
+    var schemasValid = this.isValid() && validator.validateSchema([schema.session]);
     return schemasValid && validator.validate(session, schema.session);
 }
 
 function eventIsValid (event) {
-    var schemasValid = validator.validateSchema([schema.event]);
+    var schemasValid = this.isValid() && validator.validateSchema([schema.event]);
     return schemasValid && validator.validate(event, schema.event);
 }
 
 function attributeIsValid (attribute) {
-    var schemasValid = validator.validateSchema([schema.attribute]);
+    var schemasValid = this.isValid() && validator.validateSchema([schema.attribute]);
     return schemasValid && validator.validate(attribute, schema.attribute);
 }
 
@@ -34,10 +47,14 @@ function getErrors () {
     return validator.getLastErrors();
 }
 
-module.exports = {
+Validator.prototype = {
+    preloadSchema: preloadSchema,
     profileIsValid: profileIsValid,
     sessionIsValid: sessionIsValid,
     eventIsValid: eventIsValid,
     attributeIsValid: attributeIsValid,
-    getErrors: getErrors
+    getErrors: getErrors,
+    isValid: isValid
 };
+
+module.exports = new Validator();
