@@ -7,3 +7,6 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 ### [0.0.11] - 2016-04-27
 - Method ```getProfileFromRequest``` was returning "dirty" profile, which is going to be send to Profile Cloud, even though nothing was changed
 - Updated documentation for method ```mergeProfiles```
+
+### [0.0.12] - 2017-01-16
+- Schema validation bugfix.
