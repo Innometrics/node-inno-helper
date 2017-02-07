@@ -106,9 +106,9 @@ IdGenerator.prototype = {
         for (i = 0; i < envLgt; i += 1) {
             hash = hash * 31 + envStr.charCodeAt(i);
             // Convert to 32 bit integer
-            hash = hash & hash;
+            hash &= hash;
         }
-        return ('' + Math.abs(hash).toString(36));
+        return '' + Math.abs(hash).toString(36);
     },
 
     /**

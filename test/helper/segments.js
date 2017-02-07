@@ -4,7 +4,13 @@ var InnoHelper = require('../..').InnoHelper,
     sinon = require('sinon'),
     request = require('request');
 
-var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4},
+var config = {
+        bucketName: 'bucketName',
+        appName: 'appName',
+        appKey: 'appKey',
+        apiUrl: 'apiUrl',
+        groupId: 4
+    },
     helper;
 
 function createHelper (conf) {
@@ -12,7 +18,6 @@ function createHelper (conf) {
 }
 
 describe('Inno Helper/Segments', function () {
-
     beforeEach(function () {
         helper = createHelper(config);
     });
@@ -55,44 +60,36 @@ describe('Inno Helper/Segments', function () {
                     id: '1',
                     noiql: 'HAHA'
                 }
-            }, {
-                no: 'segment'
-            },
+            }, {no: 'segment'},
                 'non object!!'
             ],
             count: 1
         }, {
-        body: {
-            non: {
-                array: 'data'
-            }
-        },
-        count: 0
-    }
+            body: {non: {array: 'data'}},
+            count: 0
+        }
     ].forEach(function (test) {
-            it('should return array of segments', function (done) {
-                sinon.stub(request, 'get', function (opts, callback) {
-                    var response = {
-                        statusCode: 200,
-                        body: test.body
-                    };
-                    callback(null, response);
-                });
-                helper.getSegments(function (error, segments) {
-                    assert.ifError(error);
-                    assert(segments);
-                    assert(segments instanceof Array);
-                    assert.equal(segments.length, test.count);
-                    request.get.restore();
-                    done();
-                });
+        it('should return array of segments', function (done) {
+            sinon.stub(request, 'get', function (opts, callback) {
+                var response = {
+                    statusCode: 200,
+                    body: test.body
+                };
+                callback(null, response);
+            });
+            helper.getSegments(function (error, segments) {
+                assert.ifError(error);
+                assert(segments);
+                assert(segments instanceof Array);
+                assert.equal(segments.length, test.count);
+                request.get.restore();
+                done();
             });
         });
-
+    });
 });
 
 describe('Inno Helper/Segment evaluation', function () {
-
     beforeEach(function () {
         helper = createHelper(config);
     });
@@ -128,9 +125,7 @@ describe('Inno Helper/Segment evaluation', function () {
 
         sinon.stub(helper, '_evaluateProfileByParams');
         helper.evaluateProfileBySegmentId(profile, segmentId, callback);
-        assert(helper._evaluateProfileByParams.calledWith(profile, {
-            segment_id: segmentId
-        }, callback));
+        assert(helper._evaluateProfileByParams.calledWith(profile, {segment_id: segmentId}, callback));
         helper._evaluateProfileByParams.restore();
     });
 
@@ -141,9 +136,7 @@ describe('Inno Helper/Segment evaluation', function () {
 
         sinon.stub(helper, '_evaluateProfileByParams');
         helper.evaluateProfileByIql(profile, segmentIql, callback);
-        assert(helper._evaluateProfileByParams.calledWith(profile, {
-            iql: segmentIql
-        }, callback));
+        assert(helper._evaluateProfileByParams.calledWith(profile, {iql: segmentIql}, callback));
         helper._evaluateProfileByParams.restore();
     });
 
@@ -164,7 +157,10 @@ describe('Inno Helper/Segment evaluation', function () {
             callback();
         });
 
-        helper._evaluateProfileByParams(profile, {some: 'params', are: 'here'}, function () {
+        helper._evaluateProfileByParams(profile, {
+            some: 'params',
+            are: 'here'
+        }, function () {
             assert(request.get.calledWith({
                 url: 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
                 json: true
@@ -188,38 +184,29 @@ describe('Inno Helper/Segment evaluation', function () {
     });
 
     [{
-        body: {
-            segmentEvaluation: {
-                noresult: 'here'
-            }
-        },
+        body: {segmentEvaluation: {noresult: 'here'}},
         result: null
     }, {
-        body: {
-            segmentEvaluation: {
-                result: 'some result'
-            }
-        },
+        body: {segmentEvaluation: {result: 'some result'}},
         result: 'some result'
     }].forEach(function (test) {
-            it('should return Profile evaluation result', function (done) {
-                var profile = helper.createProfile('pid');
+        it('should return Profile evaluation result', function (done) {
+            var profile = helper.createProfile('pid');
 
-                sinon.stub(request, 'get', function (opts, callback) {
-                    var responce = {
-                        statusCode: 200,
-                        body: test.body
-                    };
-                    callback(null, responce);
-                });
+            sinon.stub(request, 'get', function (opts, callback) {
+                var responce = {
+                    statusCode: 200,
+                    body: test.body
+                };
+                callback(null, responce);
+            });
 
-                helper._evaluateProfileByParams(profile, {}, function (error, result) {
-                    assert.ifError(error);
-                    assert.equal(result, test.result);
-                    request.get.restore();
-                    done();
-                });
+            helper._evaluateProfileByParams(profile, {}, function (error, result) {
+                assert.ifError(error);
+                assert.equal(result, test.result);
+                request.get.restore();
+                done();
             });
         });
-
+    });
 });

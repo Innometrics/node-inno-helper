@@ -251,7 +251,6 @@ Profile.prototype = {
         if (!existSession) {
             // add as new session
             this.sessions.push(session);
-
         } else if (existSession !== session) {
             // replace existing with new one
             this.replaceSession(existSession, session);
@@ -356,7 +355,7 @@ Profile.prototype = {
     },
 
     /**
-     * Sort sessions by modifiedAt property
+     * Sort sessions by last event into the sessions
      * @returns {Profile}
      * @protected
      */

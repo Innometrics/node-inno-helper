@@ -3,22 +3,27 @@ var InnoHelper = require('../..').InnoHelper,
     assert = require('assert');
 
 describe('Inno Helper/Common', function () {
-    var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4};
+    var config = {
+        bucketName: 'bucketName',
+        appName: 'appName',
+        appKey: 'appKey',
+        apiUrl: 'apiUrl',
+        groupId: 4
+    };
 
     function createHelper (conf) {
         return new InnoHelper(conf);
     }
 
     describe('Creation', function () {
-
         it('should throw error on empty config', function () {
-            assert['throws'](function () {
+            assert.throws(function () {
                 createHelper();
             }, /Config should be defined/);
         });
 
         it('should throw error on non-object config', function () {
-            assert['throws'](function () {
+            assert.throws(function () {
                 createHelper(true);
             }, /Config should be an object/);
         });
@@ -31,31 +36,43 @@ describe('Inno Helper/Common', function () {
             initConf: {bucketName: 'bucketName'}
         }, {
             field: 'appKey',
-            initConf: {bucketName: 'bucketName', appName: 'appName'}
+            initConf: {
+                bucketName: 'bucketName',
+                appName: 'appName'
+            }
         }, {
             field: 'apiUrl',
-            initConf: {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey'}
+            initConf: {
+                bucketName: 'bucketName',
+                appName: 'appName',
+                appKey: 'appKey'
+            }
         }, {
             field: 'groupId',
-            initConf: {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl'}
+            initConf: {
+                bucketName: 'bucketName',
+                appName: 'appName',
+                appKey: 'appKey',
+                apiUrl: 'apiUrl'
+            }
         }].forEach(function (test) {
             var field = test.field,
                 conf = test.initConf;
 
             it('should throw error if ' + field + ' not defined', function () {
-                assert['throws'](function () {
+                assert.throws(function () {
                     createHelper(conf);
                 }, new RegExp('Property "' + field + '" in config should be defined'));
             });
             it('should throw error if ' + field + ' not a string', function () {
                 conf[field] = true;
-                assert['throws'](function () {
+                assert.throws(function () {
                     createHelper(conf);
                 }, new RegExp('Property "' + field + '" in config should be a string'));
             });
             it('should throw error if ' + field + ' is empty', function () {
                 conf[field] = '       ';
-                assert['throws'](function () {
+                assert.throws(function () {
                     createHelper(conf);
                 }, new RegExp('Property "' + field + '" in config can not be empty'));
             });
@@ -63,13 +80,24 @@ describe('Inno Helper/Common', function () {
 
         it('should not throw error if all required props present', function () {
             assert.doesNotThrow(function () {
-                createHelper({bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4});
+                createHelper({
+                    bucketName: 'bucketName',
+                    appName: 'appName',
+                    appKey: 'appKey',
+                    apiUrl: 'apiUrl',
+                    groupId: 4
+                });
             });
             assert.doesNotThrow(function () {
-                createHelper({bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: '42'});
+                createHelper({
+                    bucketName: 'bucketName',
+                    appName: 'appName',
+                    appKey: 'appKey',
+                    apiUrl: 'apiUrl',
+                    groupId: '42'
+                });
             });
         });
-
     });
 
     describe('Get methods', function () {
@@ -80,7 +108,6 @@ describe('Inno Helper/Common', function () {
         });
 
         describe('settings', function () {
-
             it('should properly get settings', function () {
                 var helper = createHelper(config);
                 assert.strictEqual(helper.getBucket(), config.bucketName);
@@ -92,17 +119,13 @@ describe('Inno Helper/Common', function () {
             });
 
             it('should properly set that cache is allowed', function () {
-                var helper = createHelper(util._extend(config, {
-                    noCache: true
-                }));
+                var helper = createHelper(util._extend(config, {noCache: true}));
 
                 assert.equal(helper.isCacheAllowed(), false);
             });
-
         });
 
         describe('url generation', function () {
-
             it('should return ProfileUrl', function () {
                 assert.equal(helper.getProfileUrl('some-profile'), 'apiUrl/v1/companies/4/buckets/bucketName/profiles/some-profile?app_key=appKey');
             });
@@ -118,13 +141,10 @@ describe('Inno Helper/Common', function () {
             it('should return SegmentEvaluationUrl', function () {
                 assert.equal(helper.getSegmentEvaluationUrl({param1: 'value1'}), 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&param1=value1');
             });
-
         });
-
     });
 
     describe('Internal methods', function () {
-
         describe('Object validation', function () {
             var helper;
 
@@ -155,12 +175,17 @@ describe('Inno Helper/Common', function () {
             it('should return null all required field present', function () {
                 var err;
 
-                err = helper.validateObject({foo: 'bar', test: false}, 'test');
+                err = helper.validateObject({
+                    foo: 'bar',
+                    test: false
+                }, 'test');
                 assert.strictEqual(err, null);
-                err = helper.validateObject({foo: 'bar', test: false}, ['test', 'foo']);
+                err = helper.validateObject({
+                    foo: 'bar',
+                    test: false
+                }, ['test', 'foo']);
                 assert.strictEqual(err, null);
             });
-
         });
 
         describe('Error checker', function () {
@@ -188,25 +213,26 @@ describe('Inno Helper/Common', function () {
                 null,
                 201
             ].forEach(function (code) {
-                    var msg = code || 'default 200';
-                    it('should return error it current status code does not equal to ' + msg, function () {
-                        var error;
-                        error = helper.checkErrors(null, {body: {message: 'error message'}, statusCode: 418}, code);
-                        assert.equal(error.message, 'error message');
-                        assert.equal(error.name, 'Server failed with status code 418');
-                    });
+                var msg = code || 'default 200';
+                it('should return error it current status code does not equal to ' + msg, function () {
+                    var error;
+                    error = helper.checkErrors(null, {
+                        body: {message: 'error message'},
+                        statusCode: 418
+                    }, code);
+                    assert.equal(error.message, 'error message');
+                    assert.equal(error.name, 'Server failed with status code 418');
                 });
+            });
 
             it('should return null if no error found', function () {
                 var error;
-                error = helper.checkErrors(null, {body: {some: 'data'}, statusCode: 418}, 418);
+                error = helper.checkErrors(null, {
+                    body: {some: 'data'},
+                    statusCode: 418
+                }, 418);
                 assert.strictEqual(error, null);
             });
-
         });
-
     });
-
-
-
 });

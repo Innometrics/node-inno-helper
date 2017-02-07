@@ -10,3 +10,7 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 
 ### [0.0.12] - 2017-01-16
 - Schema validation bugfix.
+
+### [0.0.13] - 2017-02-07
+- Preparing for remove the modifiedAt properties.
+- Migrate from jshint + jscs to eslint.

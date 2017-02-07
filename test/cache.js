@@ -1,33 +1,27 @@
 var inno = require('../'),
-    Cache = inno.Cache,
     assert = require('assert');
+var Cache = inno.Cache;
 
 describe('Cache', function () {
-
     describe('Creation', function () {
-
         it('should use default config if needed', function () {
             var cache = new Cache();
             assert.equal(cache.cachedTime, 60);
         });
 
         it('should throw error on incorrect config', function () {
-            assert['throws'](function () {
+            assert.throws(function () {
                 return new Cache(true);
             }, /Config should be an object/);
         });
 
         it('should set correct config', function () {
-            var cache = new Cache({
-                cachedTime: 120
-            });
+            var cache = new Cache({cachedTime: 120});
             assert.equal(cache.cachedTime, 120);
         });
-
     });
 
     describe('Get/Set methods', function () {
-
         it('should set cached time', function () {
             var cache = new Cache();
             assert.equal(cache.cachedTime, 60);
@@ -55,11 +49,6 @@ describe('Cache', function () {
             assert.strictEqual(cache.get('a'), undefined);
             assert.strictEqual(cache.get('b'), undefined);
             assert.strictEqual(cache.get('c'), undefined);
-
         });
-
     });
-
-
-
 });

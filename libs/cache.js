@@ -53,7 +53,7 @@ Cache.prototype = {
     set: function (name, value) {
         if (this.cachedTime) {
             this.cache[name] = {
-                expired: Date.now() + (this.cachedTime * 1000),
+                expired: Date.now() + this.cachedTime * 1000,
                 value: value
             };
         }

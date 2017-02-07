@@ -1,6 +1,6 @@
 {
   "name": "innometrics-helper",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -13,13 +13,11 @@
     "z-schema": "^3.12.4"
   },
   "devDependencies": {
-    "istanbul": "^0.3.17",
-    "jscs": "^1.13.1",
-    "jshint": "^2.8.0",
-    "mocha": "^2.2.5",
-    "sinon": "^1.15.4",
     "gulp": "^3.9.0",
-    "jsduck": "*"
+    "istanbul": "^0.3.17",
+    "jsduck": "^1.1.2",
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4"
   },
   "scripts": {
     "test": "npm run test-node",

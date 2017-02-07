@@ -1,6 +1,6 @@
 var inno = require('../../'),
-    Profile = inno.Profile,
     assert = require('assert');
+var Profile = inno.Profile;
 
 describe('Profile/Sessions', function () {
     var profile;
@@ -14,7 +14,6 @@ describe('Profile/Sessions', function () {
     });
 
     describe('Initialization', function () {
-
         it('should create sessions from config', function () {
             var profile = createProfile({
                     id: 'pid',
@@ -33,11 +32,9 @@ describe('Profile/Sessions', function () {
             assert.equal(session.getCollectApp(), 'app');
             assert.equal(session.getSection(), 'sec');
         });
-
     });
 
     describe('Creation', function () {
-
         it('should create session instance', function () {
             var sessionData = {
                     id: 'sid',
@@ -51,13 +48,11 @@ describe('Profile/Sessions', function () {
             assert.equal(session.getCollectApp(), sessionData.collectApp);
             assert.equal(session.getSection(), sessionData.section);
         });
-
     });
 
     describe('Set methods', function () {
-
         it('it should throw error if session is invalid', function () {
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.setSession({id: "asd"});
             }, /Session is not valid/);
         });
@@ -138,11 +133,9 @@ describe('Profile/Sessions', function () {
             session = profile.getSessions()[0];
             assert.strictEqual(session, session1);
         });
-
     });
 
     describe('Get methods', function () {
-
         it('should return session', function () {
             assert.strictEqual(profile.getSession('no existing'), null);
             profile.setSession({
@@ -155,15 +148,15 @@ describe('Profile/Sessions', function () {
         });
 
         it('should throw error if filter no a function', function () {
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.getSessions(null);
             }, /filter should be a function/);
 
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.getSessions(true);
             }, /filter should be a function/);
 
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.getSessions({});
             }, /filter should be a function/);
         });
@@ -191,7 +184,6 @@ describe('Profile/Sessions', function () {
             assert(sessions);
             assert.equal(sessions.length, 2);
         });
-
 
         it('should return only filtered sessions', function () {
             var sessions = profile.getSessions(),
@@ -235,21 +227,35 @@ describe('Profile/Sessions', function () {
                 id: 'sid1',
                 collectApp: 'app1',
                 section: 'sec1',
-                modifiedAt: 100
+                createdAt: 1
             });
 
             profile.setSession({
                 id: 'sid2',
                 collectApp: 'app2',
                 section: 'sec2',
-                modifiedAt: 50
+                createdAt: 2
+            });
+
+            session = profile.getLastSession();
+            assert(session);
+            assert.strictEqual(session.getId(), 'sid2');
+
+            profile.getSession('sid1').addEvent({
+                id: 'e1',
+                definitionId: 'b1',
+                createdAt: 100
+            });
+
+            profile.getSession('sid2').addEvent({
+                id: 'e2',
+                definitionId: 'b2',
+                createdAt: 10
             });
 
             session = profile.getLastSession();
             assert(session);
             assert.strictEqual(session.getId(), 'sid1');
         });
-
     });
-
 });

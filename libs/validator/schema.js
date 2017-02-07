@@ -2,18 +2,9 @@ var attribute = {
     id: 'attribute',
     type: 'object',
     properties: {
-        collectApp: {
-            type: 'string'
-        },
-        section: {
-            type: 'string'
-        },
-        data: {
-            type: 'object'
-        },
-        modifiedAt: {
-            type: 'number'
-        }
+        collectApp: {type: 'string'},
+        section: {type: 'string'},
+        data: {type: 'object'}
     },
     required: ['collectApp', 'section', 'data']
 };
@@ -21,102 +12,53 @@ var attribute = {
 var attributes = {
     id: 'attributes',
     type: 'array',
-    items: {
-        $ref: 'attribute'
-    }
+    items: {$ref: 'attribute'}
 };
 
 var session = {
     id: 'session',
     type: 'object',
     properties: {
-        id: {
-            type: 'string'
-        },
-        createdAt: {
-            type: 'number'
-        },
-        collectApp: {
-            type: 'string'
-        },
-        section: {
-            type: 'string'
-        },
+        id: {type: 'string'},
+        createdAt: {type: 'number'},
+        collectApp: {type: 'string'},
+        section: {type: 'string'},
         data: {
             type: 'object',
             properties: {
-                countryCode: {
-                    type: "number"
-                },
-                countryName: {
-                    type: "string"
-                },
-                region: {
-                    type: "string"
-                },
-                city: {
-                    type: "string"
-                },
-                postalCode: {
-                    type: "string"
-                },
-                latitude: {
-                    type: "number"
-                },
-                longitude: {
-                    type: "number"
-                },
-                dmaCode: {
-                    type: "number"
-                },
-                areaCode: {
-                    type: "number"
-                },
-                metroCode: {
-                    type: "number"
-                },
-                organization: {
-                    type: "string"
-                },
-                isp: {
-                    type: "string"
-                }
+                countryCode: {type: "number"},
+                countryName: {type: "string"},
+                region: {type: "string"},
+                city: {type: "string"},
+                postalCode: {type: "string"},
+                latitude: {type: "number"},
+                longitude: {type: "number"},
+                dmaCode: {type: "number"},
+                areaCode: {type: "number"},
+                metroCode: {type: "number"},
+                organization: {type: "string"},
+                isp: {type: "string"}
             }
         },
-        events: {
-            $ref: 'events'
-        },
-        modifiedAt: {
-            type: 'number'
-        }
+        events: {$ref: 'events'}
     },
-    required: ['id', 'createdAt', 'collectApp', 'section', 'data', 'events', 'modifiedAt']
+    required: ['id', 'createdAt', 'collectApp', 'section', 'data', 'events']
 };
 
 var sessions = {
     id: 'sessions',
     type: 'array',
-    items: {
-        $ref: 'session'
-    }
+    items: {$ref: 'session'}
 };
 
 var event = {
     id: 'event',
     type: 'object',
     properties: {
-        id: {
-            type: 'string'
-        },
-        createdAt: {
-            type: 'number'
-        },
-        definitionId: {
-            type: 'string'
-        },
-        data: {
-            type: 'object'
-        }
+        id: {type: 'string'},
+        createdAt: {type: 'number'},
+        definitionId: {type: 'string'},
+        data: {type: 'object'}
     },
     required: ['id', 'createdAt', 'definitionId', 'data']
 };
@@ -124,35 +66,20 @@ var event = {
 var events = {
     id: 'events',
     type: 'array',
-    items: {
-        $ref: 'event'
-    }
+    items: {$ref: 'event'}
 };
-
 
 var profile = {
     type: 'object',
     properties: {
-        id: {
-            type: 'string'
-        },
-        version: {
-            type: 'string'
-        },
-        createdAt: {
-            type: 'number'
-        },
-        sessions: {
-            $ref: 'sessions'
-        },
-        attributes: {
-            $ref: 'attributes'
-        },
+        id: {type: 'string'},
+        version: {type: 'string'},
+        createdAt: {type: 'number'},
+        sessions: {$ref: 'sessions'},
+        attributes: {$ref: 'attributes'},
         mergedProfiles: {
             type: 'array',
-            items: {
-                type: 'string'
-            }
+            items: {type: 'string'}
         }
     },
     required: ['id', 'sessions', 'attributes']

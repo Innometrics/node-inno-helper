@@ -26,9 +26,7 @@ var InnoHelper = function (config) {
     }
 
     if (this.isCacheAllowed()) {
-        this.cache = new Cache({
-            cachedTime: 600 // 10 min
-        });
+        this.cache = new Cache({cachedTime: 600});
     }
 };
 
@@ -211,7 +209,6 @@ InnoHelper.prototype = {
         };
 
         request.put(opts, function (error, response) {
-
             var settings = null;
             error = self.checkErrors(error, response);
 
@@ -228,9 +225,8 @@ InnoHelper.prototype = {
             }
 
             if (typeof callback === 'function') {
-                callback(error, settings);
+                return callback(error, settings);
             }
-
         });
     },
 
@@ -257,7 +253,6 @@ InnoHelper.prototype = {
         }
 
         request.get(opts, function (error, response) {
-
             var settings = null;
             error = self.checkErrors(error, response);
 
@@ -302,7 +297,7 @@ InnoHelper.prototype = {
                         try {
                             sgmInstance = new Segment(sgmData.segment);
                             segments.push(sgmInstance);
-                        }catch (e) {
+                        } catch (e) {
                             console.error(e);
                         }
                     }
@@ -337,9 +332,7 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     evaluateProfileBySegmentId: function (profile, segmentId, callback) {
-        this._evaluateProfileByParams(profile, {
-            segment_id: segmentId
-        }, callback);
+        this._evaluateProfileByParams(profile, {segment_id: segmentId}, callback);
     },
 
     /**
@@ -349,9 +342,7 @@ InnoHelper.prototype = {
      * @param {Function} callback
      */
     evaluateProfileByIql: function (profile, iql, callback) {
-        this._evaluateProfileByParams(profile, {
-            iql: iql
-        }, callback);
+        this._evaluateProfileByParams(profile, {iql: iql}, callback);
     },
 
     /**
@@ -367,7 +358,6 @@ InnoHelper.prototype = {
         };
 
         request.get(opts, function (error, response) {
-
             var data = null;
             var profile = null;
 
@@ -405,7 +395,7 @@ InnoHelper.prototype = {
             error = self.checkErrors(error, response, 204);
 
             if (typeof callback === 'function') {
-                callback(error);
+                return callback(error);
             }
         });
     },
@@ -423,7 +413,7 @@ InnoHelper.prototype = {
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
             if (typeof callback === 'function') {
-                callback(error, result);
+                return callback(error, result);
             }
             return;
         }
@@ -434,7 +424,7 @@ InnoHelper.prototype = {
         if (!validator.profileIsValid(bodyProfile)) {
             error = new Error('Profile is not valid');
             if (typeof callback === 'function') {
-                callback(error, result);
+                return callback(error, result);
             }
             return;
         }
@@ -462,7 +452,7 @@ InnoHelper.prototype = {
             }
 
             if (typeof callback === 'function') {
-                callback(error, profile);
+                return callback(error, profile);
             }
         });
     },
@@ -486,7 +476,7 @@ InnoHelper.prototype = {
 
         if (error) {
             if (typeof callback === 'function') {
-                callback(error, result);
+                return callback(error, result);
             }
             return;
         }
@@ -522,9 +512,8 @@ InnoHelper.prototype = {
             }
 
             if (typeof callback === 'function') {
-                callback(error, profile);
+                return callback(error, profile);
             }
-
         });
     },
 
@@ -540,7 +529,7 @@ InnoHelper.prototype = {
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
             if (typeof callback === 'function') {
-                callback(error, result);
+                return callback(error, result);
             }
             return;
         }
@@ -553,7 +542,7 @@ InnoHelper.prototype = {
             }
 
             if (typeof callback === 'function') {
-                callback(error, profile);
+                return callback(error, profile);
             }
         });
     },
@@ -743,9 +732,7 @@ InnoHelper.prototype = {
             return callback(error, result);
         }
 
-        var defParams = {
-            profile_id: profile.getId()
-        };
+        var defParams = {profile_id: profile.getId()};
 
         params = util._extend(params, defParams);
 
@@ -755,7 +742,6 @@ InnoHelper.prototype = {
         };
 
         request.get(opts, function (error, response) {
-
             var data;
 
             error = self.checkErrors(error, response);
