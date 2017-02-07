@@ -2,7 +2,6 @@ var IdGenerator = require('../libs/id-generator'),
     assert = require('assert');
 
 describe('Id generator', function () {
-
     function createIdGenerator (length) {
         return new IdGenerator(length);
     }
@@ -19,19 +18,19 @@ describe('Id generator', function () {
     });
 
     it('should throw error if passed length is not a number', function () {
-        assert['throws'](function () {
+        assert.throws(function () {
             createIdGenerator('not number');
         }, /Length should be a number/);
     });
 
     it('should throw error if passed length less that zero', function () {
-        assert['throws'](function () {
+        assert.throws(function () {
             createIdGenerator(-1);
         }, /Length should be positive/);
     });
 
     it('should throw error if passed not integer value', function () {
-        assert['throws'](function () {
+        assert.throws(function () {
             createIdGenerator(9.5);
         }, /Length should be integer/);
     });
@@ -43,5 +42,4 @@ describe('Id generator', function () {
         assert.equal(typeof id, 'string');
         assert.equal(id.length, length);
     });
-
 });

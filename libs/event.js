@@ -11,7 +11,6 @@ var validator = require('./validator/index');
  * @constructor
  */
 var Event = function (config) {
-
     config = config || {};
 
     this.setId(config.id || (new IdGenerator(8)).getId());

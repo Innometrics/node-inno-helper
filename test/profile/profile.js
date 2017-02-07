@@ -1,15 +1,13 @@
 var inno = require('../../'),
-    Profile = inno.Profile,
     assert = require('assert');
+var Profile = inno.Profile;
 
 describe('Profile/Common', function () {
-
     function createProfile (conf) {
         return new Profile(conf);
     }
 
     describe('Creation', function () {
-
         it('should not throw error on empty config', function () {
             assert.doesNotThrow(function () {
                 createProfile();
@@ -45,11 +43,9 @@ describe('Profile/Common', function () {
                 constructor({});
             });
         });
-
     });
 
     describe('Serialization', function () {
-
         var profileData = {
             id: 'pid',
             attributes: [{
@@ -72,32 +68,25 @@ describe('Profile/Common', function () {
                 collectApp: 'app1',
                 section: 'sec1',
                 createdAt: 1,
-                modifiedAt: 2,
-                data: {
-                    data1: 'value1'
-                },
+                data: {data1: 'value1'},
                 events: []
             }, {
                 id: 'sid2',
                 collectApp: 'app2',
                 section: 'sec2',
                 createdAt: 3,
-                modifiedAt: 4,
                 data: {},
                 events: [{
                     id: 'ev1',
                     definitionId: 'def1',
                     createdAt: 5,
-                    data: {
-                        spider: 'man'
-                    }
+                    data: {spider: 'man'}
                 }]
             }, {
                 id: 'sid3',
                 collectApp: 'app3',
                 section: 'sec3',
                 createdAt: 5,
-                modifiedAt: 6,
                 data: {},
                 events: []
             }]
@@ -110,7 +99,6 @@ describe('Profile/Common', function () {
         });
 
         describe('Partially serialization', function () {
-
             it('should serialize only changed parts', function () {
                 var profile = createProfile(profileData);
                 profile.resetDirty();
@@ -130,16 +118,13 @@ describe('Profile/Common', function () {
                     attributes: [{
                         collectApp: 'app1',
                         section: 'sec1',
-                        data: {
-                            test: 'babar'
-                        }
+                        data: {test: 'babar'}
                     }],
                     sessions: [{
                         id: 'sid1',
                         collectApp: 'app1',
                         section: 'sec1',
                         createdAt: 1,
-                        modifiedAt: 2,
                         data: {},
                         events: [{
                             id: 'a',
@@ -152,31 +137,24 @@ describe('Profile/Common', function () {
                         collectApp: 'app2',
                         section: 'sec2',
                         createdAt: 3,
-                        modifiedAt: 4,
-                        data: {
-                            dd: 'bb'
-                        },
+                        data: {dd: 'bb'},
                         events: []
                     }]
                 });
-
             });
-
         });
-
     });
 
     describe('Merge', function () {
-
         it('should throw error if non Profile instance passed', function () {
             var profile = createProfile();
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.merge(null);
             }, /Argument "profile" should be a Profile instance/);
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.merge(true);
             }, /Argument "profile" should be a Profile instance/);
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile.merge({});
             }, /Argument "profile" should be a Profile instance/);
         });
@@ -185,7 +163,7 @@ describe('Profile/Common', function () {
             var profile1 = createProfile('pid1'),
                 profile2 = createProfile('pid2');
 
-            assert['throws'](function () {
+            assert.throws(function () {
                 profile1.merge(profile2);
             }, /Profile IDs should be similar/);
         });
@@ -206,17 +184,13 @@ describe('Profile/Common', function () {
                         collectApp: 'app1',
                         section: 'sec1',
                         createdAt: 1,
-                        modifiedAt: 2,
-                        data: {
-                            data1: 'value1'
-                        },
+                        data: {data1: 'value1'},
                         events: []
                     }, {
                         id: 'sid2',
                         collectApp: 'app2',
                         section: 'sec2',
                         createdAt: 3,
-                        modifiedAt: 4,
                         data: {
                             test1: 'q',
                             test2: 'w'
@@ -225,9 +199,7 @@ describe('Profile/Common', function () {
                             id: 'ev1',
                             definitionId: 'def1',
                             createdAt: 5,
-                            data: {
-                                spider: 'man'
-                            }
+                            data: {spider: 'man'}
                         }]
                     }]
                 }),
@@ -236,35 +208,25 @@ describe('Profile/Common', function () {
                     attributes: [{
                         collectApp: 'app1',
                         section: 'sec1',
-                        data: {
-                            foo: 'baz'
-                        }
+                        data: {foo: 'baz'}
                     }, {
                         collectApp: 'app2',
                         section: 'sec2',
-                        data: {
-                            cat: 'dog'
-                        }
+                        data: {cat: 'dog'}
                     }],
                     sessions: [{
                         id: 'sid0',
                         collectApp: 'app1',
                         section: 'sec2',
                         createdAt: 0,
-                        modifiedAt: 0,
-                        data: {
-                            car: 'moto'
-                        },
+                        data: {car: 'moto'},
                         events: []
                     }, {
                         id: 'sid2',
                         collectApp: 'app2',
                         section: 'sec2',
                         createdAt: 3,
-                        modifiedAt: 10,
-                        data: {
-                            test1: 'e'
-                        },
+                        data: {test1: 'e'},
                         events: [{
                             id: 'ev1',
                             definitionId: 'def1',
@@ -279,7 +241,6 @@ describe('Profile/Common', function () {
 
             profile1.merge(profile2);
 
-
             assert.strictEqual(profile1.getAttributes().length, 3);
             assert.strictEqual(profile1.getAttribute('foo', 'app1', 'sec1').getValue(), 'baz');
 
@@ -288,13 +249,10 @@ describe('Profile/Common', function () {
                 test1: 'e',
                 test2: 'w'
             });
-
         });
-
     });
 
     describe('Dirty flag', function () {
-
         it('should be changed if has changed attribute', function () {
             var profile = createProfile();
             assert.equal(profile.hasChanges(), false);
@@ -325,9 +283,7 @@ describe('Profile/Common', function () {
                 attributes: [{
                     collectApp: 'web',
                     section: 'sec',
-                    data: {
-                        a: 1
-                    }
+                    data: {a: 1}
                 }]
             });
             assert(profile.hasChanges());
@@ -335,7 +291,5 @@ describe('Profile/Common', function () {
             profile.resetDirty();
             assert.equal(profile.hasChanges(), false);
         });
-
     });
-
 });

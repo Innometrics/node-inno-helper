@@ -8,11 +8,10 @@ var validator = require('./validator/index');
 /**
  *
  * @param {Object} config
- * config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp, modifiedAt: modifiedAt }
+ * config equals to {id: id, section: sectionId, collectApp: collectApp, data: data, events: events, createdAt: timestamp }
  * @constructor
  */
 var Session = function (config) {
-
     config = config || {};
 
     var now = +new Date();
@@ -21,8 +20,7 @@ var Session = function (config) {
     this.setData(config.data);
     this.setCollectApp(config.collectApp);
     this.setSection(config.section);
-    this.setCreatedAt(config.createdAt  || now);
-    this.modifiedAt = config.modifiedAt || now;
+    this.setCreatedAt(config.createdAt || now);
     this.initEvents(config.events);
 };
 
@@ -51,12 +49,6 @@ Session.prototype = {
      * @type {Number}
      */
     createdAt: null,
-
-    /**
-     * Timestamp in ms when session was changed
-     * @type {Number}
-     */
-    modifiedAt: null,
 
     /**
      * Session data object
@@ -196,7 +188,8 @@ Session.prototype = {
      * @return {Number}
      */
     getModifiedAt: function () {
-        return this.modifiedAt;
+        var lastEvent = this.getLastEvent();
+        return lastEvent ? lastEvent.createdAt : this.createdAt;
     },
 
     /**
@@ -309,7 +302,6 @@ Session.prototype = {
             section:    this.getSection(),
             collectApp: this.getCollectApp(),
             createdAt:  this.getCreatedAt(),
-            modifiedAt: this.getModifiedAt(),
             data:       data,
             events:     events
         };
@@ -342,11 +334,6 @@ Session.prototype = {
 
         if (this.getId() !== session.getId()) {
             throw new Error('Session IDs should be similar');
-        }
-
-        // update last changed date
-        if (session.modifiedAt > this.modifiedAt) {
-            this.modifiedAt = session.modifiedAt;
         }
 
         // merge data

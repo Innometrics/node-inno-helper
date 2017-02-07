@@ -1,6 +1,6 @@
 {
   "name": "innometrics-helper",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -13,16 +13,17 @@
     "z-schema": "^3.12.4"
   },
   "devDependencies": {
+    "gulp": "^3.9.0",
     "istanbul": "^0.3.17",
-    "jscs": "^1.13.1",
-    "jshint": "^2.8.0",
+    "jsduck": "^1.1.2",
     "mocha": "^2.2.5",
     "sinon": "^1.15.4"
   },
   "scripts": {
     "test": "npm run test-node",
     "test-node": "mocha -R spec --recursive",
-    "test-cov": "istanbul cover _mocha -- -R spec --recursive"
+    "test-cov": "istanbul cover _mocha -- -R spec --recursive",
+    "generate-docs": "gulp generate-docs"
   },
   "engines": {
     "node": ">= 0.10"

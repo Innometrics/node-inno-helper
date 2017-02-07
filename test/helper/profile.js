@@ -3,10 +3,14 @@ var InnoHelper = require('../..').InnoHelper,
     sinon = require('sinon'),
     request = require('request');
 
-
 describe('Inno Helper/Profile', function () {
-
-    var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4},
+    var config = {
+            bucketName: 'bucketName',
+            appName: 'appName',
+            appKey: 'appKey',
+            apiUrl: 'apiUrl',
+            groupId: 4
+        },
         helper;
 
     function createHelper (conf) {
@@ -28,7 +32,6 @@ describe('Inno Helper/Profile', function () {
     });
 
     describe('Load', function () {
-
         it('should make properly request to load profile', function (done) {
             var pid = 'pid';
 
@@ -37,7 +40,6 @@ describe('Inno Helper/Profile', function () {
             });
 
             helper.loadProfile(pid, function () {
-
                 assert(request.get.calledWith({
                     url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
                     json: true
@@ -60,35 +62,29 @@ describe('Inno Helper/Profile', function () {
             });
         });
 
-        [{
-            body: {}
-        }, {
-            body: {profile: true}
-        }].forEach(function (test) {
-                it('should return null if profile data corrupted', function (done) {
-                    sinon.stub(request, 'get', function (opts, callback) {
-                        var response = {
-                            statusCode: 200,
-                            body: test.body
-                        };
-                        callback(null, response);
-                    });
-                    helper.loadProfile('pid', function (error, profile) {
-                        assert.ifError(error);
-                        assert.strictEqual(profile, null);
-                        request.get.restore();
-                        done();
-                    });
+        [{body: {}}, {body: {profile: true}}].forEach(function (test) {
+            it('should return null if profile data corrupted', function (done) {
+                sinon.stub(request, 'get', function (opts, callback) {
+                    var response = {
+                        statusCode: 200,
+                        body: test.body
+                    };
+                    callback(null, response);
+                });
+                helper.loadProfile('pid', function (error, profile) {
+                    assert.ifError(error);
+                    assert.strictEqual(profile, null);
+                    request.get.restore();
+                    done();
                 });
             });
+        });
 
         it('should return profile', function (done) {
             sinon.stub(request, 'get', function (opts, callback) {
                 var response = {
                     statusCode: 200,
-                    body: {
-                        profile: {id: 'pid'}
-                    }
+                    body: {profile: {id: 'pid'}}
                 };
                 callback(null, response);
             });
@@ -101,11 +97,9 @@ describe('Inno Helper/Profile', function () {
                 done();
             });
         });
-
     });
 
     describe('Delete', function () {
-
         it('should make properly request to delete profile', function (done) {
             var pid = 'pid';
 
@@ -149,11 +143,9 @@ describe('Inno Helper/Profile', function () {
                 done();
             });
         });
-
     });
 
     describe('Save', function () {
-
         it('should return error if profile is not instance of Profile', function (done) {
             var fakeProfile = {id: 1};
             helper.saveProfile(fakeProfile, function (error) {
@@ -172,7 +164,11 @@ describe('Inno Helper/Profile', function () {
             helper.saveProfile(profile, function () {});
             assert(request.post.calledWith({
                 url: 'apiUrl/v1/companies/4/buckets/bucketName/profiles/pid?app_key=appKey',
-                body: {id: 'pid', attributes: [], sessions: []},
+                body: {
+                    id: 'pid',
+                    attributes: [],
+                    sessions: []
+                },
                 json: true
             }));
             request.post.restore();
@@ -226,11 +222,7 @@ describe('Inno Helper/Profile', function () {
             sinon.stub(request, 'post', function (opts, callback) {
                 var response = {
                     statusCode: 200,
-                    body: {
-                        profile: {
-                            id: 'pidSaved'
-                        }
-                    }
+                    body: {profile: {id: 'pidSaved'}}
                 };
                 callback(null, response);
             });
@@ -248,11 +240,9 @@ describe('Inno Helper/Profile', function () {
                 done();
             });
         });
-
     });
 
     describe('Merge', function () {
-
         it('should return error if profile1 is not instance of Profile', function (done) {
             var fakeProfile1 = {id: 1},
                 fakeProfile2 = {id: 2};
@@ -341,11 +331,7 @@ describe('Inno Helper/Profile', function () {
             sinon.stub(request, 'post', function (opts, callback) {
                 var response = {
                     statusCode: 200,
-                    body: {
-                        profile: {
-                            id: 'pid12'
-                        }
-                    }
+                    body: {profile: {id: 'pid12'}}
                 };
                 callback(null, response);
             });
@@ -359,11 +345,9 @@ describe('Inno Helper/Profile', function () {
                 done();
             });
         });
-
     });
 
     describe('Refresh', function () {
-
         it('should return error if profile is not instance of Profile', function () {
             var fakeProfile = {id: 1};
             helper.refreshLocalProfile(fakeProfile, function (error) {
@@ -410,21 +394,19 @@ describe('Inno Helper/Profile', function () {
                 done();
             });
         });
-
     });
 
     describe('Profile Stream', function () {
-
         it('should throw error on wrong data', function () {
             var rawBody = 'some non json data';
-            assert['throws'](function () {
+            assert.throws(function () {
                 helper.getProfileFromRequest(rawBody);
             }, /Wrong stream data/);
         });
 
         it('should throw error if data has not "profile" property', function () {
             var jsonBody = {noprofile: 'hahaha'};
-            assert['throws'](function () {
+            assert.throws(function () {
                 helper.getProfileFromRequest(jsonBody);
             }, /Profile not found/);
         });
@@ -444,30 +426,31 @@ describe('Inno Helper/Profile', function () {
         });
 
         describe('meta', function () {
-
             it('should throw error on wrong meta data', function () {
                 var rawBody = 'some non json data';
-                assert['throws'](function () {
+                assert.throws(function () {
                     helper.getMetaFromRequest(rawBody);
                 }, /Wrong stream data/);
             });
 
             it('should throw error if data has not "meta" property', function () {
                 var jsonBody = {nometa: 'hahaha'};
-                assert['throws'](function () {
+                assert.throws(function () {
                     helper.getMetaFromRequest(jsonBody);
                 }, /Meta not found/);
             });
 
             it('should properly create profile from Profile Stream', function () {
-                var meta = {some: 'data', or: 'ip', and: 42},
+                var meta = {
+                        some: 'data',
+                        or: 'ip',
+                        and: 42
+                    },
                     jsonBody = {meta: meta};
 
                 assert.deepEqual(helper.getMetaFromRequest(jsonBody), meta);
                 assert.deepEqual(helper.getMetaFromRequest(JSON.stringify(jsonBody)), meta);
             });
-
         });
-
     });
 });

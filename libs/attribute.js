@@ -1,4 +1,5 @@
 'use strict';
+
 var validator = require('./validator/index');
 
 /**

@@ -15,15 +15,13 @@ describe('Schema validator', function () {
         collectApp: 'app-123',
         section: 'section-123',
         data: {},
-        events: [event],
-        modifiedAt: 1234567890
+        events: [event]
     };
 
     var attribute = {
         collectApp: 'app-123',
         section: 'section-123',
-        data: {},
-        modifiedAt: 1234567890
+        data: {}
     };
 
     var profile = {
@@ -50,5 +48,4 @@ describe('Schema validator', function () {
     it('should be valid session', function () {
         assert.ok(validator.sessionIsValid(session));
     });
-
 });

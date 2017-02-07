@@ -1,0 +1,25 @@
+[
+    {
+        "name": "Components",
+        "groups": [
+            {
+                "name": "InnoHelper",
+                "classes": [
+                    "InnoHelper"
+                ]
+            },
+            {
+                "name": "Profile",
+                "classes": [
+                    "Profile"
+                ]
+            },
+            {
+                "name": "Cache",
+                "classes": [
+                    "Cache"
+                ]
+            }
+        ]
+    }
+]

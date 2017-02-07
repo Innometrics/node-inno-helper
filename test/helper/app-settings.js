@@ -4,8 +4,13 @@ var InnoHelper = require('../..').InnoHelper,
     request = require('request');
 
 describe('Inno Helper/AppSettings', function () {
-
-    var config = {bucketName: 'bucketName', appName: 'appName', appKey: 'appKey', apiUrl: 'apiUrl', groupId: 4},
+    var config = {
+            bucketName: 'bucketName',
+            appName: 'appName',
+            appKey: 'appKey',
+            apiUrl: 'apiUrl',
+            groupId: 4
+        },
         helper;
 
     function createHelper (conf) {
@@ -17,7 +22,6 @@ describe('Inno Helper/AppSettings', function () {
     });
 
     describe('Get methods', function () {
-
         it('should make properly request to get application settings', function (done) {
             sinon.stub(request, 'get', function (opts, callback) {
                 callback();
@@ -46,7 +50,10 @@ describe('Inno Helper/AppSettings', function () {
 
         it('should return error if "custom" field not found', function (done) {
             sinon.stub(request, 'get', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {no: 'custom'}});
+                callback(null, {
+                    statusCode: 200,
+                    body: {no: 'custom'}
+                });
             });
             helper.getAppSettings(function (error) {
                 assert(error);
@@ -59,7 +66,10 @@ describe('Inno Helper/AppSettings', function () {
         it('should return settings: 1st time from server, 2nd time from cache', function (done) {
             var values = ['settings', 'here'];
             sinon.stub(request, 'get', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {custom: values}});
+                callback(null, {
+                    statusCode: 200,
+                    body: {custom: values}
+                });
             });
             helper.getAppSettings(function (error, settings) {
                 assert.ifError(error);
@@ -78,7 +88,10 @@ describe('Inno Helper/AppSettings', function () {
         it('should return settings from server if nocache=true', function (done) {
             var values = ['settings', 'here'];
             sinon.stub(request, 'get', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {custom: values}});
+                callback(null, {
+                    statusCode: 200,
+                    body: {custom: values}
+                });
             });
 
             helper.setCacheAllowed(false);
@@ -97,14 +110,10 @@ describe('Inno Helper/AppSettings', function () {
                 });
             });
         });
-
     });
 
-
     describe('Set methods', function () {
-
         it('should throw error if no settings passed', function (done) {
-
             helper.setAppSettings(null, function (error) {
                 assert(error);
                 assert.equal(error.message, 'Settings not found');
@@ -144,7 +153,10 @@ describe('Inno Helper/AppSettings', function () {
 
         it('should return error if "custom" field not found', function (done) {
             sinon.stub(request, 'put', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {no: 'custom'}});
+                callback(null, {
+                    statusCode: 200,
+                    body: {no: 'custom'}
+                });
             });
             helper.setAppSettings({}, function (error) {
                 assert(error);
@@ -157,7 +169,10 @@ describe('Inno Helper/AppSettings', function () {
         it('should return settings and set cache if allowed', function (done) {
             var values = ['settings', 'here'];
             sinon.stub(request, 'put', function (opts, callback) {
-                callback(null, {statusCode: 200, body: {custom: values}});
+                callback(null, {
+                    statusCode: 200,
+                    body: {custom: values}
+                });
             });
             helper.setAppSettings({}, function (error, settings) {
                 assert.ifError(error);
@@ -176,7 +191,5 @@ describe('Inno Helper/AppSettings', function () {
                 });
             });
         });
-
     });
-
 });
