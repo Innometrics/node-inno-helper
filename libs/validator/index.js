@@ -1,4 +1,4 @@
-var schema = Object.assign({}, require('./schema'));
+var schema = require('./schema');
 var ZSchema = require('z-schema');
 var validator = new ZSchema();
 

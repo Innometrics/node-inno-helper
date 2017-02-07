@@ -14,3 +14,6 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 ### [0.0.13] - 2017-02-07
 - Preparing for remove the modifiedAt properties.
 - Migrate from jshint + jscs to eslint.
+
+### [0.0.14] - 2017-02-07
+- Return back compatibility with older version Js after 0.0.12 release.
