@@ -10,7 +10,7 @@ describe('Cache', function () {
         });
 
         it('should throw error on incorrect config', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 return new Cache(true);
             }, /Config should be an object/);
         });

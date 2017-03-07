@@ -9,33 +9,33 @@ describe('Segment', function () {
 
     describe('Creation', function () {
         it('should throw error on empty config', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment();
             }, /Config should be defined/);
         });
 
         it('should throw error if config is not an object', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment(true);
             }, /Config should be an object/);
         });
 
         it('should throw error if config.id has wrong value', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment({});
             },
                 /Property "id" in config should be defined/,
                 'config.id is not defined'
             );
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment({id: 0});
             },
                 /Property "id" in config should be a string/,
                 'config.id is not defined'
             );
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment({id: ' '});
             },
                 /Property "id" in config can not be empty/,
@@ -44,14 +44,14 @@ describe('Segment', function () {
         });
 
         it('should throw error if config.id has wrong value', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment({id: '1'});
             },
                 /Property "iql" in config should be defined/,
                 'config.iql is not defined'
             );
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment({
                     id: '1',
                     iql: true
@@ -61,7 +61,7 @@ describe('Segment', function () {
                 'config.iql is not defined'
             );
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 createSegment({
                     id: '1',
                     iql: ' '

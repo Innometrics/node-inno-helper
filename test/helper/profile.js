@@ -399,14 +399,14 @@ describe('Inno Helper/Profile', function () {
     describe('Profile Stream', function () {
         it('should throw error on wrong data', function () {
             var rawBody = 'some non json data';
-            assert.throws(function () {
+            assert['throws'](function () {
                 helper.getProfileFromRequest(rawBody);
             }, /Wrong stream data/);
         });
 
         it('should throw error if data has not "profile" property', function () {
             var jsonBody = {noprofile: 'hahaha'};
-            assert.throws(function () {
+            assert['throws'](function () {
                 helper.getProfileFromRequest(jsonBody);
             }, /Profile not found/);
         });
@@ -428,14 +428,14 @@ describe('Inno Helper/Profile', function () {
         describe('meta', function () {
             it('should throw error on wrong meta data', function () {
                 var rawBody = 'some non json data';
-                assert.throws(function () {
+                assert['throws'](function () {
                     helper.getMetaFromRequest(rawBody);
                 }, /Wrong stream data/);
             });
 
             it('should throw error if data has not "meta" property', function () {
                 var jsonBody = {nometa: 'hahaha'};
-                assert.throws(function () {
+                assert['throws'](function () {
                     helper.getMetaFromRequest(jsonBody);
                 }, /Meta not found/);
             });

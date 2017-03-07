@@ -26,18 +26,18 @@ var session = {
         data: {
             type: 'object',
             properties: {
-                countryCode: {type: "number"},
-                countryName: {type: "string"},
-                region: {type: "string"},
-                city: {type: "string"},
-                postalCode: {type: "string"},
-                latitude: {type: "number"},
-                longitude: {type: "number"},
-                dmaCode: {type: "number"},
-                areaCode: {type: "number"},
-                metroCode: {type: "number"},
-                organization: {type: "string"},
-                isp: {type: "string"}
+                countryCode: {type: 'number'},
+                countryName: {type: 'string'},
+                region: {type: 'string'},
+                city: {type: 'string'},
+                postalCode: {type: 'string'},
+                latitude: {type: 'number'},
+                longitude: {type: 'number'},
+                dmaCode: {type: 'number'},
+                areaCode: {type: 'number'},
+                metroCode: {type: 'number'},
+                organization: {type: 'string'},
+                isp: {type: 'string'}
             }
         },
         events: {$ref: 'events'}

@@ -148,13 +148,13 @@ describe('Profile/Common', function () {
     describe('Merge', function () {
         it('should throw error if non Profile instance passed', function () {
             var profile = createProfile();
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.merge(null);
             }, /Argument "profile" should be a Profile instance/);
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.merge(true);
             }, /Argument "profile" should be a Profile instance/);
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.merge({});
             }, /Argument "profile" should be a Profile instance/);
         });
@@ -163,7 +163,7 @@ describe('Profile/Common', function () {
             var profile1 = createProfile('pid1'),
                 profile2 = createProfile('pid2');
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile1.merge(profile2);
             }, /Profile IDs should be similar/);
         });
