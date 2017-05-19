@@ -127,30 +127,30 @@ describe('Event', function () {
             var fakeEvent = {id: 1},
                 event = createEvent();
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 event.merge(fakeEvent);
             }, /Argument "event" should be a Event instance/);
         });
 
         it('should throw error if ids are different', function () {
-            var event1 = createEvent({id: "1"}),
-                event2 = createEvent({id: "2"});
+            var event1 = createEvent({id: '1'}),
+                event2 = createEvent({id: '2'});
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 event1.merge(event2);
             }, /Event IDs should be similar/);
         });
 
         it('should properly merge data from event to other one', function () {
             var event1 = createEvent({
-                    id: "1",
+                    id: '1',
                     data: {
                         test: 1,
                         car: 'moto'
                     }
                 }),
                 event2 = createEvent({
-                    id: "1",
+                    id: '1',
                     data: {
                         test: 2,
                         cat: 'dog'
@@ -159,7 +159,7 @@ describe('Event', function () {
 
             event1.merge(event2);
 
-            assert.strictEqual(event1.getId(), "1");
+            assert.strictEqual(event1.getId(), '1');
             assert.deepEqual(event1.getData(), {
                 test: 2,
                 cat: 'dog',

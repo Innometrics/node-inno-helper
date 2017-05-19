@@ -17,13 +17,13 @@ describe('Inno Helper/Common', function () {
 
     describe('Creation', function () {
         it('should throw error on empty config', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 createHelper();
             }, /Config should be defined/);
         });
 
         it('should throw error on non-object config', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 createHelper(true);
             }, /Config should be an object/);
         });
@@ -60,19 +60,19 @@ describe('Inno Helper/Common', function () {
                 conf = test.initConf;
 
             it('should throw error if ' + field + ' not defined', function () {
-                assert.throws(function () {
+                assert['throws'](function () {
                     createHelper(conf);
                 }, new RegExp('Property "' + field + '" in config should be defined'));
             });
             it('should throw error if ' + field + ' not a string', function () {
                 conf[field] = true;
-                assert.throws(function () {
+                assert['throws'](function () {
                     createHelper(conf);
                 }, new RegExp('Property "' + field + '" in config should be a string'));
             });
             it('should throw error if ' + field + ' is empty', function () {
                 conf[field] = '       ';
-                assert.throws(function () {
+                assert['throws'](function () {
                     createHelper(conf);
                 }, new RegExp('Property "' + field + '" in config can not be empty'));
             });

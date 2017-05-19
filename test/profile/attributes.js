@@ -61,25 +61,25 @@ describe('Profile/Attributes', function () {
 
     describe('Creation', function () {
         it('should throw error if collectApp or section is empty', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.createAttributes(null, 'section', {});
             }, /collectApp and section should be filled to create attribute correctly/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.createAttributes('app', null, {});
             }, /collectApp and section should be filled to create attribute correctly/);
         });
 
         it('should throw error if data is not an object or empty', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.createAttributes('app', 'section', null);
             }, /attributes should be an object/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.createAttributes('app', 'section', true);
             }, /attributes should be an object/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.createAttributes('app', 'section', {});
             }, /attributes are empty/);
         });
@@ -95,21 +95,21 @@ describe('Profile/Attributes', function () {
 
     describe('Set methods', function () {
         it('should throw error if non array passed', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.setAttributes();
             }, /Argument "attributes" should be an array/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.setAttributes(true);
             }, /Argument "attributes" should be an array/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.setAttributes({});
             }, /Argument "attributes" should be an array/);
         });
 
         it('should throw error if try to set invalid attributes', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.setAttributes([{
                     collectApp: 'app',
                     section: 'sec',
@@ -186,15 +186,15 @@ describe('Profile/Attributes', function () {
 
     describe('Get methods', function () {
         it('should throw error if no name, collectApp or section specified', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.getAttribute(null, 'app', 'section');
             }, /Name, collectApp and section should be filled to get attribute/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.getAttribute('name', null, 'section');
             }, /Name, collectApp and section should be filled to get attribute/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.getAttribute('name', 'app', null);
             }, /Name, collectApp and section should be filled to get attribute/);
         });

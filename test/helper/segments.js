@@ -106,7 +106,7 @@ describe('Inno Helper/Segment evaluation', function () {
     it('should delegate evaluation ProfileBySegment', function () {
         var profile = helper.createProfile('pid'),
             segment = new Profile.Segment({
-                id: "1",
+                id: '1',
                 iql: 'my-iql'
             }),
             callback = function () {};
@@ -114,13 +114,13 @@ describe('Inno Helper/Segment evaluation', function () {
         sinon.stub(helper, 'evaluateProfileBySegmentId');
 
         helper.evaluateProfileBySegment(profile, segment, callback);
-        assert(helper.evaluateProfileBySegmentId.calledWith(profile, "1", callback));
+        assert(helper.evaluateProfileBySegmentId.calledWith(profile, '1', callback));
         helper.evaluateProfileBySegmentId.restore();
     });
 
     it('should delegate evaluation ProfileBySegmentId', function () {
         var profile = helper.createProfile('pid'),
-            segmentId = "1",
+            segmentId = '1',
             callback = function () {};
 
         sinon.stub(helper, '_evaluateProfileByParams');
@@ -131,7 +131,7 @@ describe('Inno Helper/Segment evaluation', function () {
 
     it('should delegate evaluation ProfileByIql', function () {
         var profile = helper.createProfile('pid'),
-            segmentIql = "my-iql",
+            segmentIql = 'my-iql',
             callback = function () {};
 
         sinon.stub(helper, '_evaluateProfileByParams');

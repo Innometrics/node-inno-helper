@@ -135,14 +135,14 @@ describe('Session', function () {
             assert.equal(events.length, 1);
             assert.equal(events[0].getDefinitionId(), 'old-def');
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 sess.addEvent(event);
             }, /Event with id "123" already exists/);
         });
 
         it('Should throw error on invalid event', function () {
             var sess = createSession();
-            assert.throws(function () {
+            assert['throws'](function () {
                 sess.addEvent();
             });
         });
@@ -352,7 +352,7 @@ describe('Session', function () {
         });
 
         [
-            "Id", "Section", "CollectApp", "CreatedAt"
+            'Id', 'Section', 'CollectApp', 'CreatedAt'
         ].forEach(function (field) {
             it('should be invalid if required field "' + field + '" not defined', function () {
                 var event = createSession({
@@ -373,23 +373,23 @@ describe('Session', function () {
             var fakeSession = {id: 1},
                 session = createSession();
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 session.merge(fakeSession);
             }, /Argument "session" should be a Session instance/);
         });
 
         it('should throw error if ids are different', function () {
-            var session1 = createSession({id: "1"}),
-                session2 = createSession({id: "2"});
+            var session1 = createSession({id: '1'}),
+                session2 = createSession({id: '2'});
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 session1.merge(session2);
             }, /Session IDs should be similar/);
         });
 
         it('should properly merge session to other one', function () {
             var session1 = createSession({
-                    id: "1",
+                    id: '1',
                     data: {
                         name: 'value',
                         a: 1
@@ -397,7 +397,7 @@ describe('Session', function () {
                     events: [{id: 'ev1'}]
                 }),
                 session2 = createSession({
-                    id: "1",
+                    id: '1',
                     data: {
                         name: 'new',
                         b: 2
@@ -407,7 +407,7 @@ describe('Session', function () {
 
             session1.merge(session2);
 
-            assert.strictEqual(session1.getId(), "1");
+            assert.strictEqual(session1.getId(), '1');
             assert.deepEqual(session1.getData(), {
                 name: 'new',
                 a: 1,

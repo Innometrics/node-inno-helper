@@ -68,7 +68,12 @@
         "curly": "error",
         "default-case": "error",
         "dot-location": "off",
-        "dot-notation": "error",
+        "dot-notation": [
+            "error",
+            {
+                "allowKeywords": false
+            }
+        ],
         "eol-last": ["error", "always"],
         "eqeqeq": "error",
         "func-call-spacing": "error",
@@ -241,10 +246,7 @@
         "no-warning-comments": "off",
         "no-whitespace-before-property": "error",
         "no-with": "error",
-        "object-curly-newline": ["error", {
-            "multiline": true,
-            "minProperties": 2
-        }],
+        "object-curly-newline": "off",
         "object-curly-spacing": [
             "error",
             "never"
@@ -266,7 +268,9 @@
         "quote-props": ["error", "as-needed", {
             "keywords": true
         }],
-        "quotes": "off",
+        "quotes": ["error", "single", {
+            "allowTemplateLiterals": true
+        }],
         "radix": "error",
         "require-jsdoc": "off",
         "rest-spread-spacing": "error",

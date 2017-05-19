@@ -52,8 +52,8 @@ describe('Profile/Sessions', function () {
 
     describe('Set methods', function () {
         it('it should throw error if session is invalid', function () {
-            assert.throws(function () {
-                profile.setSession({id: "asd"});
+            assert['throws'](function () {
+                profile.setSession({id: 'asd'});
             }, /Session is not valid/);
         });
 
@@ -148,15 +148,15 @@ describe('Profile/Sessions', function () {
         });
 
         it('should throw error if filter no a function', function () {
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.getSessions(null);
             }, /filter should be a function/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.getSessions(true);
             }, /filter should be a function/);
 
-            assert.throws(function () {
+            assert['throws'](function () {
                 profile.getSessions({});
             }, /filter should be a function/);
         });
