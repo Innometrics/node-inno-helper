@@ -20,6 +20,7 @@ var InnoHelper = function (config) {
     this.bucketName = config.bucketName;
     this.appName = config.appName;
     this.appKey = config.appKey;
+    this.schedulerApiHost = config.schedulerApiHost;
 
     if (config.noCache !== undefined) {
         this.noCache = !!config.noCache;
@@ -73,6 +74,140 @@ InnoHelper.prototype = {
      * @type {Object}
      */
     cache: null,
+
+    /**
+     * Scheduler API host
+     * @type {String}
+     */
+    schedulerApiHost: null,
+
+    /**
+     * Get Scheduler Api url
+     * @returns {String}
+     */
+    getSchedulerApiHost: function () {
+        return this.schedulerApiHost;
+    },
+
+    /**
+     * Build Url for API request to scheduler
+     * @returns {String}
+     * @protected
+     */
+    getSchedulerApiUrl: function (params) {
+        return util.format('%s/scheduler/%s%s?token=%s',
+            this.getSchedulerApiHost(),
+            this.getSchedulerId(),
+            params && params.taskId ? '/' + params.taskId : '',
+            this.getSchedulerToken());
+    },
+
+    /**
+     * Get Scheduler id
+     * @returns {String}
+     */
+    getSchedulerId: function () {
+        return this.getCompany() + '-' + this.getBucket() + '-' + this.getCollectApp();
+    },
+
+    /**
+     * Get Scheduler token
+     * @returns {String}
+     */
+    getSchedulerToken: function () {
+        return this.getAppKey();
+    },
+
+    /**
+     * Get application tasks
+     * @param {Function} callback
+     */
+    getTasks: function (callback) {
+        var self = this;
+        var opts = {
+            url: this.getSchedulerApiUrl(),
+            json: true
+        };
+
+        request.get(opts, function (error, response) {
+            error = self.checkErrors(error, response, 200);
+
+            if (typeof callback === 'function') {
+                if (error) {
+                    return callback(error);
+                }
+                return callback(null, response.body);
+            }
+        });
+    },
+
+    /**
+     * Add application task
+     * @param {Object} params
+     *     @example
+     *     {
+     *         "endpoint": "string", // required
+     *         "method": "string", // required
+     *         "headers": {},
+     *         "id": "string",
+     *         "payload": "string",
+     *         "timestamp": 0
+     *     }
+     * @param {Function} callback
+     */
+    addTask: function (params, callback) {
+        var self = this;
+        var opts = {
+            url: this.getSchedulerApiUrl(),
+            body: params,
+            json: true
+        };
+
+        request.post(opts, function (error, response) {
+            if (response) {
+                response.body = response.body || 'no body';
+            }
+            error = self.checkErrors(error, response, 201);
+
+            if (typeof callback === 'function') {
+                if (error) {
+                    return callback(error);
+                }
+                return callback(null);
+            }
+        });
+    },
+
+    /**
+     * Delete application task
+     * @param {Object} params
+     *     @example
+     *     {
+     *         "taskId": "string", // required
+     *     }
+     * @param {Function} callback
+     */
+    deleteTask: function (params, callback) {
+        var self = this;
+        var opts = {
+            url: this.getSchedulerApiUrl(params),
+            json: true
+        };
+
+        request.del(opts, function (error, response) {
+            if (response) {
+                response.body = response.body || 'no body';
+            }
+            error = self.checkErrors(error, response, 204);
+
+            if (typeof callback === 'function') {
+                if (error) {
+                    return callback(error);
+                }
+                return callback(null);
+            }
+        });
+    },
 
     /**
      * Build Url for API request to work with certain Profile

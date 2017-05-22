@@ -17,3 +17,6 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 
 ### [0.0.14] - 2017-02-07
 - Return back compatibility with older version Js after 0.0.12 release.
+
+### [0.0.15] - 2017-05-22
+- Added support Scheduler API
