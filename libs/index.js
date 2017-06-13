@@ -144,6 +144,7 @@ InnoHelper.prototype = {
     /**
      * Add application task
      * @param {Object} params
+     *
      *     @example
      *     {
      *         "endpoint": "string", // required
@@ -151,8 +152,10 @@ InnoHelper.prototype = {
      *         "headers": {},
      *         "id": "string",
      *         "payload": "string",
-     *         "timestamp": 0
+     *         "timestamp": 0,
+     *         "delay": 0
      *     }
+     *
      * @param {Function} callback
      */
     addTask: function (params, callback) {
@@ -162,6 +165,10 @@ InnoHelper.prototype = {
             body: params,
             json: true
         };
+
+        if (params.hasOwnProperty('timestamp') && params.hasOwnProperty('delay')) {
+            return callback(new Error('You should use only one field: timestamp or delay'));
+        }
 
         request.post(opts, function (error, response) {
             if (response) {
@@ -181,10 +188,12 @@ InnoHelper.prototype = {
     /**
      * Delete application task
      * @param {Object} params
+     *
      *     @example
      *     {
      *         "taskId": "string", // required
      *     }
+     *
      * @param {Function} callback
      */
     deleteTask: function (params, callback) {
