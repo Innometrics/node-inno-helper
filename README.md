@@ -23,3 +23,7 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 
 ### [0.0.16] - 2017-06-13
 - Added delay parameter for the Scheduler API
+
+### [0.0.17] - 2017-06-26
+- Added validation in methods for the Scheduler API
+- Added unit tests for methods for Scheduler API

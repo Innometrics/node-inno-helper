@@ -160,15 +160,22 @@ InnoHelper.prototype = {
      */
     addTask: function (params, callback) {
         var self = this;
+        var timestampExists = params.hasOwnProperty('timestamp'),
+            delayExists = params.hasOwnProperty('delay');
+
+        if (!timestampExists && !delayExists) {
+            return callback(new Error('Either use timestamp or delay'));
+        }
+
+        if (timestampExists && delayExists) {
+            return callback(new Error('You should use only one field: timestamp or delay'));
+        }
+
         var opts = {
             url: this.getSchedulerApiUrl(),
             body: params,
             json: true
         };
-
-        if (params.hasOwnProperty('timestamp') && params.hasOwnProperty('delay')) {
-            return callback(new Error('You should use only one field: timestamp or delay'));
-        }
 
         request.post(opts, function (error, response) {
             if (response) {
@@ -198,6 +205,10 @@ InnoHelper.prototype = {
      */
     deleteTask: function (params, callback) {
         var self = this;
+        if (!params.hasOwnProperty('taskId')) {
+            return callback(new Error('Parameter "taskId" required'));
+        }
+
         var opts = {
             url: this.getSchedulerApiUrl(params),
             json: true
