@@ -95,10 +95,18 @@ InnoHelper.prototype = {
      * @protected
      */
     getSchedulerApiUrl: function (params) {
+        let optional = '';
+        if (params) {
+            if (params.taskId) {
+                optional = '/' + params.taskId;
+            } else if (params.getTasksAsString) {
+                optional = '/tasks';
+            }
+        }
         return util.format('%s/scheduler/%s%s?token=%s',
             this.getSchedulerApiHost(),
             this.getSchedulerId(),
-            params && params.taskId ? '/' + params.taskId : '',
+            optional,
             this.getSchedulerToken());
     },
 
@@ -126,6 +134,31 @@ InnoHelper.prototype = {
         var self = this;
         var opts = {
             url: this.getSchedulerApiUrl(),
+            json: true
+        };
+
+        request.get(opts, function (error, response) {
+            error = self.checkErrors(error, response, 200);
+
+            if (typeof callback === 'function') {
+                if (error) {
+                    return callback(error);
+                }
+                return callback(null, response.body);
+            }
+        });
+    },
+
+    /**
+     * Get list of application tasks
+     * @param {Function} callback
+     */
+    getListTasks: function (callback) {
+        var self = this;
+        var opts = {
+            url: this.getSchedulerApiUrl({
+                getTasksAsString: true
+            }),
             json: true
         };
 
