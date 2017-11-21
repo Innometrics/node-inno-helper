@@ -61,7 +61,7 @@ describe('Inno Helper/Segments', function () {
                     noiql: 'HAHA'
                 }
             }, {no: 'segment'},
-                'non object!!'
+            'non object!!'
             ],
             count: 1
         }, {
