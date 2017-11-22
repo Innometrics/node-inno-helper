@@ -95,7 +95,7 @@ InnoHelper.prototype = {
      * @protected
      */
     getSchedulerApiUrl: function (params) {
-        let optional = '';
+        var optional = '';
         if (params) {
             if (params.taskId) {
                 optional = '/' + params.taskId;
