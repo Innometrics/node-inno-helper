@@ -31,5 +31,5 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 ### [0.0.18] - 2017-11-20
 - Added method getting list of tasks
 
-### [0.0.19] - 2017-11-23
+### [0.0.20] - 2017-11-23
 - Fixed broken compatibilities with older versions Node.js after last release
