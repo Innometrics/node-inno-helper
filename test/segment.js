@@ -24,22 +24,22 @@ describe('Segment', function () {
             assert['throws'](function () {
                 createSegment({});
             },
-                /Property "id" in config should be defined/,
-                'config.id is not defined'
+            /Property "id" in config should be defined/,
+            'config.id is not defined'
             );
 
             assert['throws'](function () {
                 createSegment({id: 0});
             },
-                /Property "id" in config should be a string/,
-                'config.id is not defined'
+            /Property "id" in config should be a string/,
+            'config.id is not defined'
             );
 
             assert['throws'](function () {
                 createSegment({id: ' '});
             },
-                /Property "id" in config can not be empty/,
-                'config.id is empty'
+            /Property "id" in config can not be empty/,
+            'config.id is empty'
             );
         });
 
@@ -47,8 +47,8 @@ describe('Segment', function () {
             assert['throws'](function () {
                 createSegment({id: '1'});
             },
-                /Property "iql" in config should be defined/,
-                'config.iql is not defined'
+            /Property "iql" in config should be defined/,
+            'config.iql is not defined'
             );
 
             assert['throws'](function () {
@@ -57,8 +57,8 @@ describe('Segment', function () {
                     iql: true
                 });
             },
-                /Property "iql" in config should be a string/,
-                'config.iql is not defined'
+            /Property "iql" in config should be a string/,
+            'config.iql is not defined'
             );
 
             assert['throws'](function () {
@@ -67,8 +67,8 @@ describe('Segment', function () {
                     iql: ' '
                 });
             },
-                /Property "iql" in config can not be empty/,
-                'config.iql is empty'
+            /Property "iql" in config can not be empty/,
+            'config.iql is empty'
             );
         });
 

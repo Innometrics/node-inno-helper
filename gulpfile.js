@@ -12,5 +12,8 @@ var sources = [
 
 gulp.task('generate-docs', function () {
     var jsDuck = new JsDuck(['--output', 'docs/' + pack.version, '--categories', 'defines.json']);
-    jsDuck.doc(sources);
+    var result = jsDuck.doc(sources);
+    if (result.status === 0) {
+        console.error(result.stderr.toString());
+    }
 });
