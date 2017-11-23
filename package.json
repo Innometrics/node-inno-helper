@@ -1,6 +1,6 @@
 {
   "name": "innometrics-helper",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -8,16 +8,16 @@
     "url": "https://github.com/Innometrics/node-inno-helper.git"
   },
   "dependencies": {
-    "merge": "^1.2.0",
-    "request": "^2.81.0",
-    "z-schema": "^3.18.2"
+    "merge": "1.2.0",
+    "request": "2.81.0",
+    "z-schema": "3.18.2"
   },
   "devDependencies": {
-    "gulp": "^3.9.0",
-    "istanbul": "^0.3.22",
-    "jsduck": "^1.1.2",
-    "mocha": "^2.5.3",
-    "sinon": "^1.17.7"
+    "gulp": "3.9.0",
+    "istanbul": "0.3.22",
+    "jsduck": "1.1.2",
+    "mocha": "2.5.3",
+    "sinon": "1.17.7"
   },
   "scripts": {
     "test": "npm run test-node",
