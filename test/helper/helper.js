@@ -8,6 +8,7 @@ describe('Inno Helper/Common', function () {
         appName: 'appName',
         appKey: 'appKey',
         apiUrl: 'apiUrl',
+        evaluationApiUrl: 'evaluationApiUrl',
         groupId: 4
     };
 
@@ -33,7 +34,9 @@ describe('Inno Helper/Common', function () {
             initConf: {}
         }, {
             field: 'appName',
-            initConf: {bucketName: 'bucketName'}
+            initConf: {
+                bucketName: 'bucketName'
+            }
         }, {
             field: 'appKey',
             initConf: {
@@ -114,12 +117,15 @@ describe('Inno Helper/Common', function () {
                 assert.strictEqual(helper.getCollectApp(), config.appName);
                 assert.strictEqual(helper.getAppKey(), config.appKey);
                 assert.strictEqual(helper.getApiHost(), config.apiUrl);
+                assert.strictEqual(helper.getEvaluationApiHost(), config.evaluationApiUrl);
                 assert.strictEqual(helper.getCompany(), config.groupId);
                 assert.equal(helper.isCacheAllowed(), true);
             });
 
             it('should properly set that cache is allowed', function () {
-                var helper = createHelper(util._extend(config, {noCache: true}));
+                var helper = createHelper(util._extend(config, {
+                    noCache: true
+                }));
 
                 assert.equal(helper.isCacheAllowed(), false);
             });
@@ -139,7 +145,10 @@ describe('Inno Helper/Common', function () {
             });
 
             it('should return SegmentEvaluationUrl', function () {
-                assert.equal(helper.getSegmentEvaluationUrl({param1: 'value1'}), 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&param1=value1');
+                assert.equal(helper.getSegmentEvaluationUrl({
+                    param1: 'value1',
+                    typeSegmentEvaluation: 'segment-id-evaluation'
+                }), 'evaluationApiUrl/v1/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&param1=value1');
             });
         });
     });
@@ -163,11 +172,15 @@ describe('Inno Helper/Common', function () {
             it('should return error if required field does not exist', function () {
                 var err;
 
-                err = helper.validateObject({foo: 'bar'}, 'baz');
+                err = helper.validateObject({
+                    foo: 'bar'
+                }, 'baz');
                 assert(err);
                 assert.equal(err.message, 'BAZ not found');
 
-                err = helper.validateObject({foo: 'bar'}, ['cat']);
+                err = helper.validateObject({
+                    foo: 'bar'
+                }, ['cat']);
                 assert(err);
                 assert.equal(err.message, 'CAT not found');
             });
@@ -205,7 +218,9 @@ describe('Inno Helper/Common', function () {
                 error = helper.checkErrors(null, false);
                 assert.equal(error.message, 'Response does not contain data');
 
-                error = helper.checkErrors(null, {no: 'body'});
+                error = helper.checkErrors(null, {
+                    no: 'body'
+                });
                 assert.equal(error.message, 'Response does not contain data');
             });
 
@@ -217,7 +232,9 @@ describe('Inno Helper/Common', function () {
                 it('should return error it current status code does not equal to ' + msg, function () {
                     var error;
                     error = helper.checkErrors(null, {
-                        body: {message: 'error message'},
+                        body: {
+                            message: 'error message'
+                        },
                         statusCode: 418
                     }, code);
                     assert.equal(error.message, 'error message');
@@ -228,7 +245,9 @@ describe('Inno Helper/Common', function () {
             it('should return null if no error found', function () {
                 var error;
                 error = helper.checkErrors(null, {
-                    body: {some: 'data'},
+                    body: {
+                        some: 'data'
+                    },
                     statusCode: 418
                 }, 418);
                 assert.strictEqual(error, null);
