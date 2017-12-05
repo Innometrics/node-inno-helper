@@ -33,3 +33,6 @@ For more info read [API reference](http://public.innomdc.com/node-helper/)
 
 ### [0.0.20] - 2017-11-23
 - Fixed broken compatibilities with older versions Node.js after last release
+
+### [0.0.21] - 2017-12-5
+- Has add support a new segment evaluation

@@ -322,7 +322,7 @@ InnoHelper.prototype = {
         var typeSegmentEvaluation = params.typeSegmentEvaluation;
         delete params.typeSegmentEvaluation;
 
-        return util.format('%s/v1/companies/%s/buckets/%s/%s?app_key=%s&%s',
+        return util.format('%s/companies/%s/buckets/%s/%s?app_key=%s&%s',
             this.getEvaluationApiHost(),
             this.getCompany(),
             this.getBucket(),
@@ -537,7 +537,7 @@ InnoHelper.prototype = {
     /**
      * Evaluate profile by segment's id
      * @param {Profile} profile
-     * @param {String} segmentId
+     * @param {String|Array} segmentIds
      * @param {Function} callback
      */
     evaluateProfileBySegmentId: function (profile, segmentIds, callback) {
@@ -958,8 +958,6 @@ InnoHelper.prototype = {
             url: this.getSegmentEvaluationUrl(params),
             json: true
         };
-
-        console.log(this.getSegmentEvaluationUrl(params));
 
         request.get(opts, function (error, response) {
             var data;

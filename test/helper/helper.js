@@ -148,7 +148,7 @@ describe('Inno Helper/Common', function () {
                 assert.equal(helper.getSegmentEvaluationUrl({
                     param1: 'value1',
                     typeSegmentEvaluation: 'segment-id-evaluation'
-                }), 'evaluationApiUrl/v1/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&param1=value1');
+                }), 'evaluationApiUrl/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&param1=value1');
             });
         });
     });

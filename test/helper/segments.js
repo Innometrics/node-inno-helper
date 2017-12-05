@@ -182,7 +182,7 @@ describe('Inno Helper/Segment evaluation', function () {
             typeSegmentEvaluation: 'segment-id-evaluation'
         }, function () {
             assert(request.get.calledWith({
-                url: 'evaluationApiUrl/v1/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
+                url: 'evaluationApiUrl/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
                 json: true
             }));
             request.get.restore();
