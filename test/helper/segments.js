@@ -151,7 +151,7 @@ describe('Inno Helper/Segment evaluation', function () {
         sinon.stub(helper, '_evaluateProfileByParams');
         helper.evaluateProfileByIql(profile, segmentIql, callback);
         assert(helper._evaluateProfileByParams.calledWith(profile, {
-            iql: segmentIql,
+            iql: [segmentIql],
             typeSegmentEvaluation: 'iql-evaluation'
         }, callback));
         helper._evaluateProfileByParams.restore();

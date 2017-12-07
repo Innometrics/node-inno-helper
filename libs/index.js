@@ -551,12 +551,13 @@ InnoHelper.prototype = {
     /**
      * Evaluate profile by IQL expression
      * @param {Profile} profile
-     * @param {String} iql
+     * @param {String|Array} iqls
      * @param {Function} callback
      */
-    evaluateProfileByIql: function (profile, iql, callback) {
+    evaluateProfileByIql: function (profile, iqls, callback) {
+        iqls = Array.isArray(iqls) ? iqls : [iqls];
         this._evaluateProfileByParams(profile, {
-            iql: iql,
+            iql: iqls,
             typeSegmentEvaluation: 'iql-evaluation'
         }, callback);
     },
