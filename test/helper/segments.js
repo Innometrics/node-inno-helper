@@ -9,6 +9,7 @@ var config = {
         appName: 'appName',
         appKey: 'appKey',
         apiUrl: 'apiUrl',
+        evaluationApiUrl: 'evaluationApiUrl',
         groupId: 4
     },
     helper;
@@ -60,12 +61,18 @@ describe('Inno Helper/Segments', function () {
                     id: '1',
                     noiql: 'HAHA'
                 }
-            }, {no: 'segment'},
+            }, {
+                no: 'segment'
+            },
             'non object!!'
             ],
             count: 1
         }, {
-            body: {non: {array: 'data'}},
+            body: {
+                non: {
+                    array: 'data'
+                }
+            },
             count: 0
         }
     ].forEach(function (test) {
@@ -95,8 +102,12 @@ describe('Inno Helper/Segment evaluation', function () {
     });
 
     it('should return error if segment is not an instance of Segment', function () {
-        var fakeSegment = {id: 1},
-            fakeProfile = {id: 2};
+        var fakeSegment = {
+                id: 1
+            },
+            fakeProfile = {
+                id: 2
+            };
         helper.evaluateProfileBySegment(fakeProfile, fakeSegment, function (error) {
             assert(error);
             assert.equal(error.message, 'Argument "segment" should be a Segment instance');
@@ -125,7 +136,10 @@ describe('Inno Helper/Segment evaluation', function () {
 
         sinon.stub(helper, '_evaluateProfileByParams');
         helper.evaluateProfileBySegmentId(profile, segmentId, callback);
-        assert(helper._evaluateProfileByParams.calledWith(profile, {segment_id: segmentId}, callback));
+        assert(helper._evaluateProfileByParams.calledWith(profile, {
+            segment_id: [segmentId],
+            typeSegmentEvaluation: 'segment-id-evaluation'
+        }, callback));
         helper._evaluateProfileByParams.restore();
     });
 
@@ -136,12 +150,17 @@ describe('Inno Helper/Segment evaluation', function () {
 
         sinon.stub(helper, '_evaluateProfileByParams');
         helper.evaluateProfileByIql(profile, segmentIql, callback);
-        assert(helper._evaluateProfileByParams.calledWith(profile, {iql: segmentIql}, callback));
+        assert(helper._evaluateProfileByParams.calledWith(profile, {
+            iql: [segmentIql],
+            typeSegmentEvaluation: 'iql-evaluation'
+        }, callback));
         helper._evaluateProfileByParams.restore();
     });
 
     it('should return error from Profile evaluation if profile is not instance of Profile', function (done) {
-        var fakeProfile = {id: 1};
+        var fakeProfile = {
+            id: 1
+        };
 
         helper._evaluateProfileByParams(fakeProfile, {}, function (error) {
             assert(error);
@@ -159,10 +178,11 @@ describe('Inno Helper/Segment evaluation', function () {
 
         helper._evaluateProfileByParams(profile, {
             some: 'params',
-            are: 'here'
+            are: 'here',
+            typeSegmentEvaluation: 'segment-id-evaluation'
         }, function () {
             assert(request.get.calledWith({
-                url: 'apiUrl/v1/companies/4/buckets/bucketName/segment-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
+                url: 'evaluationApiUrl/companies/4/buckets/bucketName/segment-id-evaluation?app_key=appKey&some=params&are=here&profile_id=pid',
                 json: true
             }));
             request.get.restore();
@@ -184,10 +204,18 @@ describe('Inno Helper/Segment evaluation', function () {
     });
 
     [{
-        body: {segmentEvaluation: {noresult: 'here'}},
+        body: {
+            segmentEvaluation: {
+                noresult: 'here'
+            }
+        },
         result: null
     }, {
-        body: {segmentEvaluation: {result: 'some result'}},
+        body: {
+            segmentEvaluation: {
+                results: 'some result'
+            }
+        },
         result: 'some result'
     }].forEach(function (test) {
         it('should return Profile evaluation result', function (done) {

@@ -2,8 +2,9 @@
     "globals": {
         "Ext": true,
         "ElyGui": true,
+        "ElyIF": true,
         "ElyTools": true,
-        "ely": true,
+        "guicore": true,
         "_ely": true,
         "jsPlumb": true,
         "nv": true,
@@ -136,7 +137,8 @@
             {
                 "allow": [
                     "&",
-                    "&="
+                    "&=",
+                    "^"
                 ]
             }
         ],
@@ -145,7 +147,9 @@
         }],
         "no-caller": "error",
         "no-catch-shadow": "error",
-        "no-confusing-arrow": "error",
+        "no-confusing-arrow": ["error", {
+          "allowParens": true
+        }],
         "no-continue": "off",
         "no-control-regex": "off",
         "no-div-regex": "error",
@@ -165,7 +169,9 @@
             "error",
             "all",
             {
-                "conditionalAssign": false
+                "conditionalAssign": false,
+                "nestedBinaryExpressions": false,
+                "enforceForArrowConditionals": false
             }
         ],
         "no-floating-decimal": "error",
@@ -222,7 +228,7 @@
         "no-shadow": "off",
         "no-shadow-restricted-names": "error",
         "no-spaced-func": "error",
-        "no-sync": "error",
+        "no-sync": "off",
         "no-tabs": "error",
         "no-template-curly-in-string": "error",
         "no-ternary": "off",
@@ -246,7 +252,7 @@
         "no-warning-comments": "off",
         "no-whitespace-before-property": "error",
         "no-with": "error",
-        "object-curly-newline": "off",
+        "object-curly-newline": ["warn", { "minProperties": 1 }],
         "object-curly-spacing": [
             "error",
             "never"
@@ -257,7 +263,10 @@
         "one-var-declaration-per-line": "off",
         "operator-assignment": "error",
         "operator-linebreak": "error",
-        "padded-blocks": ["error", "never"],
+        "padded-blocks": ["error", {
+            "blocks": "never",
+            "classes": "always"
+        }],
         "prefer-arrow-callback": "off",
         "prefer-const": "error",
         "prefer-numeric-literals": "error",
@@ -268,7 +277,7 @@
         "quote-props": ["error", "as-needed", {
             "keywords": true
         }],
-        "quotes": ["error", "single", {
+        "quotes": ["warn", "single", {
             "allowTemplateLiterals": true
         }],
         "radix": "error",
