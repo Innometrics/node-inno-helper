@@ -17,6 +17,7 @@ var InnoHelper = function (config) {
     this.validateConfig(config);
     this.groupId = config.groupId;
     this.apiUrl = config.apiUrl;
+    this.evaluationApiUrl = config.evaluationApiUrl;
     this.bucketName = config.bucketName;
     this.appName = config.appName;
     this.appKey = config.appKey;
@@ -27,7 +28,9 @@ var InnoHelper = function (config) {
     }
 
     if (this.isCacheAllowed()) {
-        this.cache = new Cache({cachedTime: 600});
+        this.cache = new Cache({
+            cachedTime: 600
+        });
     }
 };
 
@@ -62,6 +65,12 @@ InnoHelper.prototype = {
      * @type {String}
      */
     apiUrl: null,
+
+    /**
+     * Evaluation API url
+     * @type {String}
+     */
+    evaluationApiUrl: null,
 
     /**
      * No cache flag
@@ -310,10 +319,14 @@ InnoHelper.prototype = {
      * @returns {String}
      */
     getSegmentEvaluationUrl: function (params) {
-        return util.format('%s/v1/companies/%s/buckets/%s/segment-evaluation?app_key=%s&%s',
-            this.getApiHost(),
+        var typeSegmentEvaluation = params.typeSegmentEvaluation;
+        delete params.typeSegmentEvaluation;
+
+        return util.format('%s/companies/%s/buckets/%s/%s?app_key=%s&%s',
+            this.getEvaluationApiHost(),
             this.getCompany(),
             this.getBucket(),
+            typeSegmentEvaluation,
             this.getAppKey(),
             querystring.stringify(params));
     },
@@ -356,6 +369,14 @@ InnoHelper.prototype = {
      */
     getApiHost: function () {
         return this.apiUrl;
+    },
+
+    /**
+     * Get evaluation Api url
+     * @returns {String}
+     */
+    getEvaluationApiHost: function () {
+        return this.evaluationApiUrl;
     },
 
     /**
@@ -516,21 +537,29 @@ InnoHelper.prototype = {
     /**
      * Evaluate profile by segment's id
      * @param {Profile} profile
-     * @param {String} segmentId
+     * @param {String|Array} segmentIds
      * @param {Function} callback
      */
-    evaluateProfileBySegmentId: function (profile, segmentId, callback) {
-        this._evaluateProfileByParams(profile, {segment_id: segmentId}, callback);
+    evaluateProfileBySegmentId: function (profile, segmentIds, callback) {
+        segmentIds = Array.isArray(segmentIds) ? segmentIds : [segmentIds];
+        this._evaluateProfileByParams(profile, {
+            segment_id: segmentIds,
+            typeSegmentEvaluation: 'segment-id-evaluation'
+        }, callback);
     },
 
     /**
      * Evaluate profile by IQL expression
      * @param {Profile} profile
-     * @param {String} iql
+     * @param {String|Array} iqls
      * @param {Function} callback
      */
-    evaluateProfileByIql: function (profile, iql, callback) {
-        this._evaluateProfileByParams(profile, {iql: iql}, callback);
+    evaluateProfileByIql: function (profile, iqls, callback) {
+        iqls = Array.isArray(iqls) ? iqls : [iqls];
+        this._evaluateProfileByParams(profile, {
+            iql: iqls,
+            typeSegmentEvaluation: 'iql-evaluation'
+        }, callback);
     },
 
     /**
@@ -913,14 +942,16 @@ InnoHelper.prototype = {
     _evaluateProfileByParams: function (profile, params, callback) {
         var self = this;
         var error = null;
-        var result = null;
+        var results = null;
 
         if (!(profile instanceof Profile)) {
             error = new Error('Argument "profile" should be a Profile instance');
-            return callback(error, result);
+            return callback(error, results);
         }
 
-        var defParams = {profile_id: profile.getId()};
+        var defParams = {
+            profile_id: profile.getId()
+        };
 
         params = util._extend(params, defParams);
 
@@ -936,12 +967,15 @@ InnoHelper.prototype = {
 
             if (!error) {
                 data = response.body;
-                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('result')) {
-                    result = data.segmentEvaluation.result;
+                if (data.hasOwnProperty('segmentEvaluation') && data.segmentEvaluation.hasOwnProperty('results')) {
+                    results = data.segmentEvaluation.results;
+                    if (results.length === 1) {
+                        results = results[0];
+                    }
                 }
             }
 
-            callback(error, result);
+            callback(error, results);
         });
     },
 

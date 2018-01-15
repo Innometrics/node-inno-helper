@@ -52,7 +52,9 @@ describe('Inno Helper/AppSettings', function () {
             sinon.stub(request, 'get', function (opts, callback) {
                 callback(null, {
                     statusCode: 200,
-                    body: {no: 'custom'}
+                    body: {
+                        no: 'custom'
+                    }
                 });
             });
             helper.getAppSettings(function (error) {
@@ -68,7 +70,9 @@ describe('Inno Helper/AppSettings', function () {
             sinon.stub(request, 'get', function (opts, callback) {
                 callback(null, {
                     statusCode: 200,
-                    body: {custom: values}
+                    body: {
+                        custom: values
+                    }
                 });
             });
             helper.getAppSettings(function (error, settings) {
@@ -90,7 +94,9 @@ describe('Inno Helper/AppSettings', function () {
             sinon.stub(request, 'get', function (opts, callback) {
                 callback(null, {
                     statusCode: 200,
-                    body: {custom: values}
+                    body: {
+                        custom: values
+                    }
                 });
             });
 
@@ -122,7 +128,9 @@ describe('Inno Helper/AppSettings', function () {
         });
 
         it('should make properly request to set application settings', function (done) {
-            var settings = {test: 'qwe'};
+            var settings = {
+                test: 'qwe'
+            };
 
             sinon.stub(request, 'put', function (opts, callback) {
                 callback();
@@ -155,7 +163,9 @@ describe('Inno Helper/AppSettings', function () {
             sinon.stub(request, 'put', function (opts, callback) {
                 callback(null, {
                     statusCode: 200,
-                    body: {no: 'custom'}
+                    body: {
+                        no: 'custom'
+                    }
                 });
             });
             helper.setAppSettings({}, function (error) {
@@ -171,7 +181,9 @@ describe('Inno Helper/AppSettings', function () {
             sinon.stub(request, 'put', function (opts, callback) {
                 callback(null, {
                     statusCode: 200,
-                    body: {custom: values}
+                    body: {
+                        custom: values
+                    }
                 });
             });
             helper.setAppSettings({}, function (error, settings) {
